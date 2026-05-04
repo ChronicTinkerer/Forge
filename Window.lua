@@ -59,6 +59,9 @@ local function buildFrame()
     f:SetScript("OnDragStart", function(self) self:StartMoving() end)
     f:SetScript("OnDragStop",  function(self) self:StopMovingOrSizing(); persistGeometry() end)
 
+    -- Reflow tabs as the window resizes so the strip stays in bounds.
+    f:SetScript("OnSizeChanged", function() Window.RefreshTabs() end)
+
     if f.SetResizeBounds then
         f:SetResizeBounds(560, 320, 1600, 1000)
     elseif f.SetMinResize then
@@ -202,15 +205,43 @@ function Window.RefreshTabs()
         if #order == 0 then frame._emptyText:Show() else frame._emptyText:Hide() end
     end
 
+    -- Compute natural widths (text width + padding) for each tab, then scale
+    -- uniformly to fit the strip if the total exceeds available width. Floor
+    -- at 56px so labels don't disappear; cap at 120px so wide windows don't
+    -- stretch tabs absurdly.
+    local TAB_MIN, TAB_MAX = 56, 120
+    local stripW    = strip:GetWidth() or 800
+    local naturalW  = {}
+    local naturalSum = 0
+    for _, name in ipairs(order) do
+        local descriptor = ns.Registry.Get(name)
+        if descriptor then
+            local btn = buildTabButton(strip, name, descriptor)
+            btn._text:SetText(descriptor.title or name)
+            local w = (btn._text:GetStringWidth() or 60) + 18  -- L/R padding
+            w = math.min(TAB_MAX, math.max(TAB_MIN, w))
+            naturalW[name] = w
+            naturalSum = naturalSum + w
+        end
+    end
+    local gapTotal = math.max(0, (#order - 1)) * TAB_PAD
+    local need     = naturalSum + gapTotal
+    local scale    = 1
+    if need > stripW and naturalSum > 0 then
+        scale = (stripW - gapTotal) / naturalSum
+    end
+
     local x = 0
     for _, name in ipairs(order) do
         local descriptor = ns.Registry.Get(name)
         if descriptor then
             local btn = buildTabButton(strip, name, descriptor)
+            local w = math.max(TAB_MIN * 0.7, math.floor((naturalW[name] or TAB_MIN) * scale))
+            btn:SetWidth(w)
             btn:ClearAllPoints()
             btn:SetPoint("LEFT", strip, "LEFT", x, 0)
             btn:Show()
-            x = x + btn:GetWidth() + TAB_PAD
+            x = x + w + TAB_PAD
         end
     end
 
