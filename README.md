@@ -13,8 +13,9 @@ sub-addon plugs into the parent's main window as its own tab.
 It targets **WoW Retail (Midnight, Interface 120005)** and is built on
 the [Cairn](../Cairn/README.md) library stack.
 
-**Status:** parent addon scaffolded (v0.1.0-dev, build 2605031552).
-Sub-addons in active development. See [Roadmap](#roadmap).
+**Status:** parent + Forge_Console + Forge_BugCatcher shipped (v0.1.0-dev,
+build 2605040036). Other sub-addons in active development. See
+[Roadmap](#roadmap).
 
 ---
 
@@ -26,11 +27,11 @@ main window. Each sub-addon adds one tool as a tab.
 
 | Sub-addon | Tool | What it does |
 |---|---|---|
-| `Forge_BugCatcher` | Error handler | Captures Lua errors quietly. Browsable viewer with copy-as-block, minimap counter, ignore list, optional auto-popup, color-coded severity. |
+| `Forge_BugCatcher` | Error handler | Captures Lua errors quietly. Browsable viewer with copy-as-block, minimap counter, ignore list, optional auto-popup, color-coded severity. **Shipped.** |
 | `Forge_Macros` | Macro editor | Full-size editor: Account + Character lists, big text area, icon picker, drag-to-action-bar, 255-char counter. |
-| `Forge_Console` | Lua REPL | In-game Lua console with history, syntax check, scrollable output. |
+| `Forge_Console` | Lua REPL | In-game Lua console with command history, syntax check, scrollable output. **Shipped.** |
 | `Forge_Inspector` | Namespace browser | Real-time `_G` tree explorer with type display, per-level search, 0.5s auto-poll on expanded nodes, pinnable watch list. |
-| `Forge_Logs` | Activity dashboard | Per-addon log viewer with copy-as-block, level filter, search, lifecycle info. Replaces Cairn.Dashboard. |
+| `Forge_Logs` | Activity dashboard | Per-source log viewer with `DLAPI`-style public API, categories + verbosity, search, export to CSV / HTML, optional Events / ChatEvents taps. Replaces Cairn.Dashboard. |
 | `Forge_Profiles` | Profile manager | Cross-addon profile switcher, profile manager API, auto-discovery adapters so non-Cairn addons appear automatically. |
 | `Forge_Setup` | Setup wizard API | Declarative multi-page first-run wizard library that any addon can use. |
 | `Forge_AddonManager` | Addon manager | Toggle addons in-game, named sets (Raid / Solo / PvP), ReloadUI, per-addon memory and load order, profile-aware enable lists. |
@@ -65,9 +66,43 @@ The parent registers `/forge` (alias `/fg`). Built-in subcommands:
 | `/forge reset` | Reset the current profile to defaults |
 | `/forge help` | List all registered subcommands |
 
-Each sub-addon adds its own subcommand on load (e.g. `/forge bug`,
+Each sub-addon adds its own subcommand on load (for example `/forge bug`,
 `/forge console`, `/forge inspect`). They appear in `/forge help`
 automatically.
+
+### Forge_Console specifics
+
+Once `Forge_Console/` is installed, `/forge console` opens the Console
+tab. Type Lua at the prompt and press Enter to run. The REPL:
+
+- Tries `return <input>` first so expressions show their result.
+- Falls back to running `<input>` as a statement.
+- Captures `print()` output into the scrollable pane (and chat).
+- Shows syntax errors and runtime errors in red.
+- Walks command history via Up / Down arrows, or the `<` / `>` buttons.
+- Persists history per character in `ForgeConsoleDB`.
+
+### Forge_BugCatcher specifics
+
+Once `Forge_BugCatcher/` is installed, the global error handler is
+replaced with a quiet capture handler at addon load time. The default
+WoW error popup no longer appears. Errors are stored in a ring buffer of
+500 with timestamp, dedup count, and ignore-list filtering.
+
+- A minimap button (top-right of the minimap by default) shows the
+  session error count as a red badge. Click it to open the Bug Catcher
+  tab.
+- The tab has a list pane on the left (newest first) and a detail pane
+  on the right. Click a row to inspect.
+- "Show All" opens a popup `EditBox` pre-selected for `Ctrl-C`, formatted
+  for pasting into Discord or a GitHub issue.
+- "Auto-popup on new error" checkbox in the toolbar opens the tab
+  automatically when a new (non-deduped) error arrives. Throttled to
+  once per 5s to avoid spam.
+- "Ignore" on the detail pane adds the error's `file:line:` prefix to
+  a substring ignore list. Future identical errors don't get captured.
+- Chains to any previously-installed handler (BugSack, etc.), so other
+  error tools keep working.
 
 ---
 
@@ -155,18 +190,20 @@ which the next Cairn release drops `Cairn-Dashboard-1.0.lua`.
 
 - Forge parent (v0.1.0-dev): slash router, registry, main window with
   dynamic tab strip, geometry persistence.
+- `Forge_Console`: in-game Lua REPL with command history, syntax check,
+  print capture, return-value display, scrollable output, history navigation.
+- `Forge_BugCatcher`: quiet error capture, dedup ring, browsable viewer,
+  Show All copy popup, auto-popup, ignore list, minimap counter.
 
 **Build order for v0.1:**
 
-1. `Forge_Console` (Lua REPL)
-2. `Forge_BugCatcher` (error handler)
-3. `Forge_Macros` (macro editor)
-4. `Forge_Setup` (wizard API)
-5. `Forge_Logs` (activity dashboard; replaces `Cairn.Dashboard`)
-6. `Forge_Codex` (catalog browser; replaces LibCodex UI)
-7. `Forge_Inspector` (Lua namespace browser)
-8. `Forge_Profiles` (UI + API + auto-discovery adapters)
-9. `Forge_AddonManager` (toggle + sets + memory + profile-aware)
+1. `Forge_Macros` (macro editor)
+2. `Forge_Setup` (wizard API)
+3. `Forge_Logs` (activity dashboard with DLAPI compat; replaces `Cairn.Dashboard`)
+4. `Forge_Codex` (catalog browser; replaces LibCodex UI)
+5. `Forge_Inspector` (Lua namespace browser)
+6. `Forge_Profiles` (UI + API + auto-discovery adapters)
+7. `Forge_AddonManager` (toggle + sets + memory + profile-aware)
 
 **Migration plan:** once `Forge_Logs` and `Forge_Codex` are verified
 in-game, the next Cairn and LibCodex releases drop their dashboards.
@@ -184,6 +221,19 @@ Forge/
   Window.lua      Main window: tab strip, content area, geometry persistence, empty-state.
   ForgeLogo.png   Logo.
   README.md       This file.
+
+Forge_Console/    (sub-addon)
+  Forge_Console.toc
+  Core.lua        DB, Cairn.Addon lifecycle, registers Console descriptor with Forge.Registry.
+  Eval.lua        Snippet runner. Print capture, return-value display, syntax-then-statement compile.
+  UI.lua          Console tab UI: scrollable output, single-line input, Run / Clear / history buttons.
+
+Forge_BugCatcher/ (sub-addon)
+  Forge_BugCatcher.toc
+  Core.lua        DB, Cairn.Addon lifecycle, registers BugCatcher descriptor, auto-popup wiring.
+  Capture.lua     Error handler installation, dedup ring, ignore list, change-event broadcasting.
+  Viewer.lua     Tab UI: toolbar (Show All / Clear / Auto-popup), list pane, detail pane.
+  Minimap.lua     Minimap button with session-count badge.
 ```
 
 ---

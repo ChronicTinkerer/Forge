@@ -76,6 +76,14 @@ local function buildFrame()
     f:SetFrameStrata("MEDIUM")
     f:Hide()
 
+    -- Watermark logo (sits behind tabs and content). Subtle, not loud.
+    local logo = f:CreateTexture(nil, "BACKGROUND", nil, -8)
+    logo:SetTexture("Interface\\AddOns\\Forge\\ForgeLogo.png")
+    logo:SetPoint("CENTER", f, "CENTER", 0, 0)
+    logo:SetSize(360, 360)
+    logo:SetAlpha(0.08)
+    f._logo = logo
+
     -- Title.
     local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", f, "TOPLEFT", 14, -10)
@@ -136,10 +144,46 @@ end
 local function buildTabButton(parent, name, descriptor)
     local btn = tabButtons[name]
     if btn then return btn end
-    btn = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+
+    btn = CreateFrame("Button", nil, parent, "BackdropTemplate")
     btn:SetSize(120, TAB_HEIGHT)
-    btn:SetText(descriptor.title or name)
+    btn:SetBackdrop({
+        bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 8,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 },
+    })
+
+    local text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    text:SetPoint("CENTER", btn, "CENTER", 0, 0)
+    text:SetText(descriptor.title or name)
+    btn._text = text
+
+    -- Active / inactive paint.
+    btn._setActive = function(self, active)
+        self._isActive = active and true or false
+        if active then
+            self:SetBackdropColor(0.30, 0.20, 0.10, 1)        -- selected: warm
+            self:SetBackdropBorderColor(0.85, 0.50, 0.20, 1)  -- forge orange
+            self._text:SetTextColor(1.00, 0.85, 0.50, 1)
+        else
+            self:SetBackdropColor(0.08, 0.06, 0.04, 1)
+            self:SetBackdropBorderColor(0.30, 0.22, 0.12, 1)
+            self._text:SetTextColor(0.65, 0.55, 0.40, 1)
+        end
+    end
+    btn:_setActive(false)
+
+    btn:SetScript("OnEnter", function(self)
+        if self._isActive then return end
+        self:SetBackdropColor(0.16, 0.12, 0.07, 1)
+    end)
+    btn:SetScript("OnLeave", function(self)
+        if self._isActive then return end
+        self:SetBackdropColor(0.08, 0.06, 0.04, 1)
+    end)
     btn:SetScript("OnClick", function() Window.OpenTab(name) end)
+
     tabButtons[name] = btn
     return btn
 end
@@ -194,7 +238,9 @@ function Window.OpenTab(name)
     end
 
     for tabName, btn in pairs(tabButtons) do
-        if tabName == name then btn:LockHighlight() else btn:UnlockHighlight() end
+        if btn._setActive then
+            btn:_setActive(tabName == name)
+        end
     end
 
     activeTab = name
