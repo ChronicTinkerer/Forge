@@ -229,11 +229,25 @@ function Window.OpenTab(name)
         return
     end
 
-    if activeTab and activeTab ~= name then
-        local prev = ns.Registry.Get(activeTab)
-        if prev and type(prev.OnTabHide) == "function" then
-            local ok, err = pcall(prev.OnTabHide, contentArea, prev)
-            if not ok and geterrorhandler then geterrorhandler()(err) end
+    -- Defensive: hide every registered tab's frame before activating the new
+    -- one. Cures a class of bugs where a tab's OnTabHide fails silently or
+    -- where a sub-addon stashes its panel at a non-_frame field (still
+    -- rendering as a child of contentArea). After this loop the only frames
+    -- visible inside contentArea are the new tab's.
+    for _, otherName in ipairs(ns.Registry.List() or {}) do
+        if otherName ~= name then
+            local d = ns.Registry.Get(otherName)
+            if d then
+                if type(d.OnTabHide) == "function" then
+                    local ok, err = pcall(d.OnTabHide, contentArea, d)
+                    if not ok and geterrorhandler then geterrorhandler()(err) end
+                end
+                -- Hard-hide every plausible frame field the descriptor or its
+                -- UI module may have stashed.
+                if d._frame           then d._frame:Hide()           end
+                if d._macrosPanel     then d._macrosPanel:Hide()     end
+                if d._sequencesPanel  then d._sequencesPanel:Hide()  end
+            end
         end
     end
 

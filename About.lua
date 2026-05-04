@@ -1,3 +1,15 @@
+-- Forge.About: registers the About tab with the Forge.Registry.
+-- Bakes the project README at build time and shows it inside the window
+-- alongside the logo. Updated whenever the README is updated and the build
+-- stamp is bumped.
+
+local ADDON, ns = ...
+
+local About = {}
+ns.About = About
+
+-- README text baked from Forge/README.md.
+local README_TEXT = [[
 # Forge
 
 <p align="center">
@@ -14,7 +26,7 @@ It targets **WoW Retail (Midnight, Interface 120005)** and is built on
 the [Cairn](../Cairn/README.md) library stack.
 
 **Status:** parent + Forge_Console + Forge_BugCatcher + Forge_AddonManager +
-Forge_Macros shipped (v0.1.0-dev, build 2605040233). Other sub-addons in
+Forge_Macros shipped (v0.1.0-dev, build 2605040226). Other sub-addons in
 active development. See [Roadmap](#roadmap).
 
 ---
@@ -259,3 +271,118 @@ Author: **ChronicTinkerer**
 
 Naming family: Cairn (stones / foundation), Codex (book / data),
 Vellum (page / rendered guide), Forge (workshop / dev tools).
+
+]]
+
+-- Strip leading/trailing whitespace.
+local function trim(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
+
+-- Quick markdown -> plain text scrub for in-game display:
+--   * Drop image lines (<p align>...<img...></p>) entirely.
+--   * Replace `# Header`, `## Header` etc. with bracketed forms.
+--   * Code fences (``` ) become a divider line.
+--   * Leave tables alone; they're readable enough.
+local function decorate(text)
+    local out = {}
+    local in_html = false
+    for line in (text .. "\n"):gmatch("([^\n]*)\n") do
+        local s = line
+        if s:match("^<p%s") or s:match("^</p>") or s:match("^%s*<img") then
+            -- skip html image-block lines
+        elseif s:match("^```") then
+            out[#out + 1] = "|cff666666---|r"
+        else
+            -- Headings.
+            local h, body = s:match("^(#+)%s+(.*)$")
+            if h then
+                local color = (#h == 1) and "ffd87f3a"  -- forge orange
+                          or  (#h == 2) and "ffffe6a8"  -- pale gold
+                          or                "ffaaaaaa"  -- dim
+                out[#out + 1] = "|c" .. color .. body .. "|r"
+            else
+                out[#out + 1] = s
+            end
+        end
+    end
+    return table.concat(out, "\n")
+end
+
+About.Text = decorate(trim(README_TEXT))
+
+-- Build and register the descriptor.
+local function buildAbout(parent, mod)
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetAllPoints(parent)
+    mod._frame = frame
+
+    -- Logo (centered, top).
+    local logo = frame:CreateTexture(nil, "ARTWORK")
+    logo:SetTexture("Interface\\AddOns\\Forge\\ForgeLogo.png")
+    logo:SetSize(220, 220)
+    logo:SetPoint("TOP", frame, "TOP", 0, -8)
+    mod._logo = logo
+
+    -- Tagline beneath logo.
+    local tagline = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    tagline:SetPoint("TOP", logo, "BOTTOM", 0, -8)
+    tagline:SetText("|cffd87f3aForge|r  |cffaaaaaadeveloper toolset for WoW addons|r")
+
+    -- Scrollable README text below.
+    local bg = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    bg:SetPoint("TOPLEFT",     tagline, "BOTTOMLEFT",  -200, -16)
+    bg:SetPoint("TOPRIGHT",    tagline, "BOTTOMRIGHT",  200, -16)
+    bg:SetPoint("BOTTOMLEFT",  frame,   "BOTTOMLEFT",   8, 8)
+    bg:SetPoint("BOTTOMRIGHT", frame,   "BOTTOMRIGHT", -8, 8)
+    bg:SetBackdrop({
+        bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 12,
+        insets = { left = 3, right = 3, top = 3, bottom = 3 },
+    })
+    bg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
+    bg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
+
+    local sf = CreateFrame("ScrollFrame", nil, bg, "UIPanelScrollFrameTemplate")
+    sf:SetPoint("TOPLEFT",     6, -6)
+    sf:SetPoint("BOTTOMRIGHT", -28, 6)
+
+    local content = CreateFrame("Frame", nil, sf)
+    content:SetSize(1, 1)
+    sf:SetScrollChild(content)
+
+    local fs = content:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
+    fs:SetJustifyH("LEFT")
+    fs:SetJustifyV("TOP")
+    fs:SetPoint("TOPLEFT", content, "TOPLEFT", 4, -4)
+    fs:SetWordWrap(true)
+    fs:SetText(About.Text)
+
+    local function reflow()
+        local w = (sf:GetWidth() or 0) - 8
+        if w < 1 then w = 1 end
+        fs:SetWidth(w)
+        local h = (fs:GetStringHeight() or 0) + 12
+        content:SetSize(w, math.max(h, sf:GetHeight() or 0))
+        sf:UpdateScrollChildRect()
+    end
+    sf:SetScript("OnSizeChanged", reflow)
+    reflow()
+end
+
+About.descriptor = {
+    name        = "About",
+    title       = "About",
+    order       = 999,  -- always last
+    description = "Forge logo + README.",
+    SlashSub    = { name = "about", help = "open the About tab" },
+    OnTabShow   = function(parent, mod)
+        if not mod._built then
+            buildAbout(parent, mod)
+            mod._built = true
+        end
+        if mod._frame then mod._frame:Show() end
+    end,
+    OnTabHide   = function(parent, mod)
+        if mod._frame then mod._frame:Hide() end
+    end,
+}

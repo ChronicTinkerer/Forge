@@ -8,7 +8,7 @@ local ADDON, ns = ...
 
 Forge = ns
 ns.VERSION = "0.1.0-dev"
-ns.BUILD   = "2605040159"
+ns.BUILD   = "2605040233"
 
 -- --------------------------------------------------------------------------
 -- DB.
@@ -73,6 +73,11 @@ function addon:OnLogin()
 
     if log and ns.Registry then
         log:Info("  Sub-modules: %s", ns.Registry.CountString())
+    end
+
+    -- Built-in About tab (hosted by the parent itself).
+    if ns.Registry and ns.About and ns.About.descriptor then
+        ns.Registry.Register(ns.About.descriptor)
     end
 end
 
