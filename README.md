@@ -14,7 +14,7 @@ It targets **WoW Retail (Midnight, Interface 120005)** and is built on
 the [Cairn](../Cairn/README.md) library stack.
 
 **Status:** parent + Forge_Console + Forge_BugCatcher shipped (v0.1.0-dev,
-build 2605040036). Other sub-addons in active development. See
+build 2605040127). Other sub-addons in active development. See
 [Roadmap](#roadmap).
 
 ---
@@ -240,7 +240,20 @@ Forge_BugCatcher/ (sub-addon)
 
 ## License
 
-MIT.
+**All Rights Reserved.** Copyright (c) 2026 ChronicTinkerer.
+
+This software is proprietary. No use, modification, redistribution, or
+derivative works without prior written permission of the copyright
+holder. End users obtaining unmodified copies through official channels
+(CurseForge, Wago, WoWInterface, GitHub releases) may install and run
+the addon for personal use within World of Warcraft. See
+[LICENSE](LICENSE) for full terms.
+
+Vendored third-party code (LibStub) retains its own license; LibStub is
+public domain.
+
+The library dependencies — `Cairn` and `LibCodex-1.0` — are MIT-licensed
+and unaffected by this change.
 
 Author: **ChronicTinkerer**
 
