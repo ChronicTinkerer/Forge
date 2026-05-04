@@ -1,7 +1,7 @@
 -- Forge.Registry: tracks loaded Forge_* sub-addons.
 --
 -- Each sub-addon (Forge_BugCatcher, Forge_Macros, Forge_Console,
--- Forge_Inspector, Forge_Logs, Forge_Profiles, Forge_Setup,
+-- Forge_Inspector, Forge_Logs, Forge_Profiles, Forge_Registry,
 -- Forge_AddonManager, Forge_Codex) calls Forge.Registry.Register on load
 -- to advertise itself. The main /forge window asks the registry which
 -- tabs to render and which sub-modules to drive.

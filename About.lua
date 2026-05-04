@@ -156,6 +156,13 @@ local function buildBuildsBlock()
 end
 
 -- Build and register the descriptor.
+--
+-- Migration note (2026-05-04): the scrolling README panel was rebuilt on top
+-- of Cairn-Gui-Core's `ScrollFrame` widget (the Diesal-derived family) instead
+-- of `UIPanelScrollFrameTemplate`. First Forge tab to dogfood the new widget
+-- kit; logo and tagline stay as raw FontString/Texture (decorative, not
+-- interactive). The outer parchment-look BackdropTemplate frame is kept as
+-- visual chrome around the widget.
 local function buildAbout(parent, mod)
     local frame = CreateFrame("Frame", nil, parent)
     frame:SetAllPoints(parent)
@@ -173,7 +180,9 @@ local function buildAbout(parent, mod)
     tagline:SetPoint("TOP", logo, "BOTTOM", 0, -8)
     tagline:SetText("|cffd87f3aForge|r  |cffaaaaaadeveloper toolset for WoW addons|r")
 
-    -- Scrollable README text below.
+    -- Parchment-look chrome around the scroll widget. Kept as raw
+    -- BackdropTemplate because Cairn-Gui-Core doesn't yet ship a "bordered
+    -- panel" widget; the widget kit only owns the scroll machinery.
     local bg = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     bg:SetPoint("TOPLEFT",     tagline, "BOTTOMLEFT",  -200, -16)
     bg:SetPoint("TOPRIGHT",    tagline, "BOTTOMRIGHT",  200, -16)
@@ -187,19 +196,40 @@ local function buildAbout(parent, mod)
     })
     bg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
     bg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
+    mod._bg = bg
 
-    local sf = CreateFrame("ScrollFrame", nil, bg, "UIPanelScrollFrameTemplate")
-    sf:SetPoint("TOPLEFT",     6, -6)
-    sf:SetPoint("BOTTOMRIGHT", -28, 6)
+    -- Scrollable README via Cairn-Gui-Core widget. The widget exposes
+    --   sw.frame   -- outer frame; we anchor this inside `bg`
+    --   sw.content -- the scroll child; FontString lives here
+    --   sw:SetContentHeight(h) -- drives scrollbar visibility/grip size
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local sw  = Gui and Gui:Create("ScrollFrame")
+    if not sw then
+        -- Defensive fallback: if Cairn-Gui-Core isn't loaded for any reason,
+        -- fall back to a plain FontString without scroll. The About tab still
+        -- renders something useful instead of erroring out.
+        local fs = bg:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
+        fs:SetJustifyH("LEFT")
+        fs:SetJustifyV("TOP")
+        fs:SetPoint("TOPLEFT",     bg, "TOPLEFT",     8, -8)
+        fs:SetPoint("BOTTOMRIGHT", bg, "BOTTOMRIGHT", -8, 8)
+        fs:SetWordWrap(true)
+        fs:SetText(About.Text .. "\n" .. buildBuildsBlock())
+        mod._aboutFs = fs
+        return
+    end
 
-    local content = CreateFrame("Frame", nil, sf)
-    content:SetSize(1, 1)
-    sf:SetScrollChild(content)
+    sw:SetParent(bg)
+    sw:ClearAllPoints()
+    sw:SetPoint("TOPLEFT",     bg, "TOPLEFT",      6, -6)
+    sw:SetPoint("BOTTOMRIGHT", bg, "BOTTOMRIGHT", -2,  6)
+    mod._scrollWidget = sw
 
-    local fs = content:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
+    -- FontString lives on the widget's scroll child.
+    local fs = sw.content:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
     fs:SetJustifyH("LEFT")
     fs:SetJustifyV("TOP")
-    fs:SetPoint("TOPLEFT", content, "TOPLEFT", 4, -4)
+    fs:SetPoint("TOPLEFT", sw.content, "TOPLEFT", 4, -4)
     fs:SetWordWrap(true)
     -- Append the live "Loaded builds" block. Computed each build call so a
     -- /reload after bumping a sub-addon shows the new stamps without
@@ -207,16 +237,26 @@ local function buildAbout(parent, mod)
     fs:SetText(About.Text .. "\n" .. buildBuildsBlock())
     mod._aboutFs = fs
 
+    -- Recompute content height for the current FontString text. Called
+    -- whenever the text changes (e.g. on tab show after the builds block
+    -- gets refreshed) and whenever the scroll child's width changes.
     local function reflow()
-        local w = (sf:GetWidth() or 0) - 8
-        if w < 1 then w = 1 end
-        fs:SetWidth(w)
+        local w = sw.content:GetWidth() or 0
+        if w >= 1 then fs:SetWidth(math.max(w - 8, 1)) end
         local h = (fs:GetStringHeight() or 0) + 12
-        content:SetSize(w, math.max(h, sf:GetHeight() or 0))
-        sf:UpdateScrollChildRect()
+        sw:SetContentHeight(math.max(h, sw.frame:GetHeight() or 0))
     end
-    sf:SetScript("OnSizeChanged", reflow)
-    reflow()
+    mod._reflow = reflow
+
+    -- Reflow when the scroll child's width changes (driven by the widget's
+    -- internal scrollFrame:OnSizeChanged -> content:SetWidth). We gate on
+    -- width so SetContentHeight (which sets content's height) doesn't loop.
+    local lastWidth
+    sw.content:SetScript("OnSizeChanged", function(_, w)
+        if w == lastWidth or not w or w < 1 then return end
+        lastWidth = w
+        reflow()
+    end)
 end
 
 About.descriptor = {
@@ -236,6 +276,8 @@ About.descriptor = {
         if mod._aboutFs then
             mod._aboutFs:SetText(About.Text .. "\n" .. buildBuildsBlock())
         end
+        -- Recompute scroll content height for the new text (Cairn-Gui path).
+        if mod._reflow then mod._reflow() end
     end,
     OnTabHide   = function(parent, mod)
         if mod._frame then mod._frame:Hide() end

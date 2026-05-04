@@ -134,7 +134,7 @@ local function buildFrame()
     -- Empty-state message.
     local empty = contentArea:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     empty:SetPoint("CENTER", contentArea, "CENTER", 0, 0)
-    empty:SetText("No Forge sub-modules loaded.\n\nInstall any of:  Forge_BugCatcher, Forge_Macros,\nForge_Console, Forge_Inspector, Forge_Logs,\nForge_Profiles, Forge_Setup, Forge_AddonManager, Forge_Codex")
+    empty:SetText("No Forge sub-modules loaded.\n\nInstall any of:  Forge_BugCatcher, Forge_Macros,\nForge_Console, Forge_Inspector, Forge_Logs,\nForge_Profiles, Forge_Registry, Forge_AddonManager, Forge_Codex")
     empty:SetJustifyH("CENTER")
     f._emptyText = empty
 

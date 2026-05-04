@@ -1,7 +1,7 @@
 -- Forge: developer tools suite for Cairn / LibCodex addon authors.
 -- Parent addon. Hosts /forge slash router, sub-module registry, main window.
 -- Sub-addons (Forge_BugCatcher, Forge_Macros, Forge_Console, Forge_Inspector,
--- Forge_Logs, Forge_Profiles, Forge_Setup, Forge_AddonManager, Forge_Codex)
+-- Forge_Logs, Forge_Profiles, Forge_Registry, Forge_AddonManager, Forge_Codex)
 -- plug into the registry on PLAYER_LOGIN and add their own tabs to the window.
 
 local ADDON, ns = ...
@@ -40,7 +40,7 @@ local db = Cairn.DB.New("ForgeDB", {
             lastSeen  = nil,
         },
     },
-    profileType = "char",
+    profileType = "default",  -- account-level: Forge is a dev tool, no per-char variation
 })
 ns.db = db
 
@@ -63,6 +63,13 @@ ns.addon = addon
 function addon:OnInit()
     -- Force DB init so .profile is available below.
     local _ = db.profile
+    -- One-time migration to account-level profile (see Forge_Logs/Core.lua).
+    if db.global and not db.global.__acctMigrated then
+        if (db:GetCurrentProfile() or "") ~= "Default" then
+            db:SetProfile("Default")
+        end
+        db.global.__acctMigrated = true
+    end
 end
 
 function addon:OnLogin()

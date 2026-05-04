@@ -13,9 +13,12 @@ sub-addon plugs into the parent's main window as its own tab.
 It targets **WoW Retail (Midnight, Interface 120005)** and is built on
 the [Cairn](../Cairn/README.md) library stack.
 
-**Status:** parent + Forge_Console + Forge_BugCatcher + Forge_AddonManager +
-Forge_Macros shipped (v0.1.0-dev, build 2605040233). Other sub-addons in
-active development. See [Roadmap](#roadmap).
+**Status:** v0.1.0-dev. All planned sub-addons shipped: parent +
+`Forge_BugCatcher`, `Forge_Console`, `Forge_Macros`, `Forge_AddonManager`,
+`Forge_Inspector`, `Forge_Logs` (replaces `Cairn.Dashboard`),
+`Forge_Codex` (replaces LibCodex UI), `Forge_Profiles`, `Forge_Registry`.
+In-game verification across the full suite remains a pending task.
+See [Roadmap](#roadmap).
 
 ---
 
@@ -33,7 +36,7 @@ main window. Each sub-addon adds one tool as a tab.
 | `Forge_Inspector` | Namespace browser | Real-time `_G` tree explorer with type display, per-level search, 0.5s auto-poll on expanded nodes, pinnable watch list. |
 | `Forge_Logs` | Activity dashboard | Per-source log viewer with `DLAPI`-style public API, categories + verbosity, search, export to CSV / HTML, optional Events / ChatEvents taps. Replaces Cairn.Dashboard. |
 | `Forge_Profiles` | Profile manager | Cross-addon profile switcher, profile manager API, auto-discovery adapters so non-Cairn addons appear automatically. |
-| `Forge_Setup` | Setup wizard API | Declarative multi-page first-run wizard library that any addon can use. |
+| `Forge_Registry` | Registry browser | "What's wired up" view: enumerates Cairn.Addon, Cairn.Hooks, Cairn.Timer, Cairn.Events, Cairn.DB, Cairn.Slash, Cairn.Locale registries, plus LibCodex modules and consumer addons. |
 | `Forge_AddonManager` | Addon manager | Toggle addons in-game, named sets (Raid / Solo / PvP), ReloadUI, per-addon memory and load order, sortable columns, status filter, protected addons, export. **Shipped.** |
 | `Forge_Codex` | Codex browser | Browse / search / stats over LibCodex's 45-module catalog. Replaces LibCodex's UI. |
 
@@ -198,7 +201,7 @@ which the next Cairn release drops `Cairn-Dashboard-1.0.lua`.
 **Build order for v0.1:**
 
 1. `Forge_Macros` (macro editor)
-2. `Forge_Setup` (wizard API)
+2. `Forge_Registry` (registry browser)
 3. `Forge_Logs` (activity dashboard with DLAPI compat; replaces `Cairn.Dashboard`)
 4. `Forge_Codex` (catalog browser; replaces LibCodex UI)
 5. `Forge_Inspector` (Lua namespace browser)
