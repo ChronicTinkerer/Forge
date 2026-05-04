@@ -101,8 +101,8 @@ WoW error popup no longer appears. Errors are stored in a ring buffer of
   once per 5s to avoid spam.
 - "Ignore" on the detail pane adds the error's `file:line:` prefix to
   a substring ignore list. Future identical errors don't get captured.
-- Chains to any previously-installed handler (BugSack, etc.), so other
-  error tools keep working.
+- Chains to any previously-installed error handler so other error
+  tools keep working.
 
 ---
 

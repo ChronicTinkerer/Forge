@@ -104,18 +104,12 @@ slash:Subcommand("status", function()
 end, "show wiring (Cairn, LibCodex, profile, sub-modules)")
 
 slash:Subcommand("logs", function()
-    -- Forge_Logs (when installed) registers a "Logs" tab. If it is not
-    -- installed, fall back to Cairn.Dashboard so users always have a viewer.
     if ns.Registry and ns.Registry.Get("Logs") and ns.Window then
         ns.Window.OpenTab("Logs")
         return
     end
-    if Cairn.Dashboard and Cairn.Dashboard.Toggle then
-        Cairn.Dashboard:Toggle()
-        return
-    end
     out("no log viewer available (install Forge_Logs).")
-end, "open the Logs tab (or fall back to Cairn.Dashboard)")
+end, "open the Logs tab")
 
 slash:Subcommand("modules", function()
     if not ns.Registry then out("registry not ready.") return end
