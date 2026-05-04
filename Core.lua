@@ -8,7 +8,20 @@ local ADDON, ns = ...
 
 Forge = ns
 ns.VERSION = "0.1.0-dev"
-ns.BUILD   = "2605040233"
+
+-- Read the live .toc Version (build stamp). Auto-stays in sync with bumps
+-- so /forge status doesn't drift from the actual loaded build.
+local function readBuild(addonName)
+    local v
+    if C_AddOns and C_AddOns.GetAddOnMetadata then
+        v = C_AddOns.GetAddOnMetadata(addonName, "Version")
+    elseif GetAddOnMetadata then
+        v = GetAddOnMetadata(addonName, "Version")
+    end
+    return v or "?"
+end
+ns.BUILD = readBuild(ADDON)
+ns.readBuild = readBuild  -- exposed so the status sub can show sub-addon builds
 
 -- --------------------------------------------------------------------------
 -- DB.
@@ -93,15 +106,39 @@ end
 local slash = Cairn.Slash.Register("Forge", "/forge", { aliases = { "/fg" } })
 ns.slash = slash
 
+-- Walk WoW's addon list and return every loaded Forge_* folder, sorted.
+-- Robust against registry tab-key vs folder-name mismatches (e.g. the tab
+-- key "Addons" maps to folder "Forge_AddonManager").
+local function listForgeAddonFolders()
+    local names = {}
+    local count = (C_AddOns and C_AddOns.GetNumAddOns and C_AddOns.GetNumAddOns())
+        or (GetNumAddOns and GetNumAddOns()) or 0
+    for i = 1, count do
+        local nm
+        if C_AddOns and C_AddOns.GetAddOnInfo then
+            nm = C_AddOns.GetAddOnInfo(i)
+        elseif GetAddOnInfo then
+            nm = GetAddOnInfo(i)
+        end
+        if nm and nm:match("^Forge_") then names[#names + 1] = nm end
+    end
+    table.sort(names)
+    return names
+end
+ns.listForgeAddonFolders = listForgeAddonFolders
+
 slash:Subcommand("status", function()
-    out("v" .. ns.VERSION .. " (build " .. ns.BUILD .. ")")
+    out("Forge v" .. ns.VERSION .. " (build " .. ns.BUILD .. ")")
     out("  Cairn:    " .. (Cairn and "OK" or "MISSING"))
     out("  LibCodex: " .. (((LibStub and LibStub("LibCodex-1.0", true))) and "OK" or "absent"))
     out("  Profile:  " .. tostring(db:GetCurrentProfile()))
     if ns.Registry then
         out("  Sub-modules: " .. ns.Registry.CountString())
     end
-end, "show wiring (Cairn, LibCodex, profile, sub-modules)")
+    for _, n in ipairs(listForgeAddonFolders()) do
+        out(string.format("    %-22s %s", n, readBuild(n)))
+    end
+end, "show wiring (Cairn, LibCodex, profile, sub-modules + per-addon builds)")
 
 slash:Subcommand("logs", function()
     if ns.Registry and ns.Registry.Get("Logs") and ns.Window then

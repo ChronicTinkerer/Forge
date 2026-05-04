@@ -128,6 +128,33 @@ end
 
 About.Text = decorate(trim(SUMMARY_TEXT))
 
+-- Build a "Loaded builds" block listing every Forge_* sub-addon and Cairn /
+-- LibCodex with their .toc Version. Computed at tab-show time so it reflects
+-- whatever's actually loaded in the session.
+local function buildBuildsBlock()
+    local readBuild = ns.readBuild or function() return "?" end
+    local lines = {
+        "",
+        "|cffd87f3aLoaded builds|r",
+    }
+    -- Forge parent first.
+    lines[#lines + 1] = string.format("  %-22s %s", "Forge", readBuild("Forge"))
+    -- Every loaded Forge_* folder. Walks the WoW addon list directly so
+    -- folder/tab-key mismatches (Addons -> Forge_AddonManager) don't hide rows.
+    if ns.listForgeAddonFolders then
+        for _, n in ipairs(ns.listForgeAddonFolders()) do
+            lines[#lines + 1] = string.format("  %-22s %s", n, readBuild(n))
+        end
+    end
+    -- Libraries.
+    lines[#lines + 1] = string.format("  %-22s %s", "Cairn",       readBuild("Cairn"))
+    local lcVer = readBuild("LibCodex-1.0")
+    if lcVer ~= "?" then
+        lines[#lines + 1] = string.format("  %-22s %s", "LibCodex-1.0", lcVer)
+    end
+    return table.concat(lines, "\n")
+end
+
 -- Build and register the descriptor.
 local function buildAbout(parent, mod)
     local frame = CreateFrame("Frame", nil, parent)
@@ -174,7 +201,11 @@ local function buildAbout(parent, mod)
     fs:SetJustifyV("TOP")
     fs:SetPoint("TOPLEFT", content, "TOPLEFT", 4, -4)
     fs:SetWordWrap(true)
-    fs:SetText(About.Text)
+    -- Append the live "Loaded builds" block. Computed each build call so a
+    -- /reload after bumping a sub-addon shows the new stamps without
+    -- requiring About.Text to be regenerated.
+    fs:SetText(About.Text .. "\n" .. buildBuildsBlock())
+    mod._aboutFs = fs
 
     local function reflow()
         local w = (sf:GetWidth() or 0) - 8
@@ -200,6 +231,11 @@ About.descriptor = {
             mod._built = true
         end
         if mod._frame then mod._frame:Show() end
+        -- Refresh the builds list each show so it reflects whatever's loaded
+        -- right now (useful when iterating sub-addons mid-session).
+        if mod._aboutFs then
+            mod._aboutFs:SetText(About.Text .. "\n" .. buildBuildsBlock())
+        end
     end,
     OnTabHide   = function(parent, mod)
         if mod._frame then mod._frame:Hide() end
