@@ -71,17 +71,17 @@ local function buildFrame()
         tile = true, tileSize = 16, edgeSize = 16,
         insets = { left = 4, right = 4, top = 4, bottom = 4 },
     })
-    f:SetBackdropColor(0.05, 0.05, 0.05, 0.95)
+    f:SetBackdropColor(0.05, 0.05, 0.05, 0.72)
     f:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
     f:SetFrameStrata("MEDIUM")
     f:Hide()
 
     -- Watermark logo (sits behind tabs and content). Subtle, not loud.
-    local logo = f:CreateTexture(nil, "BACKGROUND", nil, -8)
+    local logo = f:CreateTexture(nil, "ARTWORK", nil, -7)
     logo:SetTexture("Interface\\AddOns\\Forge\\ForgeLogo.png")
     logo:SetPoint("CENTER", f, "CENTER", 0, 0)
-    logo:SetSize(360, 360)
-    logo:SetAlpha(0.08)
+    logo:SetSize(540, 540)
+    logo:SetAlpha(0.32)
     f._logo = logo
 
     -- Title.
@@ -295,3 +295,124 @@ end
 function Window.IsShown()
     return (frame and frame:IsShown()) or false
 end
+
+-- ===========================================================================
+-- Shared utilities exposed to every sub-addon: a copy-dialog popup and a Lua
+-- table serializer. Sub-addons hit `Forge.ShowCopyDialog(title, text, hint)`
+-- to surface text the user wants to copy out (errors, snippets, addon state),
+-- and `Forge.SerializeTable(t)` to produce loadable Lua for the dialog body.
+-- ===========================================================================
+
+local _copyDialog
+local function buildCopyDialog()
+    local f = CreateFrame("Frame", "ForgeCopyDialog", UIParent, "BackdropTemplate")
+    f:SetSize(720, 520)
+    f:SetPoint("CENTER")
+    f:SetFrameStrata("DIALOG")
+    f:SetBackdrop({
+        bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    })
+    f:SetBackdropColor(0, 0, 0, 0.95)
+    f:SetBackdropBorderColor(0.85, 0.50, 0.20, 1)
+    f:EnableMouse(true)
+    f:SetMovable(true)
+    f:RegisterForDrag("LeftButton")
+    f:SetScript("OnDragStart", function(self) self:StartMoving() end)
+    f:SetScript("OnDragStop",  function(self) self:StopMovingOrSizing() end)
+    f:Hide()
+
+    local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
+    close:SetPoint("TOPRIGHT", -2, -2)
+
+    local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", 12, -10)
+    f._title = title
+
+    local hint = f:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    hint:SetPoint("LEFT", title, "RIGHT", 8, 0)
+    f._hint = hint
+
+    local sf = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
+    sf:SetPoint("TOPLEFT",     12, -36)
+    sf:SetPoint("BOTTOMRIGHT", -32, 12)
+
+    local eb = CreateFrame("EditBox", nil, sf)
+    eb:SetMultiLine(true)
+    eb:SetAutoFocus(false)
+    eb:SetFontObject("ChatFontNormal")
+    eb:SetWidth(660)
+    eb:SetScript("OnEscapePressed", function() f:Hide() end)
+    sf:SetScrollChild(eb)
+    f._eb = eb
+    return f
+end
+
+function Window.ShowCopyDialog(title, text, hint)
+    if not _copyDialog then _copyDialog = buildCopyDialog() end
+    local f = _copyDialog
+    f._title:SetText("|cffd87f3a" .. tostring(title or "Copy") .. "|r")
+    f._hint:SetText(hint or "Ctrl-A to select all, Ctrl-C to copy")
+    f._eb:SetText(text or "")
+    f._eb:SetCursorPosition(0)
+    f._eb:HighlightText()
+    f:Show()
+    f._eb:SetFocus()
+    return f
+end
+
+-- ===========================================================================
+-- SerializeTable: produces loadable Lua for a value. Round-trippable for
+-- strings/numbers/booleans/nested tables. Cycles render as `nil --[[cycle]]`.
+-- ===========================================================================
+local function _serialize(v, indent, seen)
+    indent = indent or ""
+    seen = seen or {}
+    local t = type(v)
+    if t == "string" then return string.format("%q", v) end
+    if t == "number" or t == "boolean" or t == "nil" then return tostring(v) end
+    if t ~= "table" then return "nil --[[" .. t .. "]]" end
+    if seen[v] then return "nil --[[cycle]]" end
+    seen[v] = true
+
+    if next(v) == nil then return "{}" end
+    local pad = indent .. "    "
+    local lines = { "{" }
+
+    local seqLen = #v
+    for i = 1, seqLen do
+        lines[#lines + 1] = pad .. _serialize(v[i], pad, seen) .. ","
+    end
+
+    local hashKeys = {}
+    for k in pairs(v) do
+        if not (type(k) == "number" and k >= 1 and k <= seqLen and k == math.floor(k)) then
+            hashKeys[#hashKeys + 1] = k
+        end
+    end
+    table.sort(hashKeys, function(a, b) return tostring(a) < tostring(b) end)
+    for _, k in ipairs(hashKeys) do
+        local keyStr
+        if type(k) == "string" and k:match("^[%a_][%w_]*$") then
+            keyStr = k
+        elseif type(k) == "string" then
+            keyStr = string.format("[%q]", k)
+        else
+            keyStr = "[" .. tostring(k) .. "]"
+        end
+        lines[#lines + 1] = pad .. keyStr .. " = " .. _serialize(v[k], pad, seen) .. ","
+    end
+
+    lines[#lines + 1] = indent .. "}"
+    return table.concat(lines, "\n")
+end
+
+function Window.SerializeTable(t)
+    return _serialize(t, "", {})
+end
+
+-- Top-level convenience aliases on the Forge namespace.
+ns.ShowCopyDialog = Window.ShowCopyDialog
+ns.SerializeTable = Window.SerializeTable

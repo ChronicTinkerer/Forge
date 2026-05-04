@@ -13,9 +13,9 @@ sub-addon plugs into the parent's main window as its own tab.
 It targets **WoW Retail (Midnight, Interface 120005)** and is built on
 the [Cairn](../Cairn/README.md) library stack.
 
-**Status:** parent + Forge_Console + Forge_BugCatcher shipped (v0.1.0-dev,
-build 2605040127). Other sub-addons in active development. See
-[Roadmap](#roadmap).
+**Status:** parent + Forge_Console + Forge_BugCatcher + Forge_AddonManager +
+Forge_Macros shipped (v0.1.0-dev, build 2605040218). Other sub-addons in
+active development. See [Roadmap](#roadmap).
 
 ---
 
@@ -28,13 +28,13 @@ main window. Each sub-addon adds one tool as a tab.
 | Sub-addon | Tool | What it does |
 |---|---|---|
 | `Forge_BugCatcher` | Error handler | Captures Lua errors quietly. Browsable viewer with copy-as-block, minimap counter, ignore list, optional auto-popup, color-coded severity. **Shipped.** |
-| `Forge_Macros` | Macro editor | Full-size editor: Account + Character lists, big text area, icon picker, drag-to-action-bar, 255-char counter. |
+| `Forge_Macros` | Macro editor | Account + Character macro lists, big text area, char counter, drag-to-bar; plus a Sequences mode that builds a stack of `/cast` lines and compiles to a `/castsequence` macro. **Shipped.** |
 | `Forge_Console` | Lua REPL | In-game Lua console with command history, syntax check, scrollable output. **Shipped.** |
 | `Forge_Inspector` | Namespace browser | Real-time `_G` tree explorer with type display, per-level search, 0.5s auto-poll on expanded nodes, pinnable watch list. |
 | `Forge_Logs` | Activity dashboard | Per-source log viewer with `DLAPI`-style public API, categories + verbosity, search, export to CSV / HTML, optional Events / ChatEvents taps. Replaces Cairn.Dashboard. |
 | `Forge_Profiles` | Profile manager | Cross-addon profile switcher, profile manager API, auto-discovery adapters so non-Cairn addons appear automatically. |
 | `Forge_Setup` | Setup wizard API | Declarative multi-page first-run wizard library that any addon can use. |
-| `Forge_AddonManager` | Addon manager | Toggle addons in-game, named sets (Raid / Solo / PvP), ReloadUI, per-addon memory and load order, profile-aware enable lists. |
+| `Forge_AddonManager` | Addon manager | Toggle addons in-game, named sets (Raid / Solo / PvP), ReloadUI, per-addon memory and load order, sortable columns, status filter, protected addons, export. **Shipped.** |
 | `Forge_Codex` | Codex browser | Browse / search / stats over LibCodex's 45-module catalog. Replaces LibCodex's UI. |
 
 ---
