@@ -576,11 +576,22 @@ function UI.Build(parent, mod)
     exportBtnW:ClearAllPoints()
     exportBtnW:SetPoint("RIGHT", clearBtnFrame, "LEFT", -4, 0)
 
-    -- ===== Code editor (multi-line ScrollFrame + EditBox) =================
-    -- The editor uses a vanilla UIPanelScrollFrameTemplate + multi-line EditBox
-    -- intentionally; the Cairn-Gui ScrollingEditBox widget has a different
-    -- API contract and migrating risks subtle regressions in cursor / scroll
-    -- behaviour. Output pane below DOES use the kit.
+    -- ===== Code editor =====================================================
+    -- Migrated to Cairn-Gui-Core ScrollingEditBox. Two gotchas to know:
+    --   1. The widget hooks the inner editBox's OnEditFocusLost to do
+    --      `editBox:SetText(self.settings.text)` -- a "commit on Enter" reset.
+    --      For a free-form code editor we need every keystroke to persist, so
+    --      we hook OnTextChanged on the inner editBox and write the live
+    --      string back into widget.settings.text. With that in place, focus-
+    --      loss reads the same string the user already sees, and the reset
+    --      is a no-op visually.
+    --   2. The widget's outer .frame has no chrome of its own (background +
+    --      border are styled internally). We keep the existing parchment
+    --      BackdropTemplate around it as visual decoration.
+    --
+    -- The widget exposes `.editBox` for direct access; `mod._editor` keeps
+    -- pointing at that EditBox so all GetText/SetText/etc. consumer code
+    -- elsewhere in this file still works.
     local editorBg = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     editorBg:SetPoint("TOPLEFT",     toolbar, "BOTTOMLEFT",  0, -PAD)
     editorBg:SetPoint("BOTTOMRIGHT", frame,   "BOTTOMRIGHT", -4, OUTPUT_H + PAD + 4)
@@ -593,32 +604,52 @@ function UI.Build(parent, mod)
     editorBg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
     editorBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
 
-    local editorScroll = CreateFrame("ScrollFrame", nil, editorBg, "UIPanelScrollFrameTemplate")
-    editorScroll:SetPoint("TOPLEFT",     6, -6)
-    editorScroll:SetPoint("BOTTOMRIGHT", -28, 6)
-    mod._editorScroll = editorScroll
+    local editorWidget = Gui and Gui:Create("ScrollingEditBox")
+    if editorWidget then
+        editorWidget:SetParent(editorBg); editorWidget:ClearAllPoints()
+        editorWidget:SetPoint("TOPLEFT",     editorBg, "TOPLEFT",      6, -6)
+        editorWidget:SetPoint("BOTTOMRIGHT", editorBg, "BOTTOMRIGHT", -2,  6)
 
-    local editor = CreateFrame("EditBox", nil, editorScroll)
-    editor:SetMultiLine(true)
-    editor:SetAutoFocus(false)
-    editor:SetFontObject("ChatFontNormal")
-    editor:SetTextInsets(2, 2, 2, 2)
-    editor:SetWidth(600)
-    editor:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-    editor:SetScript("OnTextChanged", function() end)  -- we save on switch / hide / Run
-    -- F5 / Ctrl-S keybindings via OnKeyDown require EnableKeyboard, but that
-    -- breaks normal typing. Easier: rely on the Run button + the Ctrl-S
-    -- behavior auto-saves on every snippet switch and on every Run.
-    editorScroll:SetScrollChild(editor)
-    mod._editor = editor
+        -- Wire the inner editBox to the same surface we exposed before.
+        local eb = editorWidget.editBox
+        eb:SetFontObject("ChatFontNormal")
+        eb:SetTextInsets(2, 2, 2, 2)
+        eb:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+        -- KEY: keep the widget's settings.text in sync with every keystroke
+        -- so the OnEditFocusLost reset doesn't blow away unsaved typing.
+        eb:HookScript("OnTextChanged", function(self)
+            editorWidget.settings.text = self:GetText() or ""
+        end)
 
-    local function reflowEditor()
-        local w = (editorScroll:GetWidth() or 0) - 4
-        if w < 1 then w = 1 end
-        editor:SetWidth(w)
+        mod._editorWidget = editorWidget
+        mod._editor       = eb
+        mod._editorScroll = editorWidget.scrollFrame  -- preserved for SetVerticalScroll(0) callers
+    else
+        -- Defensive vanilla fallback path (kit failed to load).
+        local editorScroll = CreateFrame("ScrollFrame", nil, editorBg, "UIPanelScrollFrameTemplate")
+        editorScroll:SetPoint("TOPLEFT",     6, -6)
+        editorScroll:SetPoint("BOTTOMRIGHT", -28, 6)
+        mod._editorScroll = editorScroll
+
+        local editor = CreateFrame("EditBox", nil, editorScroll)
+        editor:SetMultiLine(true)
+        editor:SetAutoFocus(false)
+        editor:SetFontObject("ChatFontNormal")
+        editor:SetTextInsets(2, 2, 2, 2)
+        editor:SetWidth(600)
+        editor:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+        editor:SetScript("OnTextChanged", function() end)
+        editorScroll:SetScrollChild(editor)
+        mod._editor = editor
+
+        local function reflowEditor()
+            local w = (editorScroll:GetWidth() or 0) - 4
+            if w < 1 then w = 1 end
+            editor:SetWidth(w)
+        end
+        editorScroll:SetScript("OnSizeChanged", reflowEditor)
+        reflowEditor()
     end
-    editorScroll:SetScript("OnSizeChanged", reflowEditor)
-    reflowEditor()
 
     -- ===== Output / log pane ============================================
     local outputBg = CreateFrame("Frame", nil, frame, "BackdropTemplate")
