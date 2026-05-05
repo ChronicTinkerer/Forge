@@ -24,6 +24,7 @@ ns.UI = UI
 
 local TOOLBAR_H   = 28
 local OUTPUT_H    = 150
+local REPL_H      = 24
 local PAD         = 6
 local BTN_WIDTH   = 60
 local BTN_HEIGHT  = 22
@@ -109,6 +110,26 @@ function UI.SwitchTo(name)
 end
 
 -- ----- Run ---------------------------------------------------------------
+-- Move the editor cursor to the first character of the given 1-based line.
+-- Used after a runtime error to put the user right where they need to fix.
+function UI.JumpToLine(mod, lineNum)
+    mod = mod or _activeMod
+    if not (mod and mod._editor and lineNum and lineNum > 0) then return end
+    local text = mod._editor:GetText() or ""
+
+    -- Walk the text, count newlines until we land on the target line.
+    local pos, cur = 1, 1
+    while cur < lineNum do
+        local s, e = text:find("\n", pos, true)
+        if not e then break end
+        pos = e + 1
+        cur = cur + 1
+    end
+
+    mod._editor:SetFocus()
+    mod._editor:SetCursorPosition(pos - 1)
+end
+
 function UI.RunEditor(mod)
     mod = mod or _activeMod
     if not mod then return end
@@ -117,10 +138,22 @@ function UI.RunEditor(mod)
 
     UI.SaveCurrent(mod)
 
+    -- Clear any prior error highlight before we run.
+    if mod._gutter and ns.LineNumbers then
+        ns.LineNumbers.ClearHighlight(mod._gutter)
+    end
+
     UI.AppendOutput(mod, { "> run " .. (ns.GetCurrentSnippet() or "?") }, "ffd87f3a")
 
-    local ok, lines = ns.Eval.Run(code)
+    local ok, lines, errLine = ns.Eval.Run(code)
     UI.AppendOutput(mod, lines, ok and "ffaaaaaa" or "ffff4040")
+
+    if (not ok) and errLine then
+        if mod._gutter and ns.LineNumbers then
+            ns.LineNumbers.SetHighlight(mod._gutter, errLine)
+        end
+        UI.JumpToLine(mod, errLine)
+    end
 end
 
 -- ----- Dropdown widget ---------------------------------------------------
@@ -594,7 +627,8 @@ function UI.Build(parent, mod)
     -- elsewhere in this file still works.
     local editorBg = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     editorBg:SetPoint("TOPLEFT",     toolbar, "BOTTOMLEFT",  0, -PAD)
-    editorBg:SetPoint("BOTTOMRIGHT", frame,   "BOTTOMRIGHT", -4, OUTPUT_H + PAD + 4)
+    -- Bottom offset = output height + repl height + 2 gaps + bottom border.
+    editorBg:SetPoint("BOTTOMRIGHT", frame,   "BOTTOMRIGHT", -4, OUTPUT_H + REPL_H + 2*PAD + 4)
     editorBg:SetBackdrop({
         bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -606,8 +640,14 @@ function UI.Build(parent, mod)
 
     local editorWidget = Gui and Gui:Create("ScrollingEditBox")
     if editorWidget then
+        -- Reserve space on the LEFT for the line-number gutter. The gutter's
+        -- own frame is anchored to editorBg's left edge with a fixed width;
+        -- we offset the editor's TOPLEFT/BOTTOMLEFT by gutter width + a gap.
+        local GUTTER_GAP = 4
+        local INITIAL_GUTTER_W = 24  -- two-digit width; LN.Update grows as needed.
+
         editorWidget:SetParent(editorBg); editorWidget:ClearAllPoints()
-        editorWidget:SetPoint("TOPLEFT",     editorBg, "TOPLEFT",      6, -6)
+        editorWidget:SetPoint("TOPLEFT",     editorBg, "TOPLEFT",     6 + INITIAL_GUTTER_W + GUTTER_GAP, -6)
         editorWidget:SetPoint("BOTTOMRIGHT", editorBg, "BOTTOMRIGHT", -2,  6)
 
         -- Wire the inner editBox to the same surface we exposed before.
@@ -619,11 +659,39 @@ function UI.Build(parent, mod)
         -- so the OnEditFocusLost reset doesn't blow away unsaved typing.
         eb:HookScript("OnTextChanged", function(self)
             editorWidget.settings.text = self:GetText() or ""
+            -- Refresh gutter so line count tracks the user's typing.
+            if mod._gutter and ns.LineNumbers then
+                ns.LineNumbers.Update(mod._gutter)
+            end
         end)
 
         mod._editorWidget = editorWidget
         mod._editor       = eb
         mod._editorScroll = editorWidget.scrollFrame  -- preserved for SetVerticalScroll(0) callers
+
+        -- ----- Line-number gutter --------------------------------------
+        if ns.LineNumbers then
+            local gutter = ns.LineNumbers.Build(editorBg, editorWidget.scrollFrame, eb)
+            gutter.frame:SetWidth(INITIAL_GUTTER_W)
+            -- When the gutter's width grows past a decade boundary, slide
+            -- the editor's left anchor to match.
+            gutter._onWidthChanged = function(newW)
+                editorWidget:ClearAllPoints()
+                editorWidget:SetPoint("TOPLEFT",     editorBg, "TOPLEFT",     6 + newW + GUTTER_GAP, -6)
+                editorWidget:SetPoint("BOTTOMRIGHT", editorBg, "BOTTOMRIGHT", -2,  6)
+            end
+            mod._gutter = gutter
+            ns.LineNumbers.Update(gutter)
+        end
+
+        -- ----- FAIAP syntax highlighting + smart indent ----------------
+        -- Hooks OnTextChanged / OnTabPressed / OnUpdate AND swaps eb.GetText
+        -- and eb.SetText (so callers see plain text without color escapes).
+        -- Cairn-Gui's existing OnTextChanged is preserved by FAIAP's
+        -- hookHandler; our HookScript above fires after both run.
+        if ns.indent and ns.indent.enable then
+            ns.indent.enable(eb, ns.indent.defaultColorTable, 4)
+        end
     else
         -- Defensive vanilla fallback path (kit failed to load).
         local editorScroll = CreateFrame("ScrollFrame", nil, editorBg, "UIPanelScrollFrameTemplate")
@@ -654,7 +722,8 @@ function UI.Build(parent, mod)
     -- ===== Output / log pane ============================================
     local outputBg = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     outputBg:SetPoint("TOPLEFT",     editorBg, "BOTTOMLEFT",  0, -PAD)
-    outputBg:SetPoint("BOTTOMRIGHT", frame,    "BOTTOMRIGHT", -4, 4)
+    -- Leave room for the REPL strip at the bottom.
+    outputBg:SetPoint("BOTTOMRIGHT", frame,    "BOTTOMRIGHT", -4, REPL_H + PAD + 4)
     outputBg:SetBackdrop({
         bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -724,10 +793,105 @@ function UI.Build(parent, mod)
     outputSf:HookScript("OnSizeChanged", reflowOutput)
     reflowOutput()
 
+    -- ===== REPL command line ============================================
+    -- A single-line input strip below the output pane. Acts like a normal
+    -- Lua REPL: each Enter compiles + runs (or extends the buffer if the
+    -- block isn't closed yet). Up/Down cycle through history natively via
+    -- EditBox:AddHistoryLine. Esc cancels an in-progress continuation.
+    local replBg = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    replBg:SetPoint("TOPLEFT",     outputBg, "BOTTOMLEFT",  0, -PAD)
+    replBg:SetPoint("BOTTOMRIGHT", frame,    "BOTTOMRIGHT", -4, 4)
+    replBg:SetBackdrop({
+        bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 8,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 },
+    })
+    replBg:SetBackdropColor(0.05, 0.05, 0.05, 0.40)
+    replBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
+
+    -- Prompt label on the left.
+    local promptFs = replBg:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
+    promptFs:SetPoint("LEFT", replBg, "LEFT", 8, 0)
+    promptFs:SetText("|cffd87f3a> |r")
+    promptFs:SetWordWrap(false)
+    mod._replPrompt = promptFs
+
+    -- Single-line input. We deliberately use a vanilla EditBox here (not
+    -- Cairn-Gui Input) because the kit's Input is a chunky styled widget
+    -- intended for forms; a thin transparent bar fits the REPL aesthetic
+    -- better and gets us native AddHistoryLine support.
+    local replEb = CreateFrame("EditBox", nil, replBg)
+    replEb:SetPoint("LEFT",  promptFs, "RIGHT", 2, 0)
+    replEb:SetPoint("RIGHT", replBg,   "RIGHT", -8, 0)
+    replEb:SetHeight(REPL_H - 4)
+    replEb:SetAutoFocus(false)
+    replEb:SetMultiLine(false)
+    replEb:SetMaxLetters(0)
+    replEb:SetMaxBytes(0)
+    replEb:SetFontObject("ChatFontNormal")
+    replEb:SetTextInsets(2, 2, 0, 0)
+    -- Native UP/DOWN history. Seed with anything we already have on disk so
+    -- the user can recall prior commands across sessions.
+    replEb:SetHistoryLines(64)
+    if ns.GetHistory then
+        for _, line in ipairs(ns.GetHistory()) do
+            replEb:AddHistoryLine(line)
+        end
+    end
+    mod._replInput = replEb
+
+    -- Helper: refresh the prompt label based on REPL.IsContinuing().
+    local function refreshPrompt()
+        if not ns.REPL then return end
+        if ns.REPL.IsContinuing() then
+            promptFs:SetText("|cffd87f3a>> |r")
+        else
+            promptFs:SetText("|cffd87f3a> |r")
+        end
+    end
+
+    replEb:SetScript("OnEnterPressed", function(self)
+        local line = self:GetText() or ""
+        self:SetText("")
+        if not ns.REPL then return end
+
+        -- Echo the typed line into the output transcript, prefixed with the
+        -- prompt the user saw at submit time. Capture BEFORE Submit() since
+        -- that call may flip the prompt state.
+        local promptStr = ns.REPL.Prompt()
+        UI.AppendOutput(mod, { promptStr .. line }, "ffd87f3a")
+
+        -- Native arrow-key history. Skip blank lines so they don't litter.
+        if line:match("%S") then self:AddHistoryLine(line) end
+
+        local action, ok, lines = ns.REPL.Submit(line)
+        if action == "ran" then
+            UI.AppendOutput(mod, lines or {}, ok and "ffaaaaaa" or "ffff4040")
+        end
+        -- "continue" or "empty": no output, just refresh the prompt.
+        refreshPrompt()
+    end)
+
+    replEb:SetScript("OnEscapePressed", function(self)
+        if ns.REPL and ns.REPL.CancelBuffer() then
+            UI.AppendOutput(mod, { "(cancelled)" }, "ffaaaaaa")
+            refreshPrompt()
+        else
+            self:SetText("")
+            self:ClearFocus()
+        end
+    end)
+
+    -- Click to focus.
+    replBg:EnableMouse(true)
+    replBg:SetScript("OnMouseDown", function() replEb:SetFocus() end)
+
     -- ===== Welcome banner + initial load ================================
     UI.AppendOutput(mod, {
         "Forge Console - in-game scripting workspace",
         "Pick a snippet from the dropdown, edit, click Run.  Switching snippets auto-saves.",
+        "REPL: type a Lua expression below, Enter to run.  `= expr` auto-prints.",
         "Auto-run on login is per-character; toggle via the checkbox or /forge consoleautorun.",
     }, "ff7fbfff")
 

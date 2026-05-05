@@ -107,6 +107,25 @@ local function compile(input)
     return fn, err
 end
 
+-- Pull a line number out of either a syntax error or a runtime error message.
+-- Lua errors look like:
+--   [string "=forge_console"]:5: '=' expected near 'foo'
+--   [string "forge_console"]:5: attempt to index a nil value
+-- with possible variation in the chunk-name section. The :NN: pattern is
+-- what we anchor to. Returns a positive integer or nil.
+local function extractErrLine(msg)
+    if type(msg) ~= "string" then return nil end
+    -- Anchor to ']:' first (the closing bracket of [string "..."]) so we
+    -- don't accidentally pick up a colon inside a string literal in user
+    -- code, e.g. `print("foo:5:bar")`.
+    local n = msg:match("%]:(%d+):")
+    if not n then
+        -- Fallback: bare `:NN:` near the start of the message.
+        n = msg:match("^[^:]*:(%d+):")
+    end
+    return tonumber(n)
+end
+
 function Eval.Run(input)
     if type(input) ~= "string" or input:match("^%s*$") then
         return true, { "(empty)" }
@@ -119,7 +138,7 @@ function Eval.Run(input)
     local fn, err = compile(input)
     if not fn then
         out[#out + 1] = "syntax error: " .. tostring(err)
-        return false, out
+        return false, out, extractErrLine(err)
     end
 
     local origPrint = _G.print
@@ -131,7 +150,7 @@ function Eval.Run(input)
     local ok = results[1]
     if not ok then
         out[#out + 1] = "error: " .. tostring(results[2])
-        return false, out
+        return false, out, extractErrLine(results[2])
     end
 
     local n = #results

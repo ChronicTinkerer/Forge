@@ -1,13 +1,16 @@
 ## Interface: 120005
 ## Title: Forge_Console
-## Notes: In-game Lua REPL. Adds a Console tab to /forge with command history, syntax check, and a scrollable output pane.
+## Notes: In-game Lua REPL. Adds a Console tab to /forge with syntax highlighting, line numbers, smart indent, history, and a scrollable output pane.
 ## Author: ChronicTinkerer
-## Version: 2605052200
+## Version: 2605051145
 ## SavedVariables: ForgeConsoleDB
 ## Dependencies: Cairn, Forge
 ## X-Category: Development Tools
 ## X-License: All Rights Reserved
 
 Core.lua
+Indent.lua
+LineNumbers.lua
 Eval.lua
+REPL.lua
 UI.lua
