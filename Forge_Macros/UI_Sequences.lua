@@ -56,14 +56,28 @@ local function buildSequenceList(parent, mod)
     pane:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 0, 0)
     pane:SetWidth(LIST_W)
 
-    local newBtn = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-    newBtn:SetSize(LIST_W, 22)
-    newBtn:SetPoint("TOPLEFT", pane, "TOPLEFT", 0, 0)
-    newBtn:SetText("+ New sequence")
-    newBtn:SetScript("OnClick", function() S.NewSequence() end)
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local newBtn, newBtnFrame
+    do
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(pane); b:ClearAllPoints()
+            b:SetWidth(LIST_W); b:SetHeight(22); b:SetText("+ New sequence")
+            b:SetPoint("TOPLEFT", pane, "TOPLEFT", 0, 0)
+            b:SetEventListener("OnClick", function() S.NewSequence() end)
+            newBtn, newBtnFrame = b, b.frame
+        else
+            local raw = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
+            raw:SetSize(LIST_W, 22)
+            raw:SetPoint("TOPLEFT", pane, "TOPLEFT", 0, 0)
+            raw:SetText("+ New sequence")
+            raw:SetScript("OnClick", function() S.NewSequence() end)
+            newBtn, newBtnFrame = raw, raw
+        end
+    end
 
     local listBg = CreateFrame("Frame", nil, pane, "BackdropTemplate")
-    listBg:SetPoint("TOPLEFT", newBtn, "BOTTOMLEFT", 0, -PAD)
+    listBg:SetPoint("TOPLEFT", newBtnFrame, "BOTTOMLEFT", 0, -PAD)
     listBg:SetPoint("BOTTOMRIGHT", pane, "BOTTOMRIGHT", 0, 0)
     listBg:SetBackdrop({
         bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
@@ -74,12 +88,23 @@ local function buildSequenceList(parent, mod)
     listBg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
     listBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
 
-    local sf = CreateFrame("ScrollFrame", nil, listBg, "UIPanelScrollFrameTemplate")
-    sf:SetPoint("TOPLEFT", 6, -6)
-    sf:SetPoint("BOTTOMRIGHT", -22, 6)
-    mod._seqListScroll = sf
-    local content = CreateFrame("Frame", nil, sf); content:SetSize(1,1); sf:SetScrollChild(content)
-    mod._seqListContent = content
+    local seqListScroll = Gui and Gui:Create("ScrollFrame")
+    if seqListScroll then
+        seqListScroll:SetParent(listBg); seqListScroll:ClearAllPoints()
+        seqListScroll:SetPoint("TOPLEFT",     listBg, "TOPLEFT",      6, -6)
+        seqListScroll:SetPoint("BOTTOMRIGHT", listBg, "BOTTOMRIGHT", -2,  6)
+        mod._seqListScroll       = seqListScroll
+        mod._seqListContent      = seqListScroll.content
+        mod._seqListScrollFrame  = seqListScroll.scrollFrame or seqListScroll
+    else
+        local sf = CreateFrame("ScrollFrame", nil, listBg, "UIPanelScrollFrameTemplate")
+        sf:SetPoint("TOPLEFT", 6, -6)
+        sf:SetPoint("BOTTOMRIGHT", -22, 6)
+        mod._seqListScroll       = sf
+        local content = CreateFrame("Frame", nil, sf); content:SetSize(1,1); sf:SetScrollChild(content)
+        mod._seqListContent      = content
+        mod._seqListScrollFrame  = sf
+    end
     mod._seqListRows = {}
 
     return pane
@@ -116,32 +141,53 @@ local function buildEditor(parent, mod)
     stepsBg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
     stepsBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
 
-    local sf = CreateFrame("ScrollFrame", nil, stepsBg, "UIPanelScrollFrameTemplate")
-    sf:SetPoint("TOPLEFT", 6, -6)
-    sf:SetPoint("BOTTOMRIGHT", -28, 6)
-    mod._stepsScroll = sf
-    local content = CreateFrame("Frame", nil, sf); content:SetSize(1,1); sf:SetScrollChild(content)
-    mod._stepsContent = content
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local stepsScroll = Gui and Gui:Create("ScrollFrame")
+    if stepsScroll then
+        stepsScroll:SetParent(stepsBg); stepsScroll:ClearAllPoints()
+        stepsScroll:SetPoint("TOPLEFT",     stepsBg, "TOPLEFT",      6, -6)
+        stepsScroll:SetPoint("BOTTOMRIGHT", stepsBg, "BOTTOMRIGHT", -2,  6)
+        mod._stepsScroll       = stepsScroll
+        mod._stepsContent      = stepsScroll.content
+        mod._stepsScrollFrame  = stepsScroll.scrollFrame or stepsScroll
+    else
+        local sf = CreateFrame("ScrollFrame", nil, stepsBg, "UIPanelScrollFrameTemplate")
+        sf:SetPoint("TOPLEFT", 6, -6)
+        sf:SetPoint("BOTTOMRIGHT", -28, 6)
+        mod._stepsScroll       = sf
+        local content = CreateFrame("Frame", nil, sf); content:SetSize(1,1); sf:SetScrollChild(content)
+        mod._stepsContent      = content
+        mod._stepsScrollFrame  = sf
+    end
     mod._stepRows = {}
 
-    -- Bottom: Add Step | Delete Sequence | Compile.
-    local addStepBtn = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-    addStepBtn:SetSize(BTN_W + 20, BTN_H)
-    addStepBtn:SetPoint("BOTTOMLEFT", pane, "BOTTOMLEFT", 0, 0)
-    addStepBtn:SetText("+ Add step")
-    addStepBtn:SetScript("OnClick", function() S.AddStep() end)
+    -- Bottom: Add Step | Delete Sequence | Compile. All migrated to
+    -- Cairn-Gui Button with vanilla fallback.
+    local function makeBtn(label, w, h, anchorPoint, anchorTo, anchorRel, dx, onClick)
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(pane); b:ClearAllPoints()
+            b:SetWidth(w); b:SetHeight(h); b:SetText(label)
+            b:SetPoint(anchorPoint, anchorTo, anchorRel, dx, 0)
+            if onClick then b:SetEventListener("OnClick", function() onClick() end) end
+            return b, b.frame
+        else
+            local raw = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
+            raw:SetSize(w, h); raw:SetText(label)
+            raw:SetPoint(anchorPoint, anchorTo, anchorRel, dx, 0)
+            if onClick then raw:SetScript("OnClick", onClick) end
+            return raw, raw
+        end
+    end
 
-    local delBtn = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-    delBtn:SetSize(BTN_W + 20, BTN_H)
-    delBtn:SetPoint("LEFT", addStepBtn, "RIGHT", 4, 0)
-    delBtn:SetText("Delete sequence")
-    delBtn:SetScript("OnClick", function() S.DeleteCurrent() end)
+    local _, addStepBtnFrame = makeBtn("+ Add step", BTN_W + 20, BTN_H,
+        "BOTTOMLEFT", pane, "BOTTOMLEFT", 0, function() S.AddStep() end)
 
-    local compileBtn = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-    compileBtn:SetSize(140, BTN_H)
-    compileBtn:SetPoint("BOTTOMRIGHT", pane, "BOTTOMRIGHT", 0, 0)
-    compileBtn:SetText("Compile to macro")
-    compileBtn:SetScript("OnClick", function() S.CompileCurrent() end)
+    makeBtn("Delete sequence", BTN_W + 20, BTN_H,
+        "LEFT", addStepBtnFrame, "RIGHT", 4, function() S.DeleteCurrent() end)
+
+    makeBtn("Compile to macro", 140, BTN_H,
+        "BOTTOMRIGHT", pane, "BOTTOMRIGHT", 0, function() S.CompileCurrent() end)
 
     return pane
 end
@@ -179,14 +225,15 @@ local function refreshSequenceList(mod)
         row._text:SetText(string.format("%s  |cffaaaaaa(%d)|r", name, #(seq.steps or {})))
         row._sel:SetShown(name == _selectedName)
         row:ClearAllPoints()
-        row:SetWidth(mod._seqListScroll:GetWidth() - 24)
+        row:SetWidth((mod._seqListScroll:GetWidth() or LIST_W) - 24)
         row:SetPoint("TOPLEFT", mod._seqListContent, "TOPLEFT", 0, -y)
         row:Show()
         y = y + ROW_H
     end
     if y < 1 then y = 1 end
     mod._seqListContent:SetHeight(y)
-    mod._seqListScroll:UpdateScrollChildRect()
+    local sf = mod._seqListScrollFrame or mod._seqListScroll
+    if sf and sf.UpdateScrollChildRect then sf:UpdateScrollChildRect() end
 end
 
 local function buildStepRow(parent, idx)
@@ -237,14 +284,15 @@ local function refreshSteps(mod)
         row._idxLabel:SetText(tostring(i))
         row._eb:SetText(line or "")
         row:ClearAllPoints()
-        row:SetWidth(mod._stepsScroll:GetWidth() - 4)
+        row:SetWidth((mod._stepsScroll:GetWidth() or 400) - 4)
         row:SetPoint("TOPLEFT", mod._stepsContent, "TOPLEFT", 0, -y)
         row:Show()
         y = y + STEP_H + 2
     end
     if y < 1 then y = 1 end
     mod._stepsContent:SetHeight(y)
-    mod._stepsScroll:UpdateScrollChildRect()
+    local sf = mod._stepsScrollFrame or mod._stepsScroll
+    if sf and sf.UpdateScrollChildRect then sf:UpdateScrollChildRect() end
 end
 
 function S.Refresh()

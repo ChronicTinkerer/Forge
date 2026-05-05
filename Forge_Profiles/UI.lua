@@ -109,15 +109,31 @@ function UI.Build(parent, mod)
     bar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
     bar:SetHeight(TOOLBAR_H)
 
-    local saveBtn = CreateFrame("Button", nil, bar, "UIPanelButtonTemplate")
-    saveBtn:SetSize(160, 22)
-    saveBtn:SetPoint("LEFT", bar, "LEFT", 4, 0)
-    saveBtn:SetText("Save as set...")
-    saveBtn:SetScript("OnClick", function() UI._showSetNamePrompt() end)
+    -- Save-as-set button: Cairn-Gui Button with vanilla fallback. The
+    -- "Apply set..." dropdown stays on Blizzard's UIDropDownMenuTemplate
+    -- because it's a native menu construct -- migrating to Cairn-Gui
+    -- DropDown/ComboBox is a separate API change.
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local saveBtn, saveBtnFrame
+    do
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(bar); b:ClearAllPoints()
+            b:SetWidth(160); b:SetHeight(22); b:SetText("Save as set...")
+            b:SetPoint("LEFT", bar, "LEFT", 4, 0)
+            b:SetEventListener("OnClick", function() UI._showSetNamePrompt() end)
+            saveBtn, saveBtnFrame = b, b.frame
+        else
+            local raw = CreateFrame("Button", nil, bar, "UIPanelButtonTemplate")
+            raw:SetSize(160, 22); raw:SetPoint("LEFT", bar, "LEFT", 4, 0); raw:SetText("Save as set...")
+            raw:SetScript("OnClick", function() UI._showSetNamePrompt() end)
+            saveBtn, saveBtnFrame = raw, raw
+        end
+    end
 
     -- "Apply set" dropdown.
     local applyDd = CreateFrame("Frame", nil, bar, "UIDropDownMenuTemplate")
-    applyDd:SetPoint("LEFT", saveBtn, "RIGHT", 4, -2)
+    applyDd:SetPoint("LEFT", saveBtnFrame, "RIGHT", 4, -2)
     UIDropDownMenu_SetWidth(applyDd, 160)
     UIDropDownMenu_SetText(applyDd, "Apply set...")
     UIDropDownMenu_Initialize(applyDd, function(self, level)
@@ -190,14 +206,28 @@ function UI.Build(parent, mod)
     listBg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
     listBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
 
-    local scroll = CreateFrame("ScrollFrame", nil, listBg, "UIPanelScrollFrameTemplate")
-    scroll:SetPoint("TOPLEFT", 6, -6)
-    scroll:SetPoint("BOTTOMRIGHT", -28, 6)
-    local content = CreateFrame("Frame", nil, scroll)
-    content:SetSize(1, 1)
-    scroll:SetScrollChild(content)
-    mod._listScroll  = scroll
-    mod._listContent = content
+    -- Migrated to Cairn-Gui-Core ScrollFrame. _listScrollFrame stores the
+    -- inner Blizzard scrollFrame (same on both backends) for
+    -- UpdateScrollChildRect calls.
+    local listScroll = Gui and Gui:Create("ScrollFrame")
+    if listScroll then
+        listScroll:SetParent(listBg); listScroll:ClearAllPoints()
+        listScroll:SetPoint("TOPLEFT",     listBg, "TOPLEFT",      6, -6)
+        listScroll:SetPoint("BOTTOMRIGHT", listBg, "BOTTOMRIGHT", -2,  6)
+        mod._listScroll       = listScroll
+        mod._listContent      = listScroll.content
+        mod._listScrollFrame  = listScroll.scrollFrame or listScroll
+    else
+        local scroll = CreateFrame("ScrollFrame", nil, listBg, "UIPanelScrollFrameTemplate")
+        scroll:SetPoint("TOPLEFT", 6, -6)
+        scroll:SetPoint("BOTTOMRIGHT", -28, 6)
+        local content = CreateFrame("Frame", nil, scroll)
+        content:SetSize(1, 1)
+        scroll:SetScrollChild(content)
+        mod._listScroll       = scroll
+        mod._listContent      = content
+        mod._listScrollFrame  = scroll
+    end
     mod._rows        = {}
 
     UI.Refresh()
@@ -219,14 +249,15 @@ function UI.Refresh()
         end
         refreshRow(row, info)
         row:ClearAllPoints()
-        row:SetWidth(mod._listScroll:GetWidth() - 8)
+        row:SetWidth((mod._listScroll:GetWidth() or 600) - 8)
         row:SetPoint("TOPLEFT", mod._listContent, "TOPLEFT", 0, -y)
         row:Show()
         y = y + ROW_H
     end
     if y < 1 then y = 1 end
     mod._listContent:SetHeight(y)
-    mod._listScroll:UpdateScrollChildRect()
+    local sf = mod._listScrollFrame or mod._listScroll
+    if sf and sf.UpdateScrollChildRect then sf:UpdateScrollChildRect() end
 
     if mod._countFs then
         local nSets = #ns.ListSetNames()

@@ -10,9 +10,16 @@ local PAD       = 6
 local _activeMod
 local _mode = "macros"  -- "macros" or "sequences"
 
+-- ObjectBase doesn't pass through LockHighlight, so for kit buttons we
+-- delegate to the inner frame. Vanilla buttons accept LockHighlight directly.
 local function paint(btn, active)
     if not btn then return end
-    if active then btn:LockHighlight() else btn:UnlockHighlight() end
+    local target = btn.frame or btn
+    if active then
+        if target.LockHighlight then target:LockHighlight() end
+    else
+        if target.UnlockHighlight then target:UnlockHighlight() end
+    end
 end
 
 function UI.SwitchMode(mode)
@@ -41,22 +48,46 @@ function UI.Build(parent, mod)
     bar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
     bar:SetHeight(TOOLBAR_H)
 
-    local macrosBtn = CreateFrame("Button", nil, bar, "UIPanelButtonTemplate")
-    macrosBtn:SetSize(110, 22)
-    macrosBtn:SetPoint("LEFT", bar, "LEFT", 4, 0)
-    macrosBtn:SetText("Macros")
-    macrosBtn:SetScript("OnClick", function() UI.SwitchMode("macros") end)
+    -- Mode tabs via Cairn-Gui Button with vanilla fallback. paint() above
+    -- handles both backends for highlight state.
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local function makeBtn(label, w, h, anchor, dx, onClick)
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(bar); b:ClearAllPoints()
+            b:SetWidth(w); b:SetHeight(h); b:SetText(label)
+            if anchor.point == "LEFT_OF_BAR" then
+                b:SetPoint("LEFT", bar, "LEFT", dx, 0)
+            else
+                b:SetPoint("LEFT", anchor.frame, "RIGHT", dx, 0)
+            end
+            if onClick then b:SetEventListener("OnClick", function() onClick() end) end
+            return b, b.frame
+        else
+            local raw = CreateFrame("Button", nil, bar, "UIPanelButtonTemplate")
+            raw:SetSize(w, h); raw:SetText(label)
+            if anchor.point == "LEFT_OF_BAR" then
+                raw:SetPoint("LEFT", bar, "LEFT", dx, 0)
+            else
+                raw:SetPoint("LEFT", anchor.frame, "RIGHT", dx, 0)
+            end
+            if onClick then raw:SetScript("OnClick", onClick) end
+            return raw, raw
+        end
+    end
+
+    local macrosBtn, macrosBtnFrame = makeBtn("Macros", 110, 22,
+        { point = "LEFT_OF_BAR" }, 4,
+        function() UI.SwitchMode("macros") end)
     mod._modeMacros = macrosBtn
 
-    local seqBtn = CreateFrame("Button", nil, bar, "UIPanelButtonTemplate")
-    seqBtn:SetSize(110, 22)
-    seqBtn:SetPoint("LEFT", macrosBtn, "RIGHT", 4, 0)
-    seqBtn:SetText("Sequences")
-    seqBtn:SetScript("OnClick", function() UI.SwitchMode("sequences") end)
+    local seqBtn, seqBtnFrame = makeBtn("Sequences", 110, 22,
+        { point = "LEFT_OF", frame = macrosBtnFrame }, 4,
+        function() UI.SwitchMode("sequences") end)
     mod._modeSequences = seqBtn
 
     local hint = bar:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    hint:SetPoint("LEFT", seqBtn, "RIGHT", 12, 0)
+    hint:SetPoint("LEFT", seqBtnFrame, "RIGHT", 12, 0)
     hint:SetText("Macros: edit raw WoW macros.   Sequences: stack of lines that compile to a /castsequence macro.")
 
     -- Body panel that holds whichever mode's UI is currently visible.

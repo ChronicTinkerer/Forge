@@ -97,24 +97,35 @@ local function buildEditor(parent, mod)
     end)
     body:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
 
-    -- Bottom bar: Save, Delete, Drag-to-bar.
-    local saveBtn = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-    saveBtn:SetSize(BTN_W, BTN_H)
-    saveBtn:SetPoint("BOTTOMLEFT", pane, "BOTTOMLEFT", 0, 0)
-    saveBtn:SetText("Save")
-    saveBtn:SetScript("OnClick", function() M.SaveCurrent(mod) end)
+    -- Bottom bar: Save, Delete, Drag-to-bar. Migrated to Cairn-Gui Button
+    -- with vanilla fallback.
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local function makeBtn(label, w, h, anchorPoint, anchorTo, anchorRel, dx, onClick)
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(pane); b:ClearAllPoints()
+            b:SetWidth(w); b:SetHeight(h); b:SetText(label)
+            b:SetPoint(anchorPoint, anchorTo, anchorRel, dx, 0)
+            if onClick then b:SetEventListener("OnClick", function() onClick() end) end
+            return b, b.frame
+        else
+            local raw = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
+            raw:SetSize(w, h); raw:SetText(label)
+            raw:SetPoint(anchorPoint, anchorTo, anchorRel, dx, 0)
+            if onClick then raw:SetScript("OnClick", onClick) end
+            return raw, raw
+        end
+    end
 
-    local delBtn = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-    delBtn:SetSize(BTN_W, BTN_H)
-    delBtn:SetPoint("LEFT", saveBtn, "RIGHT", 4, 0)
-    delBtn:SetText("Delete")
-    delBtn:SetScript("OnClick", function() M.DeleteCurrent(mod) end)
+    local saveBtn, saveBtnFrame = makeBtn("Save", BTN_W, BTN_H,
+        "BOTTOMLEFT", pane, "BOTTOMLEFT", 0, function() M.SaveCurrent(mod) end)
 
-    local dragBtn = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-    dragBtn:SetSize(120, BTN_H)
-    dragBtn:SetPoint("BOTTOMRIGHT", pane, "BOTTOMRIGHT", 0, 0)
-    dragBtn:SetText("Pick up to bar")
-    dragBtn:SetScript("OnClick", function() if _selectedIndex then ns.MacroAPI.Pickup(_selectedIndex) end end)
+    local delBtn = makeBtn("Delete", BTN_W, BTN_H,
+        "LEFT", saveBtnFrame, "RIGHT", 4, function() M.DeleteCurrent(mod) end)
+
+    local dragBtn = makeBtn("Pick up to bar", 120, BTN_H,
+        "BOTTOMRIGHT", pane, "BOTTOMRIGHT", 0,
+        function() if _selectedIndex then ns.MacroAPI.Pickup(_selectedIndex) end end)
 
     return pane
 end
@@ -125,31 +136,46 @@ local function buildList(parent, mod)
     pane:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 0, 0)
     pane:SetWidth(LIST_W)
 
-    -- Tab strip: Account / Character.
-    local accBtn = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-    accBtn:SetSize(LIST_W / 2 - 2, 22)
+    -- Tab strip + scrollable list. All migrated to Cairn-Gui with vanilla
+    -- fallbacks. _listScrollFrame stores the inner Blizzard scrollFrame for
+    -- UpdateScrollChildRect calls.
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local function makeBtn(label, w, h, onClick)
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(pane); b:ClearAllPoints()
+            b:SetWidth(w); b:SetHeight(h); b:SetText(label)
+            if onClick then b:SetEventListener("OnClick", function() onClick() end) end
+            return b, b.frame
+        else
+            local raw = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
+            raw:SetSize(w, h); raw:SetText(label)
+            if onClick then raw:SetScript("OnClick", onClick) end
+            return raw, raw
+        end
+    end
+
+    local accBtn, accBtnFrame = makeBtn("Account", LIST_W / 2 - 2, 22,
+        function() _activeKind = "account"; _selectedIndex = nil; M.Refresh() end)
+    accBtn:ClearAllPoints()
     accBtn:SetPoint("TOPLEFT", pane, "TOPLEFT", 0, 0)
-    accBtn:SetText("Account")
-    accBtn:SetScript("OnClick", function() _activeKind = "account"; _selectedIndex = nil; M.Refresh() end)
     mod._accBtn = accBtn
 
-    local charBtn = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-    charBtn:SetSize(LIST_W / 2 - 2, 22)
-    charBtn:SetPoint("LEFT", accBtn, "RIGHT", 4, 0)
-    charBtn:SetText("Character")
-    charBtn:SetScript("OnClick", function() _activeKind = "character"; _selectedIndex = nil; M.Refresh() end)
+    local charBtn, charBtnFrame = makeBtn("Character", LIST_W / 2 - 2, 22,
+        function() _activeKind = "character"; _selectedIndex = nil; M.Refresh() end)
+    charBtn:ClearAllPoints()
+    charBtn:SetPoint("LEFT", accBtnFrame, "RIGHT", 4, 0)
     mod._charBtn = charBtn
 
     -- New button beneath.
-    local newBtn = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-    newBtn:SetSize(LIST_W, 22)
-    newBtn:SetPoint("TOPLEFT", accBtn, "BOTTOMLEFT", 0, -PAD)
-    newBtn:SetText("+ New macro")
-    newBtn:SetScript("OnClick", function() M.NewMacro(mod) end)
+    local newBtn, newBtnFrame = makeBtn("+ New macro", LIST_W, 22,
+        function() M.NewMacro(mod) end)
+    newBtn:ClearAllPoints()
+    newBtn:SetPoint("TOPLEFT", accBtnFrame, "BOTTOMLEFT", 0, -PAD)
 
     -- Scrollable list.
     local listBg = CreateFrame("Frame", nil, pane, "BackdropTemplate")
-    listBg:SetPoint("TOPLEFT", newBtn, "BOTTOMLEFT", 0, -PAD)
+    listBg:SetPoint("TOPLEFT", newBtnFrame, "BOTTOMLEFT", 0, -PAD)
     listBg:SetPoint("BOTTOMRIGHT", pane, "BOTTOMRIGHT", 0, 0)
     listBg:SetBackdrop({
         bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
@@ -160,12 +186,23 @@ local function buildList(parent, mod)
     listBg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
     listBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
 
-    local sf = CreateFrame("ScrollFrame", nil, listBg, "UIPanelScrollFrameTemplate")
-    sf:SetPoint("TOPLEFT", 6, -6)
-    sf:SetPoint("BOTTOMRIGHT", -22, 6)
-    mod._listScroll = sf
-    local content = CreateFrame("Frame", nil, sf); content:SetSize(1,1); sf:SetScrollChild(content)
-    mod._listContent = content
+    local listScroll = Gui and Gui:Create("ScrollFrame")
+    if listScroll then
+        listScroll:SetParent(listBg); listScroll:ClearAllPoints()
+        listScroll:SetPoint("TOPLEFT",     listBg, "TOPLEFT",      6, -6)
+        listScroll:SetPoint("BOTTOMRIGHT", listBg, "BOTTOMRIGHT", -2,  6)
+        mod._listScroll       = listScroll
+        mod._listContent      = listScroll.content
+        mod._listScrollFrame  = listScroll.scrollFrame or listScroll
+    else
+        local sf = CreateFrame("ScrollFrame", nil, listBg, "UIPanelScrollFrameTemplate")
+        sf:SetPoint("TOPLEFT", 6, -6)
+        sf:SetPoint("BOTTOMRIGHT", -22, 6)
+        mod._listScroll       = sf
+        local content = CreateFrame("Frame", nil, sf); content:SetSize(1,1); sf:SetScrollChild(content)
+        mod._listContent      = content
+        mod._listScrollFrame  = sf
+    end
     mod._listRows = {}
 
     return pane
@@ -174,7 +211,12 @@ end
 local function refreshTabs(mod)
     local function paint(btn, active)
         if not btn then return end
-        if active then btn:LockHighlight() else btn:UnlockHighlight() end
+        local target = btn.frame or btn
+        if active then
+            if target.LockHighlight then target:LockHighlight() end
+        else
+            if target.UnlockHighlight then target:UnlockHighlight() end
+        end
     end
     paint(mod._accBtn, _activeKind == "account")
     paint(mod._charBtn, _activeKind == "character")
@@ -229,7 +271,7 @@ function M.Refresh()
         row._text:SetText(entry.name)
         row._sel:SetShown(entry.index == _selectedIndex)
         row:ClearAllPoints()
-        row:SetWidth(mod._listScroll:GetWidth() - 24)
+        row:SetWidth((mod._listScroll:GetWidth() or LIST_W) - 24)
         row:SetPoint("TOPLEFT", mod._listContent, "TOPLEFT", 0, -y)
         row:Show()
         y = y + ROW_H
@@ -237,7 +279,9 @@ function M.Refresh()
 
     if y < 1 then y = 1 end
     mod._listContent:SetHeight(y)
-    mod._listScroll:UpdateScrollChildRect()
+    -- UpdateScrollChildRect lives only on the inner Blizzard scrollFrame.
+    local sf = mod._listScrollFrame or mod._listScroll
+    if sf and sf.UpdateScrollChildRect then sf:UpdateScrollChildRect() end
 
     -- Refresh editor with current selection.
     M.RefreshEditor()

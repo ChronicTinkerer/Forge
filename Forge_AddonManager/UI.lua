@@ -225,7 +225,13 @@ function UI.RefreshFilterButton()
             break
         end
     end
-    _activeMod._filterBtn._label:SetText(label)
+    local btn = _activeMod._filterBtn
+    -- Cairn-Gui Button writes via SetText; fallback path uses ._label.
+    if btn._label then
+        btn._label:SetText(label)
+    elseif btn.SetText then
+        btn:SetText(label .. "  |cffd87f3av|r")
+    end
 end
 
 -- ===== Sets dropdown popup ================================================
@@ -233,10 +239,12 @@ local function refreshSetsDropdown(f)
     for _, row in ipairs(f._rows) do row:Hide() end
     local names = ns.Manager.ListSetNames() or {}
     local y = 0
+    local rowParent = f._content
+    local widthSrc  = f._scroll
     for i, name in ipairs(names) do
         local row = f._rows[i]
         if not row then
-            row = CreateFrame("Button", nil, f._content)
+            row = CreateFrame("Button", nil, rowParent)
             row:SetHeight(20)
             local sel = row:CreateTexture(nil, "BACKGROUND", nil, -2)
             sel:SetColorTexture(0.85, 0.50, 0.20, 0.30)
@@ -262,18 +270,23 @@ local function refreshSetsDropdown(f)
         local set = ns.Manager.GetSets()[name] or {}
         row._text:SetText(string.format("%s   |cffaaaaaa(%d)|r", name, #set))
         row:ClearAllPoints()
-        row:SetWidth(f._scroll:GetWidth() - 24)
-        row:SetPoint("TOPLEFT", f._content, "TOPLEFT", 0, -y)
+        row:SetWidth((widthSrc:GetWidth() or 240) - 24)
+        row:SetPoint("TOPLEFT", rowParent, "TOPLEFT", 0, -y)
         row:Show()
         y = y + 20
     end
     if y < 1 then y = 1 end
     f._content:SetHeight(y)
-    f._scroll:UpdateScrollChildRect()
+    if f._scroll.UpdateScrollChildRect then
+        f._scroll:UpdateScrollChildRect()
+    elseif f._scroll.scrollFrame and f._scroll.scrollFrame.UpdateScrollChildRect then
+        f._scroll.scrollFrame:UpdateScrollChildRect()
+    end
     f._emptyText:SetShown(#names == 0)
 end
 
 local function buildSetsDropdown()
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
     local f = CreateFrame("Frame", "ForgeAMSetsDropdown", UIParent, "BackdropTemplate")
     f:SetSize(260, 240)
     f:SetFrameStrata("DIALOG")
@@ -291,30 +304,50 @@ local function buildSetsDropdown()
     title:SetPoint("TOPLEFT", 8, -6)
     title:SetText("Load a set:")
 
-    local scroll = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
-    scroll:SetPoint("TOPLEFT", 6, -22)
-    scroll:SetPoint("BOTTOMRIGHT", -22, 30)
-    f._scroll = scroll
-    local content = CreateFrame("Frame", nil, scroll); content:SetSize(1,1); scroll:SetScrollChild(content)
-    f._content = content
+    -- Migrated to Cairn-Gui-Core ScrollFrame with vanilla fallback.
+    local scrollGui = Gui and Gui:Create("ScrollFrame")
+    if scrollGui then
+        scrollGui:SetParent(f); scrollGui:ClearAllPoints()
+        scrollGui:SetPoint("TOPLEFT",     f, "TOPLEFT",      6, -22)
+        scrollGui:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2,  30)
+        f._scroll  = scrollGui
+        f._content = scrollGui.content
+    else
+        local scroll = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
+        scroll:SetPoint("TOPLEFT", 6, -22)
+        scroll:SetPoint("BOTTOMRIGHT", -22, 30)
+        f._scroll = scroll
+        local content = CreateFrame("Frame", nil, scroll); content:SetSize(1,1); scroll:SetScrollChild(content)
+        f._content = content
+    end
     f._rows = {}
 
     local empty = f:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    empty:SetPoint("CENTER", scroll, "CENTER", 0, 0)
+    empty:SetPoint("CENTER", f, "CENTER", 0, 0)
     empty:SetText("(no sets saved)")
     empty:Hide()
     f._emptyText = empty
 
-    local close = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    close:SetSize(60, 20)
-    close:SetPoint("BOTTOMRIGHT", -6, 6)
-    close:SetText("Close")
-    close:SetScript("OnClick", function() f:Hide() end)
+    local closeWidget = Gui and Gui:Create("Button")
+    if closeWidget then
+        closeWidget:SetParent(f); closeWidget:ClearAllPoints()
+        closeWidget:SetWidth(60); closeWidget:SetHeight(20)
+        closeWidget:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -6, 6)
+        closeWidget:SetText("Close")
+        closeWidget:SetEventListener("OnClick", function() f:Hide() end)
+    else
+        local close = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+        close:SetSize(60, 20)
+        close:SetPoint("BOTTOMRIGHT", -6, 6)
+        close:SetText("Close")
+        close:SetScript("OnClick", function() f:Hide() end)
+    end
 
     return f
 end
 
 local function buildNamePrompt()
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
     local f = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
     f:SetSize(360, 110)
     f:SetPoint("CENTER")
@@ -337,20 +370,81 @@ local function buildNamePrompt()
     label:SetPoint("TOPLEFT", 12, -36)
     label:SetText("Name:")
 
-    local eb = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
-    eb:SetSize(280, 22); eb:SetPoint("LEFT", label, "RIGHT", 8, 0); eb:SetAutoFocus(true)
-    f._eb = eb
+    -- Migrated to Cairn-Gui Input. The widget exposes its inner EditBox at
+    -- .editBox; we drive focus / text / scripts through that for the parts
+    -- the widget itself doesn't surface (SetFocus, OnEnterPressed handler).
+    local eb, ebFrame, ebGetText, ebSetText, ebSetFocus
+    local inputWidget = Gui and Gui:Create("Input")
+    if inputWidget then
+        inputWidget:SetParent(f); inputWidget:ClearAllPoints()
+        inputWidget:SetWidth(280); inputWidget:SetHeight(22)
+        inputWidget:SetPoint("LEFT", label, "RIGHT", 8, 0)
+        eb        = inputWidget
+        ebFrame   = inputWidget.frame
+        ebGetText = function() return inputWidget:GetText() or "" end
+        ebSetText = function(s) inputWidget:SetText(s or "") end
+        ebSetFocus = function() inputWidget.editBox:SetFocus() end
+    else
+        local raw = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
+        raw:SetSize(280, 22); raw:SetPoint("LEFT", label, "RIGHT", 8, 0); raw:SetAutoFocus(true)
+        eb        = raw
+        ebFrame   = raw
+        ebGetText = function() return raw:GetText() or "" end
+        ebSetText = function(s) raw:SetText(s or "") end
+        ebSetFocus = function() raw:SetFocus() end
+    end
+    f._eb         = eb
+    f._ebGetText  = ebGetText
+    f._ebSetText  = ebSetText
+    f._ebSetFocus = ebSetFocus
 
-    local ok = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    ok:SetSize(80, 22); ok:SetPoint("BOTTOMRIGHT", -12, 10)
+    -- OK / Cancel buttons. Click on cancel hides; click on OK calls the
+    -- runtime-installed ._okHandler so UI._showSetNamePrompt can swap behavior
+    -- per call without re-registering scripts on the widget every time.
+    local function makeBtn(labelText, anchor)
+        local w = Gui and Gui:Create("Button")
+        if w then
+            w:SetParent(f); w:ClearAllPoints()
+            w:SetWidth(80); w:SetHeight(22)
+            if anchor.point == "BOTTOMRIGHT" then
+                w:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 10)
+            else
+                w:SetPoint("RIGHT", anchor.to, "LEFT", -6, 0)
+            end
+            w:SetText(labelText)
+            return w, w.frame
+        else
+            local raw = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+            raw:SetSize(80, 22)
+            if anchor.point == "BOTTOMRIGHT" then
+                raw:SetPoint("BOTTOMRIGHT", -12, 10)
+            else
+                raw:SetPoint("RIGHT", anchor.to, "LEFT", -6, 0)
+            end
+            raw:SetText(labelText)
+            return raw, raw
+        end
+    end
+
+    local ok, okFrame = makeBtn("OK", { point = "BOTTOMRIGHT" })
+    if ok.SetEventListener then
+        ok:SetEventListener("OnClick", function() if f._okHandler then f._okHandler() end end)
+    else
+        ok:SetScript("OnClick", function() if f._okHandler then f._okHandler() end end)
+    end
     f._ok = ok
 
-    local cancel = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    cancel:SetSize(80, 22); cancel:SetPoint("RIGHT", ok, "LEFT", -6, 0); cancel:SetText("Cancel")
-    cancel:SetScript("OnClick", function() f:Hide() end)
+    local cancel = makeBtn("Cancel", { point = "RIGHT", to = okFrame })
+    if cancel.SetEventListener then
+        cancel:SetEventListener("OnClick", function() f:Hide() end)
+    else
+        cancel:SetScript("OnClick", function() f:Hide() end)
+    end
 
-    eb:SetScript("OnEscapePressed", function() f:Hide() end)
-    eb:SetScript("OnEnterPressed", function() ok:Click() end)
+    -- Enter / Esc on the inner EditBox dispatch the OK / Cancel actions.
+    local innerEb = (inputWidget and inputWidget.editBox) or eb
+    innerEb:SetScript("OnEscapePressed", function() f:Hide() end)
+    innerEb:HookScript("OnEnterPressed", function() if f._okHandler then f._okHandler() end end)
     return f
 end
 
@@ -358,15 +452,15 @@ function UI._showSetNamePrompt(title, defaultText, onAccept)
     local f = ns._namePrompt
     if not f then f = buildNamePrompt(); ns._namePrompt = f end
     f._title:SetText("|cffd87f3a" .. (title or "Set name") .. "|r")
-    f._ok:SetText("OK")
-    f._ok:SetScript("OnClick", function()
-        local v = (f._eb:GetText() or ""):match("^%s*(.-)%s*$") or ""
+    if f._ok.SetText then f._ok:SetText("OK") end
+    f._okHandler = function()
+        local v = (f._ebGetText() or ""):match("^%s*(.-)%s*$") or ""
         if v == "" then return end
         f:Hide()
         if onAccept then onAccept(v) end
-    end)
-    f._eb:SetText(defaultText or "")
-    f:Show(); f._eb:SetFocus()
+    end
+    f._ebSetText(defaultText or "")
+    f:Show(); f._ebSetFocus()
 end
 
 -- Static popup for reload prompt.
@@ -390,82 +484,145 @@ function UI.Build(parent, mod)
     frame:SetAllPoints(parent)
     mod._frame = frame
 
+    -- Acquire Cairn-Gui-Core once for the whole UI; falsy if the kit failed
+    -- to load (each migration site below has a defensive vanilla fallback).
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+
     -- ----- Toolbar -------------------------------------------------------
     local bar = CreateFrame("Frame", nil, frame)
     bar:SetPoint("TOPLEFT",  frame, "TOPLEFT",  4, -4)
     bar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
     bar:SetHeight(TOOLBAR_H)
 
-    -- Search box. (Cairn-Gui Input migration tried this session along with
-    -- a button refactor; click misrouting surfaced -- clicks on the right
-    -- toolbar buttons were dispatched to filterBtn 8 buttons away. Theory
-    -- was an ObjectBase.SetParent nil-intermediate issue but direct
-    -- SetParent didn't fix it. Reverted to vanilla while we investigate
-    -- with proper runtime diagnostics next session.)
     -- Toolbar layout budget (recap, after the chain-misroute investigation
     -- 2026-05-04): bar is roughly 850 px wide. Search 110 + filter 90 +
     -- 8 action buttons (most 70, reload 90) + gaps + margins must fit. If
     -- you widen any of these and the chain anchors silently overlap, you
-    -- get clicks routed to the wrong button (the older filterBtn layout
-    -- bug -- it overlapped exportBtn / enableBtn / disableBtn).
-    local searchBg = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-    searchBg:SetSize(110, BTN_HEIGHT)
-    searchBg:SetPoint("LEFT", bar, "LEFT", 4, 0)
-    searchBg:SetBackdrop({
-        bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        tile = true, tileSize = 16, edgeSize = 8,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 },
-    })
-    searchBg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
-    searchBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
+    -- get clicks routed to the wrong button.
+    --
+    -- Search box. Migrated to Cairn-Gui-Core Input. The widget owns its own
+    -- background/highlight/outline styling, so we drop the BackdropTemplate.
+    -- Notable widget gap: Input fires OnEnterPressed/OnEscapePressed/
+    -- OnEditFocus*, but NOT OnTextChanged. Hook the inner editBox directly
+    -- for live filtering. searchAnchor downstream points at the real Frame
+    -- regardless of which backend won, so chain-anchors stay sane.
+    local search, searchAnchor
+    do
+        local s = Gui and Gui:Create("Input")
+        if s then
+            s:SetParent(bar); s:ClearAllPoints()
+            s:SetWidth(110); s:SetHeight(BTN_HEIGHT)
+            s:SetPoint("LEFT", bar, "LEFT", 4, 0)
 
-    local search = CreateFrame("EditBox", nil, searchBg)
-    search:SetMultiLine(false); search:SetAutoFocus(false)
-    search:SetFontObject("ChatFontNormal")
-    search:SetPoint("LEFT", 6, 0); search:SetPoint("RIGHT", -6, 0)
-    search:SetHeight(BTN_HEIGHT - 4); search:SetTextInsets(0, 0, 0, 0)
-    search:SetScript("OnTextChanged", function(self) _filterText = self:GetText() or ""; UI.Refresh() end)
-    search:SetScript("OnEscapePressed", function(self) self:ClearFocus(); self:SetText(""); _filterText = ""; UI.Refresh() end)
+            s.editBox:HookScript("OnTextChanged", function(self)
+                _filterText = self:GetText() or ""
+                UI.Refresh()
+            end)
+            s:SetEventListener("OnEscapePressed", function()
+                s:SetText("")
+                _filterText = ""
+                UI.Refresh()
+            end)
 
-    local placeholder = searchBg:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    placeholder:SetPoint("LEFT", 8, 0); placeholder:SetText("Filter by name...")
-    search:SetScript("OnEditFocusGained", function() placeholder:Hide() end)
-    search:SetScript("OnEditFocusLost", function(self)
-        if (self:GetText() or "") == "" then placeholder:Show() end
-    end)
+            local hint = bar:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+            hint:SetPoint("LEFT", s.frame, "LEFT", 8, 0)
+            hint:SetText("Filter by name...")
+            s:SetEventListener("OnEditFocusGained", function() hint:Hide() end)
+            s:SetEventListener("OnEditFocusLost", function()
+                if (s:GetText() or "") == "" then hint:Show() end
+            end)
+            search       = s
+            searchAnchor = s.frame
+        else
+            local searchBg = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+            searchBg:SetSize(110, BTN_HEIGHT)
+            searchBg:SetPoint("LEFT", bar, "LEFT", 4, 0)
+            searchBg:SetBackdrop({
+                bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+                edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+                tile = true, tileSize = 16, edgeSize = 8,
+                insets = { left = 2, right = 2, top = 2, bottom = 2 },
+            })
+            searchBg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
+            searchBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
+
+            local sf = CreateFrame("EditBox", nil, searchBg)
+            sf:SetMultiLine(false); sf:SetAutoFocus(false)
+            sf:SetFontObject("ChatFontNormal")
+            sf:SetPoint("LEFT", 6, 0); sf:SetPoint("RIGHT", -6, 0)
+            sf:SetHeight(BTN_HEIGHT - 4); sf:SetTextInsets(0, 0, 0, 0)
+            sf:SetScript("OnTextChanged", function(self) _filterText = self:GetText() or ""; UI.Refresh() end)
+            sf:SetScript("OnEscapePressed", function(self) self:ClearFocus(); self:SetText(""); _filterText = ""; UI.Refresh() end)
+
+            local placeholder = searchBg:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+            placeholder:SetPoint("LEFT", 8, 0); placeholder:SetText("Filter by name...")
+            sf:SetScript("OnEditFocusGained", function() placeholder:Hide() end)
+            sf:SetScript("OnEditFocusLost", function(self)
+                if (self:GetText() or "") == "" then placeholder:Show() end
+            end)
+            search       = sf
+            searchAnchor = searchBg
+        end
+    end
 
     -- Status filter dropdown button. Width 90 -- the FILTER_STATUSES table
     -- carries a short-form label per status that's chosen for fitting in
     -- this width; the popup itself uses the full descriptive labels.
-    local filterBtn = CreateFrame("Button", nil, bar, "BackdropTemplate")
-    filterBtn:SetSize(90, BTN_HEIGHT)
-    filterBtn:SetPoint("LEFT", searchBg, "RIGHT", 6, 0)
-    filterBtn:SetBackdrop({
-        bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        tile = true, tileSize = 16, edgeSize = 8,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 },
-    })
-    filterBtn:SetBackdropColor(0.05, 0.05, 0.05, 0.40)
-    filterBtn:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
-    local fLabel = filterBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    fLabel:SetPoint("LEFT", 6, 0); fLabel:SetPoint("RIGHT", -22, 0); fLabel:SetJustifyH("LEFT")
-    fLabel:SetWordWrap(false); fLabel:SetMaxLines(1)
-    filterBtn._label = fLabel
-    local fArrow = filterBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    fArrow:SetPoint("RIGHT", -6, 0); fArrow:SetText("|cffd87f3av|r")
-    filterBtn:SetScript("OnEnter", function(self) self:SetBackdropBorderColor(0.85, 0.50, 0.20, 1) end)
-    filterBtn:SetScript("OnLeave", function(self) self:SetBackdropBorderColor(0.4, 0.3, 0.15, 1) end)
-    filterBtn:SetScript("OnClick", function(self)
-        if not ns._filterPopup then ns._filterPopup = buildFilterPopup() end
-        local f = ns._filterPopup
-        if f:IsShown() then f:Hide() return end
-        f:ClearAllPoints()
-        f:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, -2)
-        refreshFilterPopup(f)
-        f:Show()
-    end)
+    --
+    -- Migrated to Cairn-Gui Button: SetText is the active label (so we drop
+    -- the separate ._label FontString -- UI.RefreshFilterButton has been
+    -- updated to call SetText instead). The trailing chevron is appended to
+    -- the label string. Onclick toggles the existing popup unchanged.
+    local filterBtn, filterBtnFrame
+    do
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(bar); b:ClearAllPoints()
+            b:SetWidth(90); b:SetHeight(BTN_HEIGHT)
+            b:SetPoint("LEFT", searchAnchor, "RIGHT", 6, 0)
+            b:SetText("All")
+            b:SetEventListener("OnClick", function()
+                if not ns._filterPopup then ns._filterPopup = buildFilterPopup() end
+                local f = ns._filterPopup
+                if f:IsShown() then f:Hide() return end
+                f:ClearAllPoints()
+                f:SetPoint("TOPLEFT", b.frame, "BOTTOMLEFT", 0, -2)
+                refreshFilterPopup(f)
+                f:Show()
+            end)
+            filterBtn, filterBtnFrame = b, b.frame
+        else
+            local raw = CreateFrame("Button", nil, bar, "BackdropTemplate")
+            raw:SetSize(90, BTN_HEIGHT)
+            raw:SetPoint("LEFT", searchAnchor, "RIGHT", 6, 0)
+            raw:SetBackdrop({
+                bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+                edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+                tile = true, tileSize = 16, edgeSize = 8,
+                insets = { left = 2, right = 2, top = 2, bottom = 2 },
+            })
+            raw:SetBackdropColor(0.05, 0.05, 0.05, 0.40)
+            raw:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
+            local fLabel = raw:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            fLabel:SetPoint("LEFT", 6, 0); fLabel:SetPoint("RIGHT", -22, 0); fLabel:SetJustifyH("LEFT")
+            fLabel:SetWordWrap(false); fLabel:SetMaxLines(1)
+            raw._label = fLabel
+            local fArrow = raw:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            fArrow:SetPoint("RIGHT", -6, 0); fArrow:SetText("|cffd87f3av|r")
+            raw:SetScript("OnEnter", function(self) self:SetBackdropBorderColor(0.85, 0.50, 0.20, 1) end)
+            raw:SetScript("OnLeave", function(self) self:SetBackdropBorderColor(0.4, 0.3, 0.15, 1) end)
+            raw:SetScript("OnClick", function(self)
+                if not ns._filterPopup then ns._filterPopup = buildFilterPopup() end
+                local f = ns._filterPopup
+                if f:IsShown() then f:Hide() return end
+                f:ClearAllPoints()
+                f:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, -2)
+                refreshFilterPopup(f)
+                f:Show()
+            end)
+            filterBtn, filterBtnFrame = raw, raw
+        end
+    end
     mod._filterBtn = filterBtn
     UI.RefreshFilterButton()
 
@@ -519,14 +676,13 @@ function UI.Build(parent, mod)
             string.format("%d enabled / %d protected / %d sets", #enabled, #protected, (function() local n=0 for _ in pairs(sets) do n=n+1 end return n end)()))
     end
 
-    local Gui_OK = USE_CAIRN_TOOLBAR and (LibStub and LibStub("Cairn-Gui-Core-1.0", true)) or nil
+    local Gui_OK = USE_CAIRN_TOOLBAR and Gui or nil
 
     if Gui_OK then
         -- Cairn-Gui Button variant. Each helper returns (widget, frame). The
         -- frame is what other code SetPoints to (popups, etc.). Click handler
         -- goes on the widget via SetEventListener so PlaySound + FireEvent
         -- still run inside the kit.
-        local Gui = Gui_OK
         local function makeCairnBtn(label, w, h, anchorTo, dx)
             local widget = Gui:Create("Button")
             widget:SetParent(bar)
@@ -704,13 +860,25 @@ function UI.Build(parent, mod)
     listBg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
     listBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
 
-    local scroll = CreateFrame("ScrollFrame", nil, listBg, "UIPanelScrollFrameTemplate")
-    scroll:SetPoint("TOPLEFT", 6, -6)
-    scroll:SetPoint("BOTTOMRIGHT", -28, 6)
-    mod._scroll = scroll
-
-    local content = CreateFrame("Frame", nil, scroll); content:SetSize(1, 1); scroll:SetScrollChild(content)
-    mod._content = content
+    -- Migrated to Cairn-Gui-Core ScrollFrame. Same backend-OK fallback shape
+    -- as Forge_Logs: store both the high-level surface (._scroll) and the
+    -- underlying scrollchild (._content). _scroll:GetWidth/UpdateScrollChildRect
+    -- are duck-typed so consumer code stays backend-agnostic.
+    local scrollGui = Gui and Gui:Create("ScrollFrame")
+    if scrollGui then
+        scrollGui:SetParent(listBg); scrollGui:ClearAllPoints()
+        scrollGui:SetPoint("TOPLEFT",     listBg, "TOPLEFT",      6, -6)
+        scrollGui:SetPoint("BOTTOMRIGHT", listBg, "BOTTOMRIGHT", -2,  6)
+        mod._scroll  = scrollGui
+        mod._content = scrollGui.content
+    else
+        local scroll = CreateFrame("ScrollFrame", nil, listBg, "UIPanelScrollFrameTemplate")
+        scroll:SetPoint("TOPLEFT", 6, -6)
+        scroll:SetPoint("BOTTOMRIGHT", -28, 6)
+        mod._scroll = scroll
+        local content = CreateFrame("Frame", nil, scroll); content:SetSize(1, 1); scroll:SetScrollChild(content)
+        mod._content = content
+    end
     mod._rows = {}
 
     -- ----- Status bar ----------------------------------------------------
@@ -718,50 +886,88 @@ function UI.Build(parent, mod)
     status:SetPoint("BOTTOMLEFT",  frame, "BOTTOMLEFT",  4, 4)
     status:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -4, 4)
     status:SetHeight(STATUS_H)
-    local autoCb = CreateFrame("CheckButton", nil, status, "UICheckButtonTemplate")
-    autoCb:SetSize(20, 20)
-    autoCb:SetPoint("LEFT", status, "LEFT", 0, 0)
-    autoCb:SetChecked(ns.Manager.IsAutoDisableNew())
-    autoCb:SetScript("OnClick", function(self)
-        ns.Manager.SetAutoDisableNew(self:GetChecked() and true or false)
-    end)
-    autoCb:SetScript("OnEnter", function(self)
-        if not GameTooltip then return end
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
-        GameTooltip:AddLine("|cffd87f3aAuto-disable new addons|r")
-        GameTooltip:AddLine("When ON, any addon that appears in your AddOns/ folder", 1, 1, 1, true)
-        GameTooltip:AddLine("for the first time will be disabled at the next login.", 1, 1, 1, true)
-        GameTooltip:AddLine("Reload required to take effect after a fresh install.", 1, 1, 1, true)
-        GameTooltip:Show()
-    end)
-    autoCb:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+    -- Auto-disable-new checkbox: Cairn-Gui CheckBox with vanilla fallback.
+    -- Wrap tooltip OnEnter/OnLeave on the inner frame because the widget
+    -- only fires kit events; we need actual GameTooltip script handlers.
+    local function makeStatusCheck(initialChecked, anchorPoint, anchorTo, anchorRel, dx, onChange, tipLines)
+        local cbWidget = Gui and Gui:Create("CheckBox")
+        if cbWidget then
+            cbWidget:SetParent(status); cbWidget:ClearAllPoints()
+            cbWidget:SetWidth(20); cbWidget:SetHeight(20)
+            cbWidget:SetPoint(anchorPoint, anchorTo, anchorRel, dx, 0)
+            cbWidget.frame:EnableMouse(true)
+            if cbWidget.frame.RegisterForClicks then
+                cbWidget.frame:RegisterForClicks("AnyUp")
+            end
+            cbWidget:SetChecked(initialChecked and true or false)
+            cbWidget:SetEventListener("OnValueChanged", function(_, _, checked)
+                onChange(checked and true or false)
+            end)
+            cbWidget.frame:HookScript("OnEnter", function(self)
+                if not GameTooltip then return end
+                GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+                for _, line in ipairs(tipLines) do
+                    if line.title then
+                        GameTooltip:AddLine("|cffd87f3a" .. line.text .. "|r")
+                    else
+                        GameTooltip:AddLine(line.text, 1, 1, 1, true)
+                    end
+                end
+                GameTooltip:Show()
+            end)
+            cbWidget.frame:HookScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+            return cbWidget, cbWidget.frame
+        else
+            local raw = CreateFrame("CheckButton", nil, status, "UICheckButtonTemplate")
+            raw:SetSize(20, 20)
+            raw:SetPoint(anchorPoint, anchorTo, anchorRel, dx, 0)
+            raw:SetChecked(initialChecked)
+            raw:SetScript("OnClick", function(self) onChange(self:GetChecked() and true or false) end)
+            raw:SetScript("OnEnter", function(self)
+                if not GameTooltip then return end
+                GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+                for _, line in ipairs(tipLines) do
+                    if line.title then
+                        GameTooltip:AddLine("|cffd87f3a" .. line.text .. "|r")
+                    else
+                        GameTooltip:AddLine(line.text, 1, 1, 1, true)
+                    end
+                end
+                GameTooltip:Show()
+            end)
+            raw:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+            return raw, raw
+        end
+    end
+
+    local autoCb, autoCbFrame = makeStatusCheck(
+        ns.Manager.IsAutoDisableNew(), "LEFT", status, "LEFT", 0,
+        function(v) ns.Manager.SetAutoDisableNew(v) end,
+        {
+            { title = true, text = "Auto-disable new addons" },
+            { text = "When ON, any addon that appears in your AddOns/ folder" },
+            { text = "for the first time will be disabled at the next login." },
+            { text = "Reload required to take effect after a fresh install." },
+        })
     mod._autoNewCb = autoCb
 
     local autoLabel = status:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    autoLabel:SetPoint("LEFT", autoCb, "RIGHT", 2, 0)
+    autoLabel:SetPoint("LEFT", autoCbFrame, "RIGHT", 2, 0)
     autoLabel:SetText("Auto-disable new")
     autoLabel:SetTextColor(0.85, 0.7, 0.4, 1)
 
-    local recCb = CreateFrame("CheckButton", nil, status, "UICheckButtonTemplate")
-    recCb:SetSize(20, 20)
-    recCb:SetPoint("LEFT", autoLabel, "RIGHT", 16, 0)
-    recCb:SetChecked(ns.Manager.IsRecursiveEnable())
-    recCb:SetScript("OnClick", function(self)
-        ns.Manager.SetRecursiveEnable(self:GetChecked() and true or false)
-    end)
-    recCb:SetScript("OnEnter", function(self)
-        if not GameTooltip then return end
-        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
-        GameTooltip:AddLine("|cffd87f3aRecursive enable|r")
-        GameTooltip:AddLine("When ON, enabling an addon also enables its required", 1, 1, 1, true)
-        GameTooltip:AddLine("dependencies. Optional deps trigger a Yes/No prompt.", 1, 1, 1, true)
-        GameTooltip:Show()
-    end)
-    recCb:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+    local recCb, recCbFrame = makeStatusCheck(
+        ns.Manager.IsRecursiveEnable(), "LEFT", autoLabel, "RIGHT", 16,
+        function(v) ns.Manager.SetRecursiveEnable(v) end,
+        {
+            { title = true, text = "Recursive enable" },
+            { text = "When ON, enabling an addon also enables its required" },
+            { text = "dependencies. Optional deps trigger a Yes/No prompt." },
+        })
     mod._recCb = recCb
 
     local recLabel = status:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    recLabel:SetPoint("LEFT", recCb, "RIGHT", 2, 0)
+    recLabel:SetPoint("LEFT", recCbFrame, "RIGHT", 2, 0)
     recLabel:SetText("Recursive enable")
     recLabel:SetTextColor(0.85, 0.7, 0.4, 1)
 
@@ -801,12 +1007,14 @@ local function buildRow(parent)
     hov:SetAllPoints(); hov:Hide()
     row._hov = hov
 
-    local cb = CreateFrame("CheckButton", nil, row, "UICheckButtonTemplate")
-    cb:SetSize(20, 20); cb:SetPoint("LEFT", row, "LEFT", 4, 0)
-    cb:SetScript("OnClick", function(self)
+    -- Checkbox: Cairn-Gui CheckBox with vanilla fallback. We adapt the API
+    -- so the rest of UI.Refresh can keep calling row._cb:SetChecked /
+    -- :GetChecked / :Enable / :Disable / :SetAlpha regardless of backend.
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local function applyToggle(checked)
         if not row._entry then return end
         local nm = row._entry.name
-        if self:GetChecked() then
+        if checked then
             if ns.Manager.IsRecursiveEnable() then
                 local result = ns.Manager.EnableWithDeps(nm)
                 if result and result.pendingOptional and #result.pendingOptional > 0 then
@@ -818,8 +1026,26 @@ local function buildRow(parent)
         else
             ns.Manager.SetEnabled(nm, false)
         end
-    end)
-    row._cb = cb
+    end
+    local cbWidget = Gui and Gui:Create("CheckBox")
+    if cbWidget then
+        cbWidget:SetParent(row); cbWidget:ClearAllPoints()
+        cbWidget:SetWidth(20); cbWidget:SetHeight(20)
+        cbWidget:SetPoint("LEFT", row, "LEFT", 4, 0)
+        cbWidget.frame:EnableMouse(true)
+        if cbWidget.frame.RegisterForClicks then
+            cbWidget.frame:RegisterForClicks("AnyUp")
+        end
+        cbWidget:SetEventListener("OnValueChanged", function(_, _, checked)
+            applyToggle(checked and true or false)
+        end)
+        row._cb = cbWidget
+    else
+        local cb = CreateFrame("CheckButton", nil, row, "UICheckButtonTemplate")
+        cb:SetSize(20, 20); cb:SetPoint("LEFT", row, "LEFT", 4, 0)
+        cb:SetScript("OnClick", function(self) applyToggle(self:GetChecked()) end)
+        row._cb = cb
+    end
 
     -- Column FontStrings (positions match COLUMNS).
     row._cols = {}
@@ -877,12 +1103,15 @@ function UI.Refresh()
         row._entry = entry
         local selfProt = ns.Manager.IsSelfProtected and ns.Manager.IsSelfProtected(entry.name)
         row._cb:SetChecked(ns.Manager.IsEffectivelyEnabled(entry.name) or selfProt)
+        -- ObjectBase doesn't expose SetAlpha; delegate to the inner frame
+        -- when present, otherwise call directly (vanilla CheckButton path).
+        local cbAlphaTarget = row._cb.frame or row._cb
         if selfProt then
             row._cb:Disable()
-            row._cb:SetAlpha(0.55)
+            cbAlphaTarget:SetAlpha(0.55)
         else
             row._cb:Enable()
-            row._cb:SetAlpha(1.0)
+            cbAlphaTarget:SetAlpha(1.0)
         end
 
         local nameStr = entry.title or entry.name
@@ -909,7 +1138,15 @@ function UI.Refresh()
 
     if y < 1 then y = 1 end
     mod._content:SetHeight(y)
-    if mod._scroll then mod._scroll:UpdateScrollChildRect() end
+    -- UpdateScrollChildRect lives only on the raw Blizzard scrollFrame (or
+    -- the kit widget's inner .scrollFrame). Guard so we work on both paths.
+    if mod._scroll then
+        if mod._scroll.UpdateScrollChildRect then
+            mod._scroll:UpdateScrollChildRect()
+        elseif mod._scroll.scrollFrame and mod._scroll.scrollFrame.UpdateScrollChildRect then
+            mod._scroll.scrollFrame:UpdateScrollChildRect()
+        end
+    end
 
     if mod._statusText then
         local total = #entries
@@ -973,23 +1210,55 @@ local function buildOptPopup()
     hint:SetJustifyH("LEFT"); hint:SetWordWrap(true)
     hint:SetText("These addons are listed as optional dependencies and are installed but disabled. Tick the ones you want to enable.")
 
-    local sf = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
-    sf:SetPoint("TOPLEFT",     hint, "BOTTOMLEFT", 0, -8)
-    sf:SetPoint("BOTTOMRIGHT", -32, 38)
-    f._scroll = sf
-    local content = CreateFrame("Frame", nil, sf); content:SetSize(1, 1); sf:SetScrollChild(content)
-    f._content = content
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+
+    local scrollGui = Gui and Gui:Create("ScrollFrame")
+    if scrollGui then
+        scrollGui:SetParent(f); scrollGui:ClearAllPoints()
+        scrollGui:SetPoint("TOPLEFT",     hint, "BOTTOMLEFT", 0, -8)
+        scrollGui:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -6, 38)
+        f._scroll  = scrollGui
+        f._content = scrollGui.content
+    else
+        local sf = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
+        sf:SetPoint("TOPLEFT",     hint, "BOTTOMLEFT", 0, -8)
+        sf:SetPoint("BOTTOMRIGHT", -32, 38)
+        f._scroll = sf
+        local content = CreateFrame("Frame", nil, sf); content:SetSize(1, 1); sf:SetScrollChild(content)
+        f._content = content
+    end
     f._rows = {}
 
-    local cancelBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    cancelBtn:SetSize(80, 22); cancelBtn:SetPoint("BOTTOMRIGHT", -12, 8)
-    cancelBtn:SetText("Cancel")
-    cancelBtn:SetScript("OnClick", function() f:Hide() end)
+    local cancelWidget = Gui and Gui:Create("Button")
+    local cancelFrame
+    if cancelWidget then
+        cancelWidget:SetParent(f); cancelWidget:ClearAllPoints()
+        cancelWidget:SetWidth(80); cancelWidget:SetHeight(22)
+        cancelWidget:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 8)
+        cancelWidget:SetText("Cancel")
+        cancelWidget:SetEventListener("OnClick", function() f:Hide() end)
+        cancelFrame = cancelWidget.frame
+    else
+        local cancelBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+        cancelBtn:SetSize(80, 22); cancelBtn:SetPoint("BOTTOMRIGHT", -12, 8)
+        cancelBtn:SetText("Cancel")
+        cancelBtn:SetScript("OnClick", function() f:Hide() end)
+        cancelFrame = cancelBtn
+    end
 
-    local enableBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    enableBtn:SetSize(120, 22); enableBtn:SetPoint("RIGHT", cancelBtn, "LEFT", -6, 0)
-    enableBtn:SetText("Enable selected")
-    f._enableBtn = enableBtn
+    local enableWidget = Gui and Gui:Create("Button")
+    if enableWidget then
+        enableWidget:SetParent(f); enableWidget:ClearAllPoints()
+        enableWidget:SetWidth(120); enableWidget:SetHeight(22)
+        enableWidget:SetPoint("RIGHT", cancelFrame, "LEFT", -6, 0)
+        enableWidget:SetText("Enable selected")
+        f._enableBtn = enableWidget
+    else
+        local enableBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+        enableBtn:SetSize(120, 22); enableBtn:SetPoint("RIGHT", cancelFrame, "LEFT", -6, 0)
+        enableBtn:SetText("Enable selected")
+        f._enableBtn = enableBtn
+    end
     return f
 end
 
@@ -997,6 +1266,7 @@ function UI.PromptOptional(pending)
     if not pending or #pending == 0 then return end
     if not _optPopup then _optPopup = buildOptPopup() end
     local f = _optPopup
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
 
     for _, row in ipairs(f._rows) do row:Hide() end
     local y = 0
@@ -1005,12 +1275,27 @@ function UI.PromptOptional(pending)
         if not row then
             row = CreateFrame("Frame", nil, f._content)
             row:SetHeight(22)
-            local cb = CreateFrame("CheckButton", nil, row, "UICheckButtonTemplate")
-            cb:SetSize(20, 20); cb:SetPoint("LEFT", row, "LEFT", 4, 0)
-            cb:SetChecked(true)
+            local cb, cbFrame
+            local cbWidget = Gui and Gui:Create("CheckBox")
+            if cbWidget then
+                cbWidget:SetParent(row); cbWidget:ClearAllPoints()
+                cbWidget:SetWidth(20); cbWidget:SetHeight(20)
+                cbWidget:SetPoint("LEFT", row, "LEFT", 4, 0)
+                cbWidget.frame:EnableMouse(true)
+                if cbWidget.frame.RegisterForClicks then
+                    cbWidget.frame:RegisterForClicks("AnyUp")
+                end
+                cbWidget:SetChecked(true)
+                cb, cbFrame = cbWidget, cbWidget.frame
+            else
+                local raw = CreateFrame("CheckButton", nil, row, "UICheckButtonTemplate")
+                raw:SetSize(20, 20); raw:SetPoint("LEFT", row, "LEFT", 4, 0)
+                raw:SetChecked(true)
+                cb, cbFrame = raw, raw
+            end
             row._cb = cb
             local text = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-            text:SetPoint("LEFT", cb, "RIGHT", 4, 0)
+            text:SetPoint("LEFT", cbFrame, "RIGHT", 4, 0)
             text:SetPoint("RIGHT", row, "RIGHT", -4, 0)
             text:SetJustifyH("LEFT"); text:SetWordWrap(false); text:SetMaxLines(1)
             row._text = text
@@ -1020,16 +1305,20 @@ function UI.PromptOptional(pending)
         row._cb:SetChecked(true)
         row._text:SetText(string.format("%s   |cffaaaaaa(suggested by %s)|r", item.dep, item.requestor))
         row:ClearAllPoints()
-        row:SetWidth(f._scroll:GetWidth() - 8)
+        row:SetWidth((f._scroll:GetWidth() or 380) - 8)
         row:SetPoint("TOPLEFT", f._content, "TOPLEFT", 0, -y)
         row:Show()
         y = y + 24
     end
     if y < 1 then y = 1 end
     f._content:SetHeight(y)
-    f._scroll:UpdateScrollChildRect()
+    if f._scroll.UpdateScrollChildRect then
+        f._scroll:UpdateScrollChildRect()
+    elseif f._scroll.scrollFrame and f._scroll.scrollFrame.UpdateScrollChildRect then
+        f._scroll.scrollFrame:UpdateScrollChildRect()
+    end
 
-    f._enableBtn:SetScript("OnClick", function()
+    local function onEnable()
         for _, row in ipairs(f._rows) do
             if row:IsShown() and row._cb and row._cb:GetChecked() and row._dep then
                 ns.Manager.SetEnabled(row._dep, true)
@@ -1037,7 +1326,12 @@ function UI.PromptOptional(pending)
         end
         f:Hide()
         if UI.Refresh then UI.Refresh() end
-    end)
+    end
+    if f._enableBtn.SetEventListener then
+        f._enableBtn:SetEventListener("OnClick", onEnable)
+    else
+        f._enableBtn:SetScript("OnClick", onEnable)
+    end
 
     f:Show()
 end

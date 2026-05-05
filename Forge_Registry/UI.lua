@@ -37,46 +37,85 @@ local function buildToolbar(parent, mod)
     bar:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -4, -4)
     bar:SetHeight(TOOLBAR_H)
 
-    -- Search box.
-    local searchBg = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-    searchBg:SetSize(220, 22)
-    searchBg:SetPoint("LEFT", bar, "LEFT", 4, 0)
-    searchBg:SetBackdrop({
-        bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        tile = true, tileSize = 16, edgeSize = 8,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 },
-    })
-    searchBg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
-    searchBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
-    local search = CreateFrame("EditBox", nil, searchBg)
-    search:SetMultiLine(false); search:SetAutoFocus(false)
-    search:SetFontObject("ChatFontNormal")
-    search:SetPoint("LEFT", 6, 0); search:SetPoint("RIGHT", -6, 0); search:SetHeight(18)
-    search:SetText(ns.GetSearchText() or "")
-    search:SetScript("OnTextChanged", function(self)
-        ns.SetSearchText(self:GetText() or "")
-        UI.Refresh()
-    end)
-    search:SetScript("OnEscapePressed", function(self)
-        self:ClearFocus(); self:SetText("")
-        ns.SetSearchText("")
-        UI.Refresh()
-    end)
-    local hint = searchBg:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    hint:SetPoint("LEFT", 8, 0); hint:SetText("Filter (substring on key + summary)...")
-    if (ns.GetSearchText() or "") ~= "" then hint:Hide() end
-    search:SetScript("OnEditFocusGained", function() hint:Hide() end)
-    search:SetScript("OnEditFocusLost",  function(self)
-        if (self:GetText() or "") == "" then hint:Show() end
-    end)
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
 
-    -- Refresh button: re-runs the active source's list().
-    local refreshBtn = CreateFrame("Button", nil, bar, "UIPanelButtonTemplate")
-    refreshBtn:SetSize(80, 22)
-    refreshBtn:SetPoint("LEFT", searchBg, "RIGHT", 6, 0)
-    refreshBtn:SetText("Refresh")
-    refreshBtn:SetScript("OnClick", function() UI.Refresh() end)
+    -- Search box: Cairn-Gui Input with vanilla fallback.
+    local searchAnchor
+    do
+        local s = Gui and Gui:Create("Input")
+        if s then
+            s:SetParent(bar); s:ClearAllPoints()
+            s:SetWidth(220); s:SetHeight(22)
+            s:SetPoint("LEFT", bar, "LEFT", 4, 0)
+
+            s.editBox:HookScript("OnTextChanged", function(this)
+                ns.SetSearchText(this:GetText() or "")
+                UI.Refresh()
+            end)
+            s:SetEventListener("OnEscapePressed", function()
+                s:SetText(""); ns.SetSearchText(""); UI.Refresh()
+            end)
+
+            local hint = bar:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+            hint:SetPoint("LEFT", s.frame, "LEFT", 8, 0)
+            hint:SetText("Filter (substring on key + summary)...")
+            if (ns.GetSearchText() or "") ~= "" then hint:Hide() end
+            s:SetEventListener("OnEditFocusGained", function() hint:Hide() end)
+            s:SetEventListener("OnEditFocusLost",  function()
+                if (s:GetText() or "") == "" then hint:Show() end
+            end)
+            searchAnchor = s.frame
+        else
+            local searchBg = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+            searchBg:SetSize(220, 22)
+            searchBg:SetPoint("LEFT", bar, "LEFT", 4, 0)
+            searchBg:SetBackdrop({
+                bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
+                edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+                tile = true, tileSize = 16, edgeSize = 8,
+                insets = { left = 2, right = 2, top = 2, bottom = 2 },
+            })
+            searchBg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
+            searchBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
+            local raw = CreateFrame("EditBox", nil, searchBg)
+            raw:SetMultiLine(false); raw:SetAutoFocus(false)
+            raw:SetFontObject("ChatFontNormal")
+            raw:SetPoint("LEFT", 6, 0); raw:SetPoint("RIGHT", -6, 0); raw:SetHeight(18)
+            raw:SetText(ns.GetSearchText() or "")
+            raw:SetScript("OnTextChanged", function(self)
+                ns.SetSearchText(self:GetText() or "")
+                UI.Refresh()
+            end)
+            raw:SetScript("OnEscapePressed", function(self)
+                self:ClearFocus(); self:SetText("")
+                ns.SetSearchText("")
+                UI.Refresh()
+            end)
+            local hint = searchBg:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+            hint:SetPoint("LEFT", 8, 0); hint:SetText("Filter (substring on key + summary)...")
+            if (ns.GetSearchText() or "") ~= "" then hint:Hide() end
+            raw:SetScript("OnEditFocusGained", function() hint:Hide() end)
+            raw:SetScript("OnEditFocusLost",  function(self)
+                if (self:GetText() or "") == "" then hint:Show() end
+            end)
+            searchAnchor = searchBg
+        end
+    end
+
+    -- Refresh button: Cairn-Gui Button with vanilla fallback.
+    do
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(bar); b:ClearAllPoints()
+            b:SetWidth(80); b:SetHeight(22); b:SetText("Refresh")
+            b:SetPoint("LEFT", searchAnchor, "RIGHT", 6, 0)
+            b:SetEventListener("OnClick", function() UI.Refresh() end)
+        else
+            local raw = CreateFrame("Button", nil, bar, "UIPanelButtonTemplate")
+            raw:SetSize(80, 22); raw:SetPoint("LEFT", searchAnchor, "RIGHT", 6, 0); raw:SetText("Refresh")
+            raw:SetScript("OnClick", function() UI.Refresh() end)
+        end
+    end
 
     -- Count label on right edge.
     local countFs = bar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -189,14 +228,26 @@ local function buildEntriesPane(parent, mod, toolbar, sourcesPane)
     bg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
     bg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
 
-    local sf = CreateFrame("ScrollFrame", nil, bg, "UIPanelScrollFrameTemplate")
-    sf:SetPoint("TOPLEFT", 6, -6)
-    sf:SetPoint("BOTTOMRIGHT", -28, 6)
-    local content = CreateFrame("Frame", nil, sf)
-    content:SetSize(1, 1)
-    sf:SetScrollChild(content)
-    mod._entriesScroll  = sf
-    mod._entriesContent = content
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local entriesScroll = Gui and Gui:Create("ScrollFrame")
+    if entriesScroll then
+        entriesScroll:SetParent(bg); entriesScroll:ClearAllPoints()
+        entriesScroll:SetPoint("TOPLEFT",     bg, "TOPLEFT",      6, -6)
+        entriesScroll:SetPoint("BOTTOMRIGHT", bg, "BOTTOMRIGHT", -2,  6)
+        mod._entriesScroll       = entriesScroll
+        mod._entriesContent      = entriesScroll.content
+        mod._entriesScrollFrame  = entriesScroll.scrollFrame or entriesScroll
+    else
+        local sf = CreateFrame("ScrollFrame", nil, bg, "UIPanelScrollFrameTemplate")
+        sf:SetPoint("TOPLEFT", 6, -6)
+        sf:SetPoint("BOTTOMRIGHT", -28, 6)
+        local content = CreateFrame("Frame", nil, sf)
+        content:SetSize(1, 1)
+        sf:SetScrollChild(content)
+        mod._entriesScroll       = sf
+        mod._entriesContent      = content
+        mod._entriesScrollFrame  = sf
+    end
     mod._entryRows      = {}
     return bg
 end
@@ -234,11 +285,8 @@ local function buildDetailPane(parent, mod, entriesPane)
 
     -- Copy button on the top-right corner of the detail pane. Falls back
     -- to a no-op if Forge.ShowCopyDialog isn't available.
-    local copyBtn = CreateFrame("Button", nil, bg, "UIPanelButtonTemplate")
-    copyBtn:SetSize(76, 20)
-    copyBtn:SetPoint("TOPRIGHT", bg, "TOPRIGHT", -6, -4)
-    copyBtn:SetText("Copy")
-    copyBtn:SetScript("OnClick", function()
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local function copyHandler()
         local e = mod._selectedEntry
         if not e then return end
         if Forge and Forge.ShowCopyDialog then
@@ -247,15 +295,40 @@ local function buildDetailPane(parent, mod, entriesPane)
             Forge.ShowCopyDialog(title_str, e.detail or e.summary or "(no detail)",
                 "Ctrl-A to select all, Ctrl-C to copy.")
         end
-    end)
+    end
+    do
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(bg); b:ClearAllPoints()
+            b:SetWidth(76); b:SetHeight(20); b:SetText("Copy")
+            b:SetPoint("TOPRIGHT", bg, "TOPRIGHT", -6, -4)
+            b:SetEventListener("OnClick", copyHandler)
+        else
+            local raw = CreateFrame("Button", nil, bg, "UIPanelButtonTemplate")
+            raw:SetSize(76, 20); raw:SetPoint("TOPRIGHT", bg, "TOPRIGHT", -6, -4); raw:SetText("Copy")
+            raw:SetScript("OnClick", copyHandler)
+        end
+    end
 
     -- Scrollable detail body.
-    local sf = CreateFrame("ScrollFrame", nil, bg, "UIPanelScrollFrameTemplate")
-    sf:SetPoint("TOPLEFT",    bg, "TOPLEFT",    6, -28)
-    sf:SetPoint("BOTTOMRIGHT", bg, "BOTTOMRIGHT", -28, 6)
-    local content = CreateFrame("Frame", nil, sf)
-    content:SetSize(1, 1)
-    sf:SetScrollChild(content)
+    local sf, content
+    do
+        local s = Gui and Gui:Create("ScrollFrame")
+        if s then
+            s:SetParent(bg); s:ClearAllPoints()
+            s:SetPoint("TOPLEFT",    bg, "TOPLEFT",    6, -28)
+            s:SetPoint("BOTTOMRIGHT", bg, "BOTTOMRIGHT", -2, 6)
+            sf      = s
+            content = s.content
+        else
+            sf = CreateFrame("ScrollFrame", nil, bg, "UIPanelScrollFrameTemplate")
+            sf:SetPoint("TOPLEFT",    bg, "TOPLEFT",    6, -28)
+            sf:SetPoint("BOTTOMRIGHT", bg, "BOTTOMRIGHT", -28, 6)
+            content = CreateFrame("Frame", nil, sf)
+            content:SetSize(1, 1)
+            sf:SetScrollChild(content)
+        end
+    end
 
     local fs = content:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
     fs:SetJustifyH("LEFT"); fs:SetJustifyV("TOP")
@@ -268,16 +341,20 @@ local function buildDetailPane(parent, mod, entriesPane)
     mod._detailFs      = fs
 
     -- Reflow on width change so SetText recomputes the wrap height.
+    -- The widget exposes the inner Blizzard scrollFrame as .scrollFrame for
+    -- HookScript / GetWidth / GetHeight / UpdateScrollChildRect calls.
+    local sfInner = sf.scrollFrame or sf
     local function reflow()
-        local w = (sf:GetWidth() or 1) - 8
+        local w = (sfInner:GetWidth() or 1) - 8
         if w < 1 then w = 1 end
         fs:SetWidth(w)
         local h = (fs:GetStringHeight() or 0) + 8
-        content:SetSize(w, math.max(h, sf:GetHeight() or 0))
-        sf:UpdateScrollChildRect()
+        content:SetSize(w, math.max(h, sfInner:GetHeight() or 0))
+        if sfInner.UpdateScrollChildRect then sfInner:UpdateScrollChildRect() end
     end
-    sf:SetScript("OnSizeChanged", reflow)
-    mod._detailReflow = reflow
+    sfInner:HookScript("OnSizeChanged", reflow)
+    mod._detailReflow      = reflow
+    mod._detailScrollFrame = sfInner
     return bg
 end
 
@@ -316,7 +393,8 @@ function UI.SelectEntry(idx)
             tostring(entry.key or "?")))
         mod._detailFs:SetText(entry.detail or entry.summary or "(no detail)")
         if mod._detailReflow then mod._detailReflow() end
-        if mod._detailScroll then mod._detailScroll:SetVerticalScroll(0) end
+        local sf = mod._detailScrollFrame or mod._detailScroll
+        if sf and sf.SetVerticalScroll then sf:SetVerticalScroll(0) end
     end
 end
 
@@ -396,10 +474,13 @@ function UI.Refresh()
         y = y + ROW_H
     end
     if y < 1 then y = 1 end
+    -- Use the inner Blizzard scrollFrame for GetHeight + UpdateScrollChildRect;
+    -- the widget exposes GetWidth via ObjectBase pass-through.
+    local sf = mod._entriesScrollFrame or mod._entriesScroll
     mod._entriesContent:SetSize(
         (mod._entriesScroll:GetWidth() or 1) - 8,
-        math.max(y, mod._entriesScroll:GetHeight() or 0))
-    mod._entriesScroll:UpdateScrollChildRect()
+        math.max(y, sf:GetHeight() or 0))
+    if sf.UpdateScrollChildRect then sf:UpdateScrollChildRect() end
 end
 
 function UI.OnTabShow(mod)

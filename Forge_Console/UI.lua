@@ -49,9 +49,12 @@ function UI.AppendOutput(mod, lines, color)
     end
     mod._outputText:SetText(buf)
     if mod._reflowOutput then mod._reflowOutput() end
-    if mod._outputScroll then
-        local maxScroll = mod._outputScroll:GetVerticalScrollRange() or 0
-        mod._outputScroll:SetVerticalScroll(maxScroll)
+    -- GetVerticalScrollRange / SetVerticalScroll live only on the inner
+    -- Blizzard scrollFrame; widget doesn't surface them.
+    local sf = mod._outputScrollFrame or mod._outputScroll
+    if sf and sf.SetVerticalScroll then
+        local maxScroll = sf:GetVerticalScrollRange() or 0
+        sf:SetVerticalScroll(maxScroll)
     end
 end
 
@@ -216,12 +219,17 @@ local function refreshDropdownList(f)
 
     if y < 1 then y = 1 end
     f._content:SetHeight(y)
-    f._scroll:UpdateScrollChildRect()
+    if f._scroll.UpdateScrollChildRect then
+        f._scroll:UpdateScrollChildRect()
+    elseif f._scroll.scrollFrame and f._scroll.scrollFrame.UpdateScrollChildRect then
+        f._scroll.scrollFrame:UpdateScrollChildRect()
+    end
 end
 
 function UI.ShowDropdownList(anchorBtn)
     local f = ns._dropdownList
     if not f then
+        local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
         f = CreateFrame("Frame", "ForgeConsoleDropdownList", UIParent, "BackdropTemplate")
         f:SetSize(DROPDOWN_W + 24, 240)
         f:SetFrameStrata("DIALOG")
@@ -236,15 +244,23 @@ function UI.ShowDropdownList(anchorBtn)
         f:EnableMouse(true)
         f:SetScript("OnHide", function() end)
 
-        local scroll = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
-        scroll:SetPoint("TOPLEFT",     6, -6)
-        scroll:SetPoint("BOTTOMRIGHT", -22, 6)
-        f._scroll = scroll
-
-        local content = CreateFrame("Frame", nil, scroll)
-        content:SetSize(1, 1)
-        scroll:SetScrollChild(content)
-        f._content = content
+        local scrollGui = Gui and Gui:Create("ScrollFrame")
+        if scrollGui then
+            scrollGui:SetParent(f); scrollGui:ClearAllPoints()
+            scrollGui:SetPoint("TOPLEFT",     f, "TOPLEFT",      6, -6)
+            scrollGui:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2,  6)
+            f._scroll  = scrollGui
+            f._content = scrollGui.content
+        else
+            local scroll = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
+            scroll:SetPoint("TOPLEFT",     6, -6)
+            scroll:SetPoint("BOTTOMRIGHT", -22, 6)
+            local content = CreateFrame("Frame", nil, scroll)
+            content:SetSize(1, 1)
+            scroll:SetScrollChild(content)
+            f._scroll  = scroll
+            f._content = content
+        end
 
         f._rows = {}
         ns._dropdownList = f
@@ -271,6 +287,7 @@ end
 
 -- ----- Add / Delete / Save popups ----------------------------------------
 local function buildSimplePopup(title)
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
     local f = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
     f:SetSize(360, 110)
     f:SetPoint("CENTER")
@@ -295,24 +312,55 @@ local function buildSimplePopup(title)
     label:SetPoint("TOPLEFT", 12, -36)
     f._label = label
 
+    -- EditBox kept as InputBoxTemplate -- gives a compact framed look for
+    -- name prompts and matches the existing style. Future work could swap
+    -- to Cairn-Gui Input but the visual difference (Cairn Input is wider
+    -- and dark-styled) is a behavior change, not a fix.
     local eb = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
     eb:SetSize(280, 22)
     eb:SetAutoFocus(true)
     f._eb = eb
 
-    local ok = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    ok:SetSize(80, 22)
-    ok:SetPoint("BOTTOMRIGHT", -12, 10)
-    f._ok = ok
+    -- OK / Cancel buttons via Cairn-Gui Button with vanilla fallback.
+    local function popupBtn(labelText, onClick, anchorOpts)
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(f); b:ClearAllPoints()
+            b:SetWidth(80); b:SetHeight(22)
+            if anchorOpts.point == "BOTTOMRIGHT" then
+                b:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 10)
+            else
+                b:SetPoint("RIGHT", anchorOpts.to, "LEFT", -6, 0)
+            end
+            b:SetText(labelText)
+            if onClick then b:SetEventListener("OnClick", function() onClick() end) end
+            return b, b.frame
+        else
+            local raw = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+            raw:SetSize(80, 22)
+            if anchorOpts.point == "BOTTOMRIGHT" then
+                raw:SetPoint("BOTTOMRIGHT", -12, 10)
+            else
+                raw:SetPoint("RIGHT", anchorOpts.to, "LEFT", -6, 0)
+            end
+            raw:SetText(labelText)
+            if onClick then raw:SetScript("OnClick", onClick) end
+            return raw, raw
+        end
+    end
 
-    local cancel = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    cancel:SetSize(80, 22)
-    cancel:SetPoint("RIGHT", ok, "LEFT", -6, 0)
-    cancel:SetText("Cancel")
-    cancel:SetScript("OnClick", function() f:Hide() end)
+    -- The OK button's OnClick handler is set per-call via showAddPrompt, so
+    -- we install a thunk that delegates to f._okHandler at click time.
+    local ok, okFrame = popupBtn("OK", function()
+        if f._okHandler then f._okHandler() end
+    end, { point = "BOTTOMRIGHT" })
+    f._ok = ok
+    f._okFrame = okFrame
+
+    popupBtn("Cancel", function() f:Hide() end, { point = "RIGHT", to = okFrame })
 
     eb:SetScript("OnEscapePressed", function() f:Hide() end)
-    eb:SetScript("OnEnterPressed", function() ok:Click() end)
+    eb:SetScript("OnEnterPressed", function() if f._okHandler then f._okHandler() end end)
 
     return f
 end
@@ -323,11 +371,11 @@ local function showAddPrompt()
         f = buildSimplePopup("New Snippet")
         f._label:SetText("Name:")
         f._eb:SetPoint("LEFT", f._label, "RIGHT", 8, 0)
-        f._ok:SetText("Create")
+        if f._ok.SetText then f._ok:SetText("Create") end
         ns._addPopup = f
     end
 
-    f._ok:SetScript("OnClick", function()
+    f._okHandler = function()
         local name = (f._eb:GetText() or ""):match("^%s*(.-)%s*$") or ""
         if name == "" then return end
         if ns.GetSnippet(name) then
@@ -338,7 +386,7 @@ local function showAddPrompt()
         ns.SetCurrentSnippet(name)
         UI.LoadCurrent()
         f:Hide()
-    end)
+    end
 
     f._eb:SetText("")
     f:Show()
@@ -350,6 +398,7 @@ local function showDeleteConfirm()
     if not cur then return end
     local f = ns._delPopup
     if not f then
+        local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
         f = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
         f:SetSize(380, 120)
         f:SetPoint("CENTER")
@@ -377,27 +426,54 @@ local function showDeleteConfirm()
         body:SetWordWrap(true)
         f._body = body
 
-        local del = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-        del:SetSize(80, 22)
-        del:SetPoint("BOTTOMRIGHT", -12, 10)
-        del:SetText("Delete")
+        -- Delete + Cancel via Cairn-Gui Button with vanilla fallback.
+        local function popupBtn(labelText, anchorOpts)
+            local b = Gui and Gui:Create("Button")
+            if b then
+                b:SetParent(f); b:ClearAllPoints()
+                b:SetWidth(80); b:SetHeight(22); b:SetText(labelText)
+                if anchorOpts.point == "BOTTOMRIGHT" then
+                    b:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 10)
+                else
+                    b:SetPoint("RIGHT", anchorOpts.to, "LEFT", -6, 0)
+                end
+                return b, b.frame
+            else
+                local raw = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+                raw:SetSize(80, 22); raw:SetText(labelText)
+                if anchorOpts.point == "BOTTOMRIGHT" then
+                    raw:SetPoint("BOTTOMRIGHT", -12, 10)
+                else
+                    raw:SetPoint("RIGHT", anchorOpts.to, "LEFT", -6, 0)
+                end
+                return raw, raw
+            end
+        end
+
+        local del, delFrame = popupBtn("Delete", { point = "BOTTOMRIGHT" })
         f._del = del
 
-        local cancel = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-        cancel:SetSize(80, 22)
-        cancel:SetPoint("RIGHT", del, "LEFT", -6, 0)
-        cancel:SetText("Cancel")
-        cancel:SetScript("OnClick", function() f:Hide() end)
+        local cancel = popupBtn("Cancel", { point = "RIGHT", to = delFrame })
+        if cancel.SetEventListener then
+            cancel:SetEventListener("OnClick", function() f:Hide() end)
+        else
+            cancel:SetScript("OnClick", function() f:Hide() end)
+        end
 
         ns._delPopup = f
     end
 
     f._body:SetText("Delete the snippet '" .. cur .. "'?\nThis cannot be undone.")
-    f._del:SetScript("OnClick", function()
+    local function doDelete()
         ns.DeleteSnippet(cur)
         UI.LoadCurrent()
         f:Hide()
-    end)
+    end
+    if f._del.SetEventListener then
+        f._del:SetEventListener("OnClick", doDelete)
+    else
+        f._del:SetScript("OnClick", doDelete)
+    end
     f:Show()
 end
 
@@ -409,6 +485,24 @@ function UI.Build(parent, mod)
     frame:SetAllPoints(parent)
     mod._frame = frame
 
+    -- Acquire Cairn-Gui-Core once. Each migration site falls back to vanilla
+    -- if the kit failed to load.
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local function makeBtn(parentFrame, label, w, h, onClick)
+        local b = Gui and Gui:Create("Button")
+        if b then
+            b:SetParent(parentFrame); b:ClearAllPoints()
+            b:SetWidth(w); b:SetHeight(h); b:SetText(label)
+            if onClick then b:SetEventListener("OnClick", function() onClick() end) end
+            return b, b.frame
+        else
+            local raw = CreateFrame("Button", nil, parentFrame, "UIPanelButtonTemplate")
+            raw:SetSize(w, h); raw:SetText(label)
+            if onClick then raw:SetScript("OnClick", onClick) end
+            return raw, raw
+        end
+    end
+
     -- ===== Top toolbar ===================================================
     local toolbar = CreateFrame("Frame", nil, frame)
     toolbar:SetPoint("TOPLEFT",  frame, "TOPLEFT",  4, -4)
@@ -419,50 +513,57 @@ function UI.Build(parent, mod)
     dropdown:SetPoint("LEFT", toolbar, "LEFT", 4, 0)
     mod._dropdown = dropdown
 
-    local addBtn = CreateFrame("Button", nil, toolbar, "UIPanelButtonTemplate")
-    addBtn:SetSize(BTN_HEIGHT, BTN_HEIGHT)
-    addBtn:SetPoint("LEFT", dropdown, "RIGHT", 4, 0)
-    addBtn:SetText("+")
-    addBtn:SetScript("OnClick", showAddPrompt)
+    local addBtnW, addBtnFrame = makeBtn(toolbar, "+", BTN_HEIGHT, BTN_HEIGHT, showAddPrompt)
+    addBtnW:ClearAllPoints()
+    addBtnW:SetPoint("LEFT", dropdown, "RIGHT", 4, 0)
 
-    local delBtn = CreateFrame("Button", nil, toolbar, "UIPanelButtonTemplate")
-    delBtn:SetSize(BTN_HEIGHT, BTN_HEIGHT)
-    delBtn:SetPoint("LEFT", addBtn, "RIGHT", 2, 0)
-    delBtn:SetText("-")
-    delBtn:SetScript("OnClick", showDeleteConfirm)
+    local delBtnW, delBtnFrame = makeBtn(toolbar, "-", BTN_HEIGHT, BTN_HEIGHT, showDeleteConfirm)
+    delBtnW:ClearAllPoints()
+    delBtnW:SetPoint("LEFT", addBtnFrame, "RIGHT", 2, 0)
 
-    -- Auto-run checkbox.
-    local autoCb = CreateFrame("CheckButton", nil, toolbar, "UICheckButtonTemplate")
-    autoCb:SetSize(22, 22)
-    autoCb:SetPoint("LEFT", delBtn, "RIGHT", 12, 0)
-    autoCb:SetScript("OnClick", function(self)
-        local name = ns.GetCurrentSnippet()
-        if not name then return end
-        ns.SetAutoRun(name, self:GetChecked() and true or false)
-    end)
+    -- Auto-run checkbox: Cairn-Gui CheckBox with vanilla fallback.
+    local autoCb, autoCbFrame
+    do
+        local widget = Gui and Gui:Create("CheckBox")
+        if widget then
+            widget:SetParent(toolbar); widget:ClearAllPoints()
+            widget:SetWidth(22); widget:SetHeight(22)
+            widget:SetPoint("LEFT", delBtnFrame, "RIGHT", 12, 0)
+            widget.frame:EnableMouse(true)
+            if widget.frame.RegisterForClicks then widget.frame:RegisterForClicks("AnyUp") end
+            widget:SetEventListener("OnValueChanged", function(_, _, checked)
+                local name = ns.GetCurrentSnippet()
+                if not name then return end
+                ns.SetAutoRun(name, checked and true or false)
+            end)
+            autoCb, autoCbFrame = widget, widget.frame
+        else
+            local raw = CreateFrame("CheckButton", nil, toolbar, "UICheckButtonTemplate")
+            raw:SetSize(22, 22)
+            raw:SetPoint("LEFT", delBtnFrame, "RIGHT", 12, 0)
+            raw:SetScript("OnClick", function(self)
+                local name = ns.GetCurrentSnippet()
+                if not name then return end
+                ns.SetAutoRun(name, self:GetChecked() and true or false)
+            end)
+            autoCb, autoCbFrame = raw, raw
+        end
+    end
     mod._autoCb = autoCb
     local autoLabel = toolbar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    autoLabel:SetPoint("LEFT", autoCb, "RIGHT", 2, 0)
+    autoLabel:SetPoint("LEFT", autoCbFrame, "RIGHT", 2, 0)
     autoLabel:SetText("Auto-run on login")
 
-    -- Right-aligned: Run, Clear.
-    local runBtn = CreateFrame("Button", nil, toolbar, "UIPanelButtonTemplate")
-    runBtn:SetSize(BTN_WIDTH, BTN_HEIGHT)
-    runBtn:SetPoint("RIGHT", toolbar, "RIGHT", -4, 0)
-    runBtn:SetText("Run")
-    runBtn:SetScript("OnClick", function() UI.RunEditor(mod) end)
+    -- Right-aligned: Run, Clear, Export.
+    local runBtnW, runBtnFrame = makeBtn(toolbar, "Run", BTN_WIDTH, BTN_HEIGHT, function() UI.RunEditor(mod) end)
+    runBtnW:ClearAllPoints()
+    runBtnW:SetPoint("RIGHT", toolbar, "RIGHT", -4, 0)
 
-    local clearBtn = CreateFrame("Button", nil, toolbar, "UIPanelButtonTemplate")
-    clearBtn:SetSize(BTN_WIDTH, BTN_HEIGHT)
-    clearBtn:SetPoint("RIGHT", runBtn, "LEFT", -4, 0)
-    clearBtn:SetText("Clear")
-    clearBtn:SetScript("OnClick", function() UI.ClearOutput(mod) end)
+    local clearBtnW, clearBtnFrame = makeBtn(toolbar, "Clear", BTN_WIDTH, BTN_HEIGHT, function() UI.ClearOutput(mod) end)
+    clearBtnW:ClearAllPoints()
+    clearBtnW:SetPoint("RIGHT", runBtnFrame, "LEFT", -4, 0)
 
-    local exportBtn = CreateFrame("Button", nil, toolbar, "UIPanelButtonTemplate")
-    exportBtn:SetSize(BTN_WIDTH, BTN_HEIGHT)
-    exportBtn:SetPoint("RIGHT", clearBtn, "LEFT", -4, 0)
-    exportBtn:SetText("Export")
-    exportBtn:SetScript("OnClick", function()
+    local exportBtnW, exportBtnFrame = makeBtn(toolbar, "Export", BTN_WIDTH, BTN_HEIGHT, function()
         if not (Forge and Forge.ShowCopyDialog and Forge.SerializeTable) then return end
         local snippets = {}
         for _, name in ipairs(ns.ListSnippets()) do
@@ -472,8 +573,14 @@ function UI.Build(parent, mod)
         Forge.ShowCopyDialog("Console - export all snippets", text,
             "Ctrl-A to select all, Ctrl-C to copy. " .. tostring(#ns.ListSnippets()) .. " snippets.")
     end)
+    exportBtnW:ClearAllPoints()
+    exportBtnW:SetPoint("RIGHT", clearBtnFrame, "LEFT", -4, 0)
 
     -- ===== Code editor (multi-line ScrollFrame + EditBox) =================
+    -- The editor uses a vanilla UIPanelScrollFrameTemplate + multi-line EditBox
+    -- intentionally; the Cairn-Gui ScrollingEditBox widget has a different
+    -- API contract and migrating risks subtle regressions in cursor / scroll
+    -- behaviour. Output pane below DOES use the kit.
     local editorBg = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     editorBg:SetPoint("TOPLEFT",     toolbar, "BOTTOMLEFT",  0, -PAD)
     editorBg:SetPoint("BOTTOMRIGHT", frame,   "BOTTOMRIGHT", -4, OUTPUT_H + PAD + 4)
@@ -526,14 +633,32 @@ function UI.Build(parent, mod)
     outputBg:SetBackdropColor(0.05, 0.05, 0.05, 0.40)
     outputBg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
 
-    local outputScroll = CreateFrame("ScrollFrame", nil, outputBg, "UIPanelScrollFrameTemplate")
-    outputScroll:SetPoint("TOPLEFT",     6, -6)
-    outputScroll:SetPoint("BOTTOMRIGHT", -28, 6)
-    mod._outputScroll = outputScroll
-
-    local outputContent = CreateFrame("Frame", nil, outputScroll)
-    outputContent:SetSize(1, 1)
-    outputScroll:SetScrollChild(outputContent)
+    -- Migrated to Cairn-Gui-Core ScrollFrame. _outputScrollFrame points at
+    -- the inner Blizzard scrollFrame (same on both backends) for the few
+    -- low-level reads (GetVerticalScrollRange / SetVerticalScroll / GetWidth /
+    -- GetHeight / UpdateScrollChildRect) that the widget doesn't surface.
+    local outputScroll, outputContent
+    do
+        local s = Gui and Gui:Create("ScrollFrame")
+        if s then
+            s:SetParent(outputBg); s:ClearAllPoints()
+            s:SetPoint("TOPLEFT",     outputBg, "TOPLEFT",      6, -6)
+            s:SetPoint("BOTTOMRIGHT", outputBg, "BOTTOMRIGHT", -2,  6)
+            outputScroll  = s
+            outputContent = s.content
+            mod._outputScroll      = s
+            mod._outputScrollFrame = s.scrollFrame or s
+        else
+            local raw = CreateFrame("ScrollFrame", nil, outputBg, "UIPanelScrollFrameTemplate")
+            raw:SetPoint("TOPLEFT",     6, -6)
+            raw:SetPoint("BOTTOMRIGHT", -28, 6)
+            local content = CreateFrame("Frame", nil, raw); content:SetSize(1, 1); raw:SetScrollChild(content)
+            outputScroll  = raw
+            outputContent = content
+            mod._outputScroll      = raw
+            mod._outputScrollFrame = raw
+        end
+    end
     mod._outputContent = outputContent
 
     local outputText = outputContent:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
@@ -553,10 +678,19 @@ function UI.Build(parent, mod)
         local th = (outputText:GetStringHeight() or 0) + 12
         if th < sh then th = sh end
         outputContent:SetSize(w, th)
-        outputScroll:UpdateScrollChildRect()
+        local sf = mod._outputScrollFrame or outputScroll
+        if sf.UpdateScrollChildRect then sf:UpdateScrollChildRect() end
     end
     mod._reflowOutput = reflowOutput
-    outputScroll:SetScript("OnSizeChanged", reflowOutput)
+    -- Hook via the inner Blizzard scrollFrame so the kit's own SetScript
+    -- handlers aren't clobbered. The leading `local sf =` avoids the Lua
+    -- parser ambiguity where `(...)` on the next line gets glued to the
+    -- previous expression as a function call (took out the Console tab on
+    -- 2026-05-05; reflowOutput returned nil and the chained :HookScript
+    -- threw "attempt to index a nil value" inside UI.Build, aborting the
+    -- entire Console UI).
+    local outputSf = mod._outputScrollFrame or outputScroll
+    outputSf:HookScript("OnSizeChanged", reflowOutput)
     reflowOutput()
 
     -- ===== Welcome banner + initial load ================================
