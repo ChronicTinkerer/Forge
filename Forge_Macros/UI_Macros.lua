@@ -62,7 +62,15 @@ local function buildEditor(parent, mod)
     counter:SetTextColor(0.85, 0.7, 0.4, 1)
     mod._counter = counter
 
-    -- Body editor (multi-line ScrollFrame + EditBox).
+    -- Body editor: migrated to Cairn-Gui-Core ScrollingEditBox. Same gotcha
+    -- as Forge_Console -- the widget hooks the inner editBox's
+    -- OnEditFocusLost to RESET the visible text to widget.settings.text.
+    -- Hook OnTextChanged to keep settings.text synced with every keystroke
+    -- so focus-loss no longer reverts unsaved typing.
+    --
+    -- mod._bodyEB still points at the multi-line EditBox so the rest of the
+    -- file (counter / SaveCurrent / RefreshEditor) keeps working unchanged.
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
     local bg = CreateFrame("Frame", nil, pane, "BackdropTemplate")
     bg:SetPoint("TOPLEFT", iconBtn, "BOTTOMLEFT", 0, -PAD)
     bg:SetPoint("BOTTOMRIGHT", pane, "BOTTOMRIGHT", 0, BTN_H + PAD + 4)
@@ -75,20 +83,41 @@ local function buildEditor(parent, mod)
     bg:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
     bg:SetBackdropBorderColor(0.4, 0.3, 0.15, 1)
 
-    local sf = CreateFrame("ScrollFrame", nil, bg, "UIPanelScrollFrameTemplate")
-    sf:SetPoint("TOPLEFT", 6, -6)
-    sf:SetPoint("BOTTOMRIGHT", -28, 6)
+    local body
+    local editorWidget = Gui and Gui:Create("ScrollingEditBox")
+    if editorWidget then
+        editorWidget:SetParent(bg); editorWidget:ClearAllPoints()
+        editorWidget:SetPoint("TOPLEFT",     bg, "TOPLEFT",      6, -6)
+        editorWidget:SetPoint("BOTTOMRIGHT", bg, "BOTTOMRIGHT", -2,  6)
 
-    local body = CreateFrame("EditBox", nil, sf)
-    body:SetMultiLine(true)
-    body:SetAutoFocus(false)
-    body:SetFontObject("ChatFontNormal")
-    body:SetWidth(420)
-    body:SetTextInsets(2, 2, 2, 2)
-    sf:SetScrollChild(body)
+        body = editorWidget.editBox
+        body:SetFontObject("ChatFontNormal")
+        body:SetTextInsets(2, 2, 2, 2)
+        -- Sync widget.settings.text on every keystroke so the kit's
+        -- OnEditFocusLost reset is a no-op.
+        body:HookScript("OnTextChanged", function(self)
+            editorWidget.settings.text = self:GetText() or ""
+        end)
+        mod._bodyWidget = editorWidget
+    else
+        local sf = CreateFrame("ScrollFrame", nil, bg, "UIPanelScrollFrameTemplate")
+        sf:SetPoint("TOPLEFT", 6, -6)
+        sf:SetPoint("BOTTOMRIGHT", -28, 6)
+        body = CreateFrame("EditBox", nil, sf)
+        body:SetMultiLine(true)
+        body:SetAutoFocus(false)
+        body:SetFontObject("ChatFontNormal")
+        body:SetWidth(420)
+        body:SetTextInsets(2, 2, 2, 2)
+        sf:SetScrollChild(body)
+    end
     mod._bodyEB = body
 
-    body:SetScript("OnTextChanged", function(self)
+    -- Counter update on every keystroke. Layered AFTER the widget's own
+    -- HookScript so both run; SetScript would clobber. We use HookScript
+    -- here unconditionally so the vanilla path also accepts a live counter
+    -- without losing other handlers if a future change adds them.
+    body:HookScript("OnTextChanged", function(self)
         local n = #(self:GetText() or "")
         if mod._counter then
             local color = n > 255 and "ffff4040" or (n > 240 and "ffffaa00" or "ffd87f3a")

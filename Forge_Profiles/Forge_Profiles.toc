@@ -2,7 +2,7 @@
 ## Title: Forge_Profiles
 ## Notes: Cross-addon profile manager. Discovers every Cairn.DB instance and lets you switch profiles per addon or in named bulk sets. Adds a Profiles tab to /forge.
 ## Author: ChronicTinkerer
-## Version: 2605052100
+## Version: 2605052230
 ## SavedVariables: ForgeProfilesDB
 ## Dependencies: Cairn, Forge
 ## X-Category: Development Tools

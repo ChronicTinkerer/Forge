@@ -237,9 +237,12 @@ local function refreshSequenceList(mod)
 end
 
 local function buildStepRow(parent, idx)
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
     local row = CreateFrame("Frame", nil, parent)
     row:SetHeight(STEP_H)
 
+    -- Tiny ^/v/x navigation buttons stay vanilla -- 20x20 visual budget,
+    -- inline glyphs, low value migrating each one.
     local upBtn = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
     upBtn:SetSize(20, 20); upBtn:SetPoint("LEFT", row, "LEFT", 0, 0); upBtn:SetText("^")
     local dnBtn = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
@@ -253,17 +256,39 @@ local function buildStepRow(parent, idx)
     idxLabel:SetTextColor(0.85, 0.7, 0.4, 1)
     row._idxLabel = idxLabel
 
-    local eb = CreateFrame("EditBox", nil, row, "InputBoxTemplate")
-    eb:SetSize(360, 20)
-    eb:SetPoint("LEFT", idxLabel, "RIGHT", 6, 0); eb:SetPoint("RIGHT", row, "RIGHT", -4, 0)
-    eb:SetAutoFocus(false)
-    row._eb = eb
+    -- Step text editor: migrated to Cairn-Gui-Core Input. row._eb still
+    -- points at the inner EditBox so SetText / GetText / SetCursorPosition
+    -- callers in refreshSteps and S.UpdateStep keep working unchanged.
+    local eb
+    local inputWidget = Gui and Gui:Create("Input")
+    if inputWidget then
+        inputWidget:SetParent(row); inputWidget:ClearAllPoints()
+        inputWidget:SetPoint("LEFT",  idxLabel, "RIGHT", 6, 0)
+        inputWidget:SetPoint("RIGHT", row,      "RIGHT", -4, 0)
+        inputWidget:SetHeight(20)
+
+        eb = inputWidget.editBox
+        -- Hook the inner editBox for live updates; the widget's own
+        -- OnEnterPressed/OnEscapePressed events fire on the widget rather
+        -- than on the editBox, but raw script handlers on the editBox
+        -- still work for OnTextChanged + OnEscapePressed.
+        eb:HookScript("OnTextChanged", function(self) S.UpdateStep(row._index, self:GetText()) end)
+        eb:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+        row._eb       = eb
+        row._ebWidget = inputWidget
+    else
+        eb = CreateFrame("EditBox", nil, row, "InputBoxTemplate")
+        eb:SetSize(360, 20)
+        eb:SetPoint("LEFT", idxLabel, "RIGHT", 6, 0); eb:SetPoint("RIGHT", row, "RIGHT", -4, 0)
+        eb:SetAutoFocus(false)
+        eb:SetScript("OnTextChanged", function(self) S.UpdateStep(row._index, self:GetText()) end)
+        eb:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+        row._eb = eb
+    end
 
     upBtn:SetScript("OnClick", function() S.MoveStep(row._index, -1) end)
     dnBtn:SetScript("OnClick", function() S.MoveStep(row._index, 1) end)
     rmBtn:SetScript("OnClick", function() S.RemoveStep(row._index) end)
-    eb:SetScript("OnTextChanged", function(self) S.UpdateStep(row._index, self:GetText()) end)
-    eb:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
 
     return row
 end

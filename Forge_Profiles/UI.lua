@@ -50,51 +50,102 @@ local function buildAddonRow(parent, mod)
     curFs:SetWidth(CURRENT_W); curFs:SetJustifyH("LEFT"); curFs:SetWordWrap(false); curFs:SetMaxLines(1)
     row._curFs = curFs
 
-    -- Switch dropdown (UIDropDownMenu via DropDownList template).
-    local dd = CreateFrame("Frame", nil, row, "UIDropDownMenuTemplate")
-    dd:SetPoint("LEFT", curFs, "RIGHT", 0, -2)
-    UIDropDownMenu_SetWidth(dd, 140)
-    row._dd = dd
+    -- Switch dropdown: Cairn-Gui Dropdown when the kit is loaded, falling
+    -- back to Blizzard's UIDropDownMenuTemplate. We don't try to mix the two
+    -- inside one row -- the populate / selection-handling APIs are too
+    -- different. row._ddBackend records which path won so refreshRow can
+    -- branch.
+    local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
+    local dd = Gui and Gui:Create("Dropdown")
+    if dd then
+        dd:SetParent(row); dd:ClearAllPoints()
+        dd:SetWidth(150); dd:SetHeight(22)
+        dd:SetPoint("LEFT", curFs, "RIGHT", 0, 0)
+        row._dd        = dd
+        row._ddBackend = "cairn-gui"
+    else
+        local raw = CreateFrame("Frame", nil, row, "UIDropDownMenuTemplate")
+        raw:SetPoint("LEFT", curFs, "RIGHT", 0, -2)
+        UIDropDownMenu_SetWidth(raw, 140)
+        row._dd        = raw
+        row._ddBackend = "vanilla"
+    end
 
     return row
 end
+
+-- Sentinel key used in the Cairn-Gui Dropdown's list to represent the
+-- "+ New profile..." action. Plain strings are profile names; this prefix
+-- can never collide because real profile names go through Cairn.DB which
+-- doesn't allow `__` prefixed names from user input.
+local NEW_PROFILE_KEY = "__new__"
 
 local function refreshRow(row, info)
     row._nameFs:SetText(info.svName)
     row._curFs:SetText(escapeBars(tostring(info.current or "?")))
 
-    UIDropDownMenu_SetText(row._dd, "Switch to...")
-    UIDropDownMenu_Initialize(row._dd, function(self, level)
-        if level ~= 1 then return end
+    if row._ddBackend == "cairn-gui" then
+        -- Cairn-Gui Dropdown path. Build a key->value map and an ordered key
+        -- list so the items render in stable order. The trailing
+        -- NEW_PROFILE_KEY entry maps to the "+ New profile..." action; we
+        -- branch on key in the OnValueSelected handler.
+        local list, ordered = {}, {}
         for _, profileName in ipairs(info.profiles or {}) do
-            local entry = UIDropDownMenu_CreateInfo()
-            entry.text  = profileName
-            entry.value = profileName
-            entry.func  = function()
-                ns.SwitchProfile(info.svName, profileName)
+            list[profileName]  = profileName
+            ordered[#ordered+1] = profileName
+        end
+        list[NEW_PROFILE_KEY]    = "|cffd87f3a+ New profile...|r"
+        ordered[#ordered+1]      = NEW_PROFILE_KEY
+
+        row._dd:SetList(list, ordered)
+        -- SetList wipes the displayed text; restore the placeholder so the
+        -- field reads "Switch to..." rather than blank.
+        row._dd:SetText("Switch to...")
+
+        row._dd:SetEventListener("OnValueSelected", function(_, _, key)
+            -- key is whichever item the user clicked. SetText resets the
+            -- placeholder so a follow-up open shows "Switch to..." again
+            -- rather than the just-clicked profile name.
+            row._dd:SetText("Switch to...")
+            row._dd:ClearSelection()
+            if key == NEW_PROFILE_KEY then
+                UI._showNewProfilePrompt(info.svName)
+            elseif key then
+                ns.SwitchProfile(info.svName, key)
                 UI.Refresh()
             end
-            entry.checked = (profileName == info.current)
-            UIDropDownMenu_AddButton(entry, level)
-        end
+        end)
+    else
+        UIDropDownMenu_SetText(row._dd, "Switch to...")
+        UIDropDownMenu_Initialize(row._dd, function(self, level)
+            if level ~= 1 then return end
+            for _, profileName in ipairs(info.profiles or {}) do
+                local entry = UIDropDownMenu_CreateInfo()
+                entry.text  = profileName
+                entry.value = profileName
+                entry.func  = function()
+                    ns.SwitchProfile(info.svName, profileName)
+                    UI.Refresh()
+                end
+                entry.checked = (profileName == info.current)
+                UIDropDownMenu_AddButton(entry, level)
+            end
 
-        -- Separator + "New profile..." action. Cairn.DB's SetProfile
-        -- auto-creates a profile with defaults when the name doesn't
-        -- exist, so the prompt only needs to collect a name.
-        local sep = UIDropDownMenu_CreateInfo()
-        sep.text         = ""
-        sep.disabled     = true
-        sep.notCheckable = true
-        UIDropDownMenu_AddButton(sep, level)
+            local sep = UIDropDownMenu_CreateInfo()
+            sep.text         = ""
+            sep.disabled     = true
+            sep.notCheckable = true
+            UIDropDownMenu_AddButton(sep, level)
 
-        local newEntry = UIDropDownMenu_CreateInfo()
-        newEntry.text         = "|cffd87f3a+ New profile...|r"
-        newEntry.notCheckable = true
-        newEntry.func         = function()
-            UI._showNewProfilePrompt(info.svName)
-        end
-        UIDropDownMenu_AddButton(newEntry, level)
-    end)
+            local newEntry = UIDropDownMenu_CreateInfo()
+            newEntry.text         = "|cffd87f3a+ New profile...|r"
+            newEntry.notCheckable = true
+            newEntry.func         = function()
+                UI._showNewProfilePrompt(info.svName)
+            end
+            UIDropDownMenu_AddButton(newEntry, level)
+        end)
+    end
 end
 
 function UI.Build(parent, mod)
@@ -131,44 +182,102 @@ function UI.Build(parent, mod)
         end
     end
 
-    -- "Apply set" dropdown.
-    local applyDd = CreateFrame("Frame", nil, bar, "UIDropDownMenuTemplate")
-    applyDd:SetPoint("LEFT", saveBtnFrame, "RIGHT", 4, -2)
-    UIDropDownMenu_SetWidth(applyDd, 160)
-    UIDropDownMenu_SetText(applyDd, "Apply set...")
-    UIDropDownMenu_Initialize(applyDd, function(self, level)
-        if level ~= 1 then return end
-        local names = ns.ListSetNames()
-        if #names == 0 then
-            local entry = UIDropDownMenu_CreateInfo()
-            entry.text = "(no sets saved)"
-            entry.disabled = true
-            UIDropDownMenu_AddButton(entry, level)
-            return
-        end
-        for _, n in ipairs(names) do
-            local entry = UIDropDownMenu_CreateInfo()
-            entry.text = n
-            entry.func = function()
-                local ok, applied = ns.LoadSet(n)
-                if ok and ns.out then
-                    ns.out(string.format("loaded set '%s' (%d addons updated).", n, applied))
+    -- "Apply set" dropdown. Cairn-Gui Dropdown when available, falling back
+    -- to UIDropDownMenuTemplate. Each set name shows up as one entry; a
+    -- companion "delete: foo" entry sits below it for the remove path
+    -- (Cairn-Gui Dropdown is a flat list, no submenu support, so we encode
+    -- the action in the key with a "delete:" prefix).
+    local applyDd = Gui and Gui:Create("Dropdown")
+    if applyDd then
+        applyDd:SetParent(bar); applyDd:ClearAllPoints()
+        applyDd:SetWidth(170); applyDd:SetHeight(22)
+        applyDd:SetPoint("LEFT", saveBtnFrame, "RIGHT", 4, 0)
+        applyDd:SetText("Apply set...")
+        mod._applyDd        = applyDd
+        mod._applyDdBackend = "cairn-gui"
+
+        -- Re-populate every time the list might have changed (saves, deletes).
+        -- mod._refreshApplyDd lets UI.Refresh trigger this without re-running
+        -- the whole UI build path.
+        local DELETE_PREFIX = "delete:"
+        local function rebuild()
+            local list, ordered = {}, {}
+            local names = ns.ListSetNames() or {}
+            if #names == 0 then
+                list["__empty__"]  = "|cffaaaaaa(no sets saved)|r"
+                ordered[#ordered+1] = "__empty__"
+            else
+                for _, n in ipairs(names) do
+                    list[n] = n
+                    ordered[#ordered+1] = n
+                    local delKey = DELETE_PREFIX .. n
+                    list[delKey] = "|cffff8080    delete|r"
+                    ordered[#ordered+1] = delKey
                 end
-                UI.Refresh()
             end
-            UIDropDownMenu_AddButton(entry, level)
-            local del = UIDropDownMenu_CreateInfo()
-            del.text = "    delete"
-            del.notCheckable = true
-            del.func = function()
+            applyDd:SetList(list, ordered)
+            applyDd:SetText("Apply set...")
+        end
+        mod._refreshApplyDd = rebuild
+        rebuild()
+
+        applyDd:SetEventListener("OnValueSelected", function(_, _, key)
+            applyDd:SetText("Apply set...")
+            applyDd:ClearSelection()
+            if not key or key == "__empty__" then return end
+            if key:sub(1, #DELETE_PREFIX) == DELETE_PREFIX then
+                local n = key:sub(#DELETE_PREFIX + 1)
                 ns.DeleteSet(n)
                 if ns.out then ns.out("deleted set '" .. n .. "'.") end
                 UI.Refresh()
+            else
+                local ok, applied = ns.LoadSet(key)
+                if ok and ns.out then
+                    ns.out(string.format("loaded set '%s' (%d addons updated).", key, applied))
+                end
+                UI.Refresh()
             end
-            UIDropDownMenu_AddButton(del, level)
-        end
-    end)
-    mod._applyDd = applyDd
+        end)
+    else
+        applyDd = CreateFrame("Frame", nil, bar, "UIDropDownMenuTemplate")
+        applyDd:SetPoint("LEFT", saveBtnFrame, "RIGHT", 4, -2)
+        UIDropDownMenu_SetWidth(applyDd, 160)
+        UIDropDownMenu_SetText(applyDd, "Apply set...")
+        UIDropDownMenu_Initialize(applyDd, function(self, level)
+            if level ~= 1 then return end
+            local names = ns.ListSetNames()
+            if #names == 0 then
+                local entry = UIDropDownMenu_CreateInfo()
+                entry.text = "(no sets saved)"
+                entry.disabled = true
+                UIDropDownMenu_AddButton(entry, level)
+                return
+            end
+            for _, n in ipairs(names) do
+                local entry = UIDropDownMenu_CreateInfo()
+                entry.text = n
+                entry.func = function()
+                    local ok, applied = ns.LoadSet(n)
+                    if ok and ns.out then
+                        ns.out(string.format("loaded set '%s' (%d addons updated).", n, applied))
+                    end
+                    UI.Refresh()
+                end
+                UIDropDownMenu_AddButton(entry, level)
+                local del = UIDropDownMenu_CreateInfo()
+                del.text = "    delete"
+                del.notCheckable = true
+                del.func = function()
+                    ns.DeleteSet(n)
+                    if ns.out then ns.out("deleted set '" .. n .. "'.") end
+                    UI.Refresh()
+                end
+                UIDropDownMenu_AddButton(del, level)
+            end
+        end)
+        mod._applyDd        = applyDd
+        mod._applyDdBackend = "vanilla"
+    end
 
     local countFs = bar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     countFs:SetPoint("RIGHT", bar, "RIGHT", -4, 0)
@@ -263,6 +372,12 @@ function UI.Refresh()
         local nSets = #ns.ListSetNames()
         mod._countFs:SetText(string.format("%d addons   %d sets", #list, nSets))
     end
+
+    -- Re-populate the Cairn-Gui Apply-set Dropdown so newly saved or
+    -- newly deleted sets appear / disappear immediately. The vanilla
+    -- UIDropDownMenuTemplate path runs Initialize lazily on open so it
+    -- doesn't need a preemptive refresh.
+    if mod._refreshApplyDd then mod._refreshApplyDd() end
 end
 
 function UI.OnTabShow(mod)
