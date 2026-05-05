@@ -2,12 +2,15 @@
 ## Title: Forge
 ## Notes: Developer tools suite for Cairn / LibCodex addon authors. Parent addon: hosts /forge slash router, sub-module registry, and the main window. Sub-addons (Forge_*) plug in to provide individual tools.
 ## Author: ChronicTinkerer
-## Version: 2605050600
+## Version: 2605042012
 ## SavedVariables: ForgeDB
 ## Dependencies: Cairn
 ## OptionalDeps: LibCodex-1.0
 ## X-Category: Development Tools
 ## X-License: All Rights Reserved
+## X-Curse-Project-ID: 1533362
+## X-Wago-ID: ZKxZa3Nk
+## X-WoWI-ID: 27135
 
 Core.lua
 Registry.lua

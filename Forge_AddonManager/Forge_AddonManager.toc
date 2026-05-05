@@ -1,0 +1,13 @@
+## Interface: 120005
+## Title: Forge_AddonManager
+## Notes: In-game addon manager. Enable/disable addons, named sets (Raid/Solo/PvP), per-addon memory + load info, search, protected addons, ReloadUI. Adds an Addons tab to /forge.
+## Author: ChronicTinkerer
+## Version: 2605042012
+## SavedVariables: ForgeAddonManagerDB
+## Dependencies: Cairn, Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+
+Manager.lua
+UI.lua
+Core.lua

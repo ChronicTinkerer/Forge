@@ -1,0 +1,60 @@
+# Forge packaging manifest.
+# Consumed by BigWigsMods/packager v2 (see .github/workflows/release.yml).
+# Reference: https://github.com/BigWigsMods/packager
+#
+# This is a MULTI-ADDON package. The published zip contains 10 addons that
+# each install as siblings under Interface/AddOns/ (same model Ace3 uses):
+#
+#   Forge/                 parent
+#   Forge_AddonManager/
+#   Forge_BugCatcher/
+#   Forge_Codex/
+#   Forge_Console/
+#   Forge_Inspector/
+#   Forge_Logs/
+#   Forge_Macros/
+#   Forge_Profiles/
+#   Forge_Registry/
+#
+# In the source repo all 9 sub-addon folders live INSIDE Forge/ (so the git
+# repo has a single top-level addon and 9 nested sub-addon folders). On
+# release the move-folders directives explode each sub-addon back out so it
+# sits next to Forge/ in the zip.
+
+package-as: Forge
+
+# Move sub-addons out of the Forge/ staging folder so they become siblings
+# in the final zip (and therefore install as independent addons).
+move-folders:
+  Forge/Forge_AddonManager: Forge_AddonManager
+  Forge/Forge_BugCatcher:   Forge_BugCatcher
+  Forge/Forge_Codex:        Forge_Codex
+  Forge/Forge_Console:      Forge_Console
+  Forge/Forge_Inspector:    Forge_Inspector
+  Forge/Forge_Logs:         Forge_Logs
+  Forge/Forge_Macros:       Forge_Macros
+  Forge/Forge_Profiles:     Forge_Profiles
+  Forge/Forge_Registry:     Forge_Registry
+
+# Don't ship dev/build infrastructure or editor state to end users.
+#  - SESSION_NOTES.md is project-internal, not user-facing
+#  - release.ps1 is a developer tool, not part of the addon
+#  - editor/IDE folders never ship
+#  - scratch/tmp dirs are local workspace junk
+ignore:
+  - .vscode
+  - .idea
+  - SESSION_NOTES.md
+  - release.ps1
+  - "*.bat"
+  - "*.ps1"
+  - scratch
+  - tmp
+
+# We do NOT use @project-version@ substitution in the .toc files -- each
+# Version field carries its own YYMMDDHHMM build stamp and is bumped by
+# release.ps1 on every edit. The packager will leave hardcoded
+# `## Version:` lines untouched.
+
+# License is "All Rights Reserved"; LICENSE is at the repo root and lives
+# inside package-as by default.
