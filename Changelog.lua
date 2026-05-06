@@ -18,6 +18,25 @@ local CHANGELOG_TEXT = [[
 
 Release notes across the Forge family. Newest releases on top.
 
+## v10 - 2026-05-06
+
+### Added
+- LoadOnDemand sub-addon support. Forge parent now scans installed
+  Forge_* addons at PLAYER_LOGIN and creates "stub" tab descriptors for
+  any that declare `## LoadOnDemand: 1` plus `## X-Forge-Tool-Name: <Title>`.
+  The sub-addon stays unloaded until the user clicks its tab; on first
+  click the stub does C_AddOns.LoadAddOn and delegates to the real
+  descriptor that the sub-addon's OnInit just registered.
+- Forge.Registry stub-protection: a real descriptor never gets
+  overwritten by a late stub registration.
+- Forge_CVars sub-addon (LoadOnDemand): in-game CVar browser and editor
+  with named profiles. First user of the new LoD-stub pattern.
+
+### Notes for sub-addon authors
+- LoD sub-addons MUST register their Forge.Registry descriptor in
+  `OnInit`, not `OnLogin`. Cairn.Events doesn't retro-fire PLAYER_LOGIN,
+  so a sub-addon LoD-loaded post-login never sees OnLogin.
+
 ## v6 - 2026-05-05
 
 ### Added

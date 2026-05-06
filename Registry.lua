@@ -51,6 +51,17 @@ function Registry.Register(descriptor)
         error("Forge.Registry.Register: descriptor.name must be a non-empty string", 2)
     end
 
+    -- LoD stub protection. Forge's parent OnLogin scanner may register a
+    -- placeholder stub descriptor for an installed-but-unloaded LoD sub-addon
+    -- (so its tab appears in the strip and clicking it triggers LoadAddOn).
+    -- When the real sub-addon eventually registers its own descriptor, that
+    -- real one wins and stays won. A late stub call (e.g. a re-scan) must
+    -- never overwrite a real entry.
+    local existing = Registry._modules[name]
+    if existing and not existing._isStub and descriptor._isStub then
+        return existing
+    end
+
     Registry._modules[name] = descriptor
     rebuildOrder()
 

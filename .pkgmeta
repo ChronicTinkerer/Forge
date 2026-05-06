@@ -2,12 +2,596 @@
 # Consumed by BigWigsMods/packager v2 (see .github/workflows/release.yml).
 # Reference: https://github.com/BigWigsMods/packager
 #
-# This is a MULTI-ADDON package. The published zip contains 10 addons that
+# This is a MULTI-ADDON package. The published zip contains 594 addons that
 # each install as siblings under Interface/AddOns/ (same model Ace3 uses):
 #
 #   Forge/                 parent
+#   Forge_APIRef/
+#   Forge_APIRef-AbbreviateConfigAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-AbbreviatedNumberFormatterAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-AccountConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Action/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ActionBarShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-AddOnProfilerConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-AppearanceSource/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ArrowCalloutConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-AsyncAssistActionsConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-AuctionHouseConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-AuctionHouseEnums/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-AutoCompleteShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-AzeriteConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-BNetOutage/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-BagConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-BagIndexConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Base/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-BattlePetConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-BattlepayConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-BountyShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Build/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ButtonState/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AccessibilityOptions/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AccountInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AccountStore/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AchievementInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AchievementTelemetry/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ActionBar/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AddOnProfiler/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AddOns/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AdventureJournal/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AdventureMap/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AlliedRaces/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AnimaDiversion/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ArdenwealdGardening/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AreaPoiInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ArtifactUI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AssistedCombat/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AuctionHouse/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AutoComplete/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AzeriteEmpoweredItem/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AzeriteEssence/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_AzeriteItem/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Bank/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_BarberShop/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_BarberShopInternal/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_BattleNet/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_BattlePet/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_BehavioralMessaging/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_BlackMarketInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Browser/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CVar/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Calendar/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CampaignInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CatalogShop/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ChallengeMode/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ChatBubbles/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ChatInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ChromieTime/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CinematicList/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ClassColor/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ClassTalents/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ClassTrial/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ClickBindings/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ClientScene/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Club/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ClubFinder/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ColorOverrides/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ColorUtil/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CombatAudioAlert/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CombatLog/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CombatLogInternal/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CombatLogSecure/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CombatText/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Commentator/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CompactUnitFrames/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ConfigurationWarnings/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ConsoleScriptCollection/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Container/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ContentTracking/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ContributionCollector/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CooldownViewer/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CovenantCallings/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CovenantPreview/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CovenantSanctumUI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Covenants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CraftingOrders/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CreatureInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CurrencyInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Cursor/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CursorUtil/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_CurveUtil/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_DamageMeter/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_DateAndTime/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_DeathAlert/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_DeathInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_DeathRecap/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_DelvesUI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_DuelInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_DurationUtil/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_DyeColor/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EditMode/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EncodingUtil/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EncounterEvents/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EncounterInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EncounterJournal/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EncounterTimeline/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EncounterWarnings/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EndOfMatchUI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EquipmentSet/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EventScheduler/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EventToastManager/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_EventUtils/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ExpansionTrial/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ExternalEventURL/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_FogOfWar/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_FrameManager/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_FriendList/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_GMTicketInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_GamePad/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_GameRules/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Garrison/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_GenericWidgetDisplay/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Glue/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_GlyphInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_GossipInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_GuildBank/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_GuildInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HeirloomInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HouseEditor/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HouseExterior/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Housing/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HousingBasicMode/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HousingCatalog/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HousingCleanupMode/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HousingCustomizeMode/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HousingDecor/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HousingExpertMode/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HousingInspectMode/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HousingLayout/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_HousingNeighborhood/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ImmersiveInteraction/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_IncomingSummon/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_InstanceEncounter/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_InstanceLeaver/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_InterfaceFileManifest/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_InvasionInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_IslandsInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_IslandsQueue/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Item/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ItemInteraction/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ItemSocketInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ItemText/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ItemUpgrade/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_KeyBindings/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LFGInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LFGList/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LegendaryCrafting/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LevelLink/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LevelSquish/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LimitedInput/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LiveEvent/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LoadingScreen/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LobbyMatchmakerInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Log/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Loot/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LootHistory/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LootJournal/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LoreText/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_LossOfControl/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_MacOptions/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Macro/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Mail/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_MajorFactions/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Map/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_MapExplorationInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_MerchantFrame/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Minimap/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ModelInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ModifiedInstance/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_MountJournal/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_MythicPlus/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_NamePlate/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_NamePlateManager/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Navigation/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_NeighborhoodInitiative/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_NewItems/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PaperDollInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PartyInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PartyPose/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PerksActivities/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PerksProgram/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PetBattles/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PetInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PetJournal/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PhotoSharing/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Ping/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PingSecure/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Platform/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PlayerChoice/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PlayerInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PlayerInteractionManager/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PlayerMentorship/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Pony/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ProfSpecs/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_PvP/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_QuestHub/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_QuestInfoSystem/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_QuestItemUse/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_QuestLine/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_QuestLog/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_QuestOffer/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_QuestSession/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_RaidLocks/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_RecentAllies/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_RecruitAFriend/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_RemixArtifactUI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ReportSystem/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Reputation/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ResearchInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_RestrictedActions/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ScenarioInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ScrappingMachineUI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ScriptWarnings/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ScriptedAnimations/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SeasonInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Secrets/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SecureTransfer/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SettingsUtil/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SkillInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SocialQueue/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SocialRestrictions/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Soulbinds/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Sound/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SpecializationInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Spell/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SpellActivationOverlay/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SpellBook/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SpellDiminish/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SplashScreen/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_StableInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_StorePublic/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_StringUtil/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SummonInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SuperTrack/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_System/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_SystemVisibilityManager/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TTSSettings/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TableUtil/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TalkingHead/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TaskQuest/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TaxiMap/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Texture/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Timer/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TimerunningUI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TooltipComparison/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TooltipInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ToyBoxInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TradeInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TradeSkillUI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Trainer/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TraitConfig/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Traits/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Transmog/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TransmogCollection/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TransmogOutfitInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_TransmogSets/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Tutorial/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_UI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_UIActionHandler/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_UIColor/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_UIWidgetManager/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_UnitAuras/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_UserFeedback/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_Vehicle/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_VideoOptions/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_VignetteInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_VoiceChat/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_WarbandScene/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_WeeklyRewards/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_WorldLootObject/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_WorldSafeLocsUIInternal/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_WorldStateInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_WowEntitlementInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_WowSurvey/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_WowTokenUI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_XMLUtil/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-C_ZoneAbility/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CalendarConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Camera/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CameraConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CatalogShopConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CharacterCreationConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CharacterSelectionConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CharacterServicesConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ChatConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ChatShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Cinematic/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CinematicConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ClickBindingsConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Client/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ClientSettings/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ClubShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Color/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ColorOverrideConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CombatAudioAlertConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CombatAudioAlertShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CombatLogConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CombatLogShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CombatTextShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CommentatorShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ConfigurationWarningConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ConnectionScript/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Console/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ContentTrackingTypes/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CooldownFrameConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CooldownViewerConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CovenantCallingsConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CovenantSanctumConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CovenantsConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CraftingOrderUIConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CraftingOrderUIShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CurrencyConstants_Mainline/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-CursorConst/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-DamageConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-DamageMeterConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-DebugToggle/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-DelvesConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-DungeonEncounterConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-DyeColorInfoShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-EditModeManagerConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-EditModeManagerConstants_Mainline/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-EncodingUtilConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-EncounterEventsShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-EncounterJournalConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-EncounterTimelineConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-EventSchedulerConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Expansion/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ExpansionConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ExpansionInfo/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ExpansionLevelConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Font/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIArchaeologyDigSiteFrame/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIBlob/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPICharacterModelBase/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPICinematicModel/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPICooldown/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIDressUpModel/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIFogOfWarFrame/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIModelSceneFrame/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIModelSceneFrameActor/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIModelSceneFrameActorBase/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIModelSceneFrameShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPINamePlate/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIQuestPOI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIScenarioPOI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPISimpleCheckout/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPITabardModel/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPITabardModelBase/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPITooltip/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameAPIUnitPositionFrame/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-FrameScript/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GARRISON_FOLLOWER_TYPEConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GARRISON_TYPEConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GameCursor/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GameError/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GamePadConst/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GameRulesConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GameUI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GarrisonConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GarrisonShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GlyphConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GossipConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GroupFinderConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GuildConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-GuildInfoShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-HouseExteriorConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-HousingCatalogConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-HousingCatalogSearcherAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-HousingDecorShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-HousingFixturePointFrameAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-HousingLayoutPinFrameAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-HousingLayoutUITypes/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-HousingUIShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ImageSharingConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Input/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-InputConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Instance/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ItemConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ItemConstants_Mainline/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ItemConstants_Shared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ItemQualities/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ItemShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LFGConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LegendaryCraftingTypes/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LevelConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Locale/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Localization/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LocalizationShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LogConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LogicConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LootConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LuaColorCurveObjectAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LuaCurveObjectAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LuaCurveObjectBaseAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LuaCurveObjectConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LuaDurationObjectAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-LuaDurationObjectShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-MajorFactionsConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-MapConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-MatrixShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-MinimapConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-MinimapFrameAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-MirrorTimer/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ModelAnimationShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-MoneyConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-MountConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Movie/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-MythicPlusInfoShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-NamePlateConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-NeighborhoodInitiativesConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-NumericFormatterAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-NumericRuleFormatterAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-NumericRuleFormatterShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Os/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PVPMgrConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ParentalControls/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PartyConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PartyPoseUIConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PerformanceScript/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PerksVendorConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PetBattleConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PetScalingConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PingConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PingPinFrameAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Player/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PlayerDataConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PlayerHousingConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PlayerInfoShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PlayerInteractionManagerConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PlayerMentorshipConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PlayerScript/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PowerTypeConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ProceduralSpawnConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ProfessionConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ProfessionSpecConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PvPFactionConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-PvpInfoConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-QuestConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-QuestConstants_Mainline/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-QuestInfoShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-QuestRewards/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-QuestSessionConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-QueueSpecific/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-RaidMarkers/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-RecentAlliesConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-RecruitAFriendShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-RenownConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ReportSystemConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-RestrictedActionsConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-RolodexConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Screen/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ScreenLocationConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SeasonsConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SecondsFormatterAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SecondsFormatterShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SecretAspectConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SecretPredicates/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SecretWrapperConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SharedScriptObjectModelLight/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SharedScriptObjectNamePlateFrame/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SharedScriptObjectUnitPositionFrame/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SharedTraitsEnums/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimAlphaAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimFlipBookAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimGroupAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimPathAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimRotationAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimScaleAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimScaleLineAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimTextureCoordTranslationAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimTranslationAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimTranslationLineAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimVertexColorAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleAnimatableObjectAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleBrowserAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleButtonAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleCheckboxAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleColorSelectAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleControlPointAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleEditBoxAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleFontAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleFontStringAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleFrameAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleFrameScriptObjectAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleHTMLAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleHTMLShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleLineAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleMapSceneAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleMaskTextureAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleMessageFrameAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleModelAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleModelFFXAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleMovieAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleObjectAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleOffScreenFrameAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleRegionAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleScriptRegionAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleScriptRegionResizingAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleScrollFrameAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleSliderAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleStatusBarAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleStatusBarConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleTextureAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SimpleTextureBaseAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SlashCommand/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SocialConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SoftTargetConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SoulbindsConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SpecializationShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SpellBookConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SpellConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SpellDiminishConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SpellID/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SpellShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SplashScreenConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Streaming/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SummonConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SuperTrackManagerShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-SystemTime/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TalentAndGlyphConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TalentConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TargetScript/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TextureShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Threat/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Time/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TimerConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TimerunningConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Title/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TooltipConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TooltipInfoShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Totem/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TradeSkillUITypes/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TraitConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TransformManipulatorConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TransmogConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TransmogOutfitConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-TransmogShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UIActionConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UIButtonShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UICharacterClassConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UIColorShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UICovenantDisplayInfoConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UIEventToastConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UIFileAssetShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UIMapPinShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UIModelInfoShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UIShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UITextureAssetShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UITextureConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UIWidgetManagerShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-URL/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UiModelSceneConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UiRpcRequestManagerConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-Unit/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UnitAuraShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UnitConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UnitHealPredictionCalculatorAPI/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UnitHealPredictionCalculatorShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UnitRole/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UnitSexConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-UnitShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ValidateNameConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-VectorShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-VignetteConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-WarbandSceneInfoConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-WeeklyRewardsShared/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-WorldElapsedTimerConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-WowCSConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-WowSurveyConstants/    LoD per-namespace data sibling for Forge_APIRef
+#   Forge_APIRef-ZoneScript/    LoD per-namespace data sibling for Forge_APIRef
 #   Forge_AddonManager/
 #   Forge_BugCatcher/
+#   Forge_CVars/
 #   Forge_Codex/
 #   Forge_Console/
 #   Forge_Inspector/
@@ -26,15 +610,599 @@ package-as: Forge
 # Move sub-addons out of the Forge/ staging folder so they become siblings
 # in the final zip (and therefore install as independent addons).
 move-folders:
-  Forge/Forge_AddonManager: Forge_AddonManager
-  Forge/Forge_BugCatcher:   Forge_BugCatcher
-  Forge/Forge_Codex:        Forge_Codex
-  Forge/Forge_Console:      Forge_Console
-  Forge/Forge_Inspector:    Forge_Inspector
-  Forge/Forge_Logs:         Forge_Logs
-  Forge/Forge_Macros:       Forge_Macros
-  Forge/Forge_Profiles:     Forge_Profiles
-  Forge/Forge_Registry:     Forge_Registry
+  Forge/Forge_APIRef:                                       Forge_APIRef
+  Forge/Forge_APIRef-AbbreviateConfigAPI:                   Forge_APIRef-AbbreviateConfigAPI
+  Forge/Forge_APIRef-AbbreviatedNumberFormatterAPI:         Forge_APIRef-AbbreviatedNumberFormatterAPI
+  Forge/Forge_APIRef-AccountConstants:                      Forge_APIRef-AccountConstants
+  Forge/Forge_APIRef-Action:                                Forge_APIRef-Action
+  Forge/Forge_APIRef-ActionBarShared:                       Forge_APIRef-ActionBarShared
+  Forge/Forge_APIRef-AddOnProfilerConstants:                Forge_APIRef-AddOnProfilerConstants
+  Forge/Forge_APIRef-AppearanceSource:                      Forge_APIRef-AppearanceSource
+  Forge/Forge_APIRef-ArrowCalloutConstants:                 Forge_APIRef-ArrowCalloutConstants
+  Forge/Forge_APIRef-AsyncAssistActionsConstants:           Forge_APIRef-AsyncAssistActionsConstants
+  Forge/Forge_APIRef-AuctionHouseConstants:                 Forge_APIRef-AuctionHouseConstants
+  Forge/Forge_APIRef-AuctionHouseEnums:                     Forge_APIRef-AuctionHouseEnums
+  Forge/Forge_APIRef-AutoCompleteShared:                    Forge_APIRef-AutoCompleteShared
+  Forge/Forge_APIRef-AzeriteConstants:                      Forge_APIRef-AzeriteConstants
+  Forge/Forge_APIRef-BNetOutage:                            Forge_APIRef-BNetOutage
+  Forge/Forge_APIRef-BagConstants:                          Forge_APIRef-BagConstants
+  Forge/Forge_APIRef-BagIndexConstants:                     Forge_APIRef-BagIndexConstants
+  Forge/Forge_APIRef-Base:                                  Forge_APIRef-Base
+  Forge/Forge_APIRef-BattlePetConstants:                    Forge_APIRef-BattlePetConstants
+  Forge/Forge_APIRef-BattlepayConstants:                    Forge_APIRef-BattlepayConstants
+  Forge/Forge_APIRef-BountyShared:                          Forge_APIRef-BountyShared
+  Forge/Forge_APIRef-Build:                                 Forge_APIRef-Build
+  Forge/Forge_APIRef-ButtonState:                           Forge_APIRef-ButtonState
+  Forge/Forge_APIRef-C_AccessibilityOptions:                Forge_APIRef-C_AccessibilityOptions
+  Forge/Forge_APIRef-C_AccountInfo:                         Forge_APIRef-C_AccountInfo
+  Forge/Forge_APIRef-C_AccountStore:                        Forge_APIRef-C_AccountStore
+  Forge/Forge_APIRef-C_AchievementInfo:                     Forge_APIRef-C_AchievementInfo
+  Forge/Forge_APIRef-C_AchievementTelemetry:                Forge_APIRef-C_AchievementTelemetry
+  Forge/Forge_APIRef-C_ActionBar:                           Forge_APIRef-C_ActionBar
+  Forge/Forge_APIRef-C_AddOnProfiler:                       Forge_APIRef-C_AddOnProfiler
+  Forge/Forge_APIRef-C_AddOns:                              Forge_APIRef-C_AddOns
+  Forge/Forge_APIRef-C_AdventureJournal:                    Forge_APIRef-C_AdventureJournal
+  Forge/Forge_APIRef-C_AdventureMap:                        Forge_APIRef-C_AdventureMap
+  Forge/Forge_APIRef-C_AlliedRaces:                         Forge_APIRef-C_AlliedRaces
+  Forge/Forge_APIRef-C_AnimaDiversion:                      Forge_APIRef-C_AnimaDiversion
+  Forge/Forge_APIRef-C_ArdenwealdGardening:                 Forge_APIRef-C_ArdenwealdGardening
+  Forge/Forge_APIRef-C_AreaPoiInfo:                         Forge_APIRef-C_AreaPoiInfo
+  Forge/Forge_APIRef-C_ArtifactUI:                          Forge_APIRef-C_ArtifactUI
+  Forge/Forge_APIRef-C_AssistedCombat:                      Forge_APIRef-C_AssistedCombat
+  Forge/Forge_APIRef-C_AuctionHouse:                        Forge_APIRef-C_AuctionHouse
+  Forge/Forge_APIRef-C_AutoComplete:                        Forge_APIRef-C_AutoComplete
+  Forge/Forge_APIRef-C_AzeriteEmpoweredItem:                Forge_APIRef-C_AzeriteEmpoweredItem
+  Forge/Forge_APIRef-C_AzeriteEssence:                      Forge_APIRef-C_AzeriteEssence
+  Forge/Forge_APIRef-C_AzeriteItem:                         Forge_APIRef-C_AzeriteItem
+  Forge/Forge_APIRef-C_Bank:                                Forge_APIRef-C_Bank
+  Forge/Forge_APIRef-C_BarberShop:                          Forge_APIRef-C_BarberShop
+  Forge/Forge_APIRef-C_BarberShopInternal:                  Forge_APIRef-C_BarberShopInternal
+  Forge/Forge_APIRef-C_BattleNet:                           Forge_APIRef-C_BattleNet
+  Forge/Forge_APIRef-C_BattlePet:                           Forge_APIRef-C_BattlePet
+  Forge/Forge_APIRef-C_BehavioralMessaging:                 Forge_APIRef-C_BehavioralMessaging
+  Forge/Forge_APIRef-C_BlackMarketInfo:                     Forge_APIRef-C_BlackMarketInfo
+  Forge/Forge_APIRef-C_Browser:                             Forge_APIRef-C_Browser
+  Forge/Forge_APIRef-C_CVar:                                Forge_APIRef-C_CVar
+  Forge/Forge_APIRef-C_Calendar:                            Forge_APIRef-C_Calendar
+  Forge/Forge_APIRef-C_CampaignInfo:                        Forge_APIRef-C_CampaignInfo
+  Forge/Forge_APIRef-C_CatalogShop:                         Forge_APIRef-C_CatalogShop
+  Forge/Forge_APIRef-C_ChallengeMode:                       Forge_APIRef-C_ChallengeMode
+  Forge/Forge_APIRef-C_ChatBubbles:                         Forge_APIRef-C_ChatBubbles
+  Forge/Forge_APIRef-C_ChatInfo:                            Forge_APIRef-C_ChatInfo
+  Forge/Forge_APIRef-C_ChromieTime:                         Forge_APIRef-C_ChromieTime
+  Forge/Forge_APIRef-C_CinematicList:                       Forge_APIRef-C_CinematicList
+  Forge/Forge_APIRef-C_ClassColor:                          Forge_APIRef-C_ClassColor
+  Forge/Forge_APIRef-C_ClassTalents:                        Forge_APIRef-C_ClassTalents
+  Forge/Forge_APIRef-C_ClassTrial:                          Forge_APIRef-C_ClassTrial
+  Forge/Forge_APIRef-C_ClickBindings:                       Forge_APIRef-C_ClickBindings
+  Forge/Forge_APIRef-C_ClientScene:                         Forge_APIRef-C_ClientScene
+  Forge/Forge_APIRef-C_Club:                                Forge_APIRef-C_Club
+  Forge/Forge_APIRef-C_ClubFinder:                          Forge_APIRef-C_ClubFinder
+  Forge/Forge_APIRef-C_ColorOverrides:                      Forge_APIRef-C_ColorOverrides
+  Forge/Forge_APIRef-C_ColorUtil:                           Forge_APIRef-C_ColorUtil
+  Forge/Forge_APIRef-C_CombatAudioAlert:                    Forge_APIRef-C_CombatAudioAlert
+  Forge/Forge_APIRef-C_CombatLog:                           Forge_APIRef-C_CombatLog
+  Forge/Forge_APIRef-C_CombatLogInternal:                   Forge_APIRef-C_CombatLogInternal
+  Forge/Forge_APIRef-C_CombatLogSecure:                     Forge_APIRef-C_CombatLogSecure
+  Forge/Forge_APIRef-C_CombatText:                          Forge_APIRef-C_CombatText
+  Forge/Forge_APIRef-C_Commentator:                         Forge_APIRef-C_Commentator
+  Forge/Forge_APIRef-C_CompactUnitFrames:                   Forge_APIRef-C_CompactUnitFrames
+  Forge/Forge_APIRef-C_ConfigurationWarnings:               Forge_APIRef-C_ConfigurationWarnings
+  Forge/Forge_APIRef-C_ConsoleScriptCollection:             Forge_APIRef-C_ConsoleScriptCollection
+  Forge/Forge_APIRef-C_Container:                           Forge_APIRef-C_Container
+  Forge/Forge_APIRef-C_ContentTracking:                     Forge_APIRef-C_ContentTracking
+  Forge/Forge_APIRef-C_ContributionCollector:               Forge_APIRef-C_ContributionCollector
+  Forge/Forge_APIRef-C_CooldownViewer:                      Forge_APIRef-C_CooldownViewer
+  Forge/Forge_APIRef-C_CovenantCallings:                    Forge_APIRef-C_CovenantCallings
+  Forge/Forge_APIRef-C_CovenantPreview:                     Forge_APIRef-C_CovenantPreview
+  Forge/Forge_APIRef-C_CovenantSanctumUI:                   Forge_APIRef-C_CovenantSanctumUI
+  Forge/Forge_APIRef-C_Covenants:                           Forge_APIRef-C_Covenants
+  Forge/Forge_APIRef-C_CraftingOrders:                      Forge_APIRef-C_CraftingOrders
+  Forge/Forge_APIRef-C_CreatureInfo:                        Forge_APIRef-C_CreatureInfo
+  Forge/Forge_APIRef-C_CurrencyInfo:                        Forge_APIRef-C_CurrencyInfo
+  Forge/Forge_APIRef-C_Cursor:                              Forge_APIRef-C_Cursor
+  Forge/Forge_APIRef-C_CursorUtil:                          Forge_APIRef-C_CursorUtil
+  Forge/Forge_APIRef-C_CurveUtil:                           Forge_APIRef-C_CurveUtil
+  Forge/Forge_APIRef-C_DamageMeter:                         Forge_APIRef-C_DamageMeter
+  Forge/Forge_APIRef-C_DateAndTime:                         Forge_APIRef-C_DateAndTime
+  Forge/Forge_APIRef-C_DeathAlert:                          Forge_APIRef-C_DeathAlert
+  Forge/Forge_APIRef-C_DeathInfo:                           Forge_APIRef-C_DeathInfo
+  Forge/Forge_APIRef-C_DeathRecap:                          Forge_APIRef-C_DeathRecap
+  Forge/Forge_APIRef-C_DelvesUI:                            Forge_APIRef-C_DelvesUI
+  Forge/Forge_APIRef-C_DuelInfo:                            Forge_APIRef-C_DuelInfo
+  Forge/Forge_APIRef-C_DurationUtil:                        Forge_APIRef-C_DurationUtil
+  Forge/Forge_APIRef-C_DyeColor:                            Forge_APIRef-C_DyeColor
+  Forge/Forge_APIRef-C_EditMode:                            Forge_APIRef-C_EditMode
+  Forge/Forge_APIRef-C_EncodingUtil:                        Forge_APIRef-C_EncodingUtil
+  Forge/Forge_APIRef-C_EncounterEvents:                     Forge_APIRef-C_EncounterEvents
+  Forge/Forge_APIRef-C_EncounterInfo:                       Forge_APIRef-C_EncounterInfo
+  Forge/Forge_APIRef-C_EncounterJournal:                    Forge_APIRef-C_EncounterJournal
+  Forge/Forge_APIRef-C_EncounterTimeline:                   Forge_APIRef-C_EncounterTimeline
+  Forge/Forge_APIRef-C_EncounterWarnings:                   Forge_APIRef-C_EncounterWarnings
+  Forge/Forge_APIRef-C_EndOfMatchUI:                        Forge_APIRef-C_EndOfMatchUI
+  Forge/Forge_APIRef-C_EquipmentSet:                        Forge_APIRef-C_EquipmentSet
+  Forge/Forge_APIRef-C_EventScheduler:                      Forge_APIRef-C_EventScheduler
+  Forge/Forge_APIRef-C_EventToastManager:                   Forge_APIRef-C_EventToastManager
+  Forge/Forge_APIRef-C_EventUtils:                          Forge_APIRef-C_EventUtils
+  Forge/Forge_APIRef-C_ExpansionTrial:                      Forge_APIRef-C_ExpansionTrial
+  Forge/Forge_APIRef-C_ExternalEventURL:                    Forge_APIRef-C_ExternalEventURL
+  Forge/Forge_APIRef-C_FogOfWar:                            Forge_APIRef-C_FogOfWar
+  Forge/Forge_APIRef-C_FrameManager:                        Forge_APIRef-C_FrameManager
+  Forge/Forge_APIRef-C_FriendList:                          Forge_APIRef-C_FriendList
+  Forge/Forge_APIRef-C_GMTicketInfo:                        Forge_APIRef-C_GMTicketInfo
+  Forge/Forge_APIRef-C_GamePad:                             Forge_APIRef-C_GamePad
+  Forge/Forge_APIRef-C_GameRules:                           Forge_APIRef-C_GameRules
+  Forge/Forge_APIRef-C_Garrison:                            Forge_APIRef-C_Garrison
+  Forge/Forge_APIRef-C_GenericWidgetDisplay:                Forge_APIRef-C_GenericWidgetDisplay
+  Forge/Forge_APIRef-C_Glue:                                Forge_APIRef-C_Glue
+  Forge/Forge_APIRef-C_GlyphInfo:                           Forge_APIRef-C_GlyphInfo
+  Forge/Forge_APIRef-C_GossipInfo:                          Forge_APIRef-C_GossipInfo
+  Forge/Forge_APIRef-C_GuildBank:                           Forge_APIRef-C_GuildBank
+  Forge/Forge_APIRef-C_GuildInfo:                           Forge_APIRef-C_GuildInfo
+  Forge/Forge_APIRef-C_HeirloomInfo:                        Forge_APIRef-C_HeirloomInfo
+  Forge/Forge_APIRef-C_HouseEditor:                         Forge_APIRef-C_HouseEditor
+  Forge/Forge_APIRef-C_HouseExterior:                       Forge_APIRef-C_HouseExterior
+  Forge/Forge_APIRef-C_Housing:                             Forge_APIRef-C_Housing
+  Forge/Forge_APIRef-C_HousingBasicMode:                    Forge_APIRef-C_HousingBasicMode
+  Forge/Forge_APIRef-C_HousingCatalog:                      Forge_APIRef-C_HousingCatalog
+  Forge/Forge_APIRef-C_HousingCleanupMode:                  Forge_APIRef-C_HousingCleanupMode
+  Forge/Forge_APIRef-C_HousingCustomizeMode:                Forge_APIRef-C_HousingCustomizeMode
+  Forge/Forge_APIRef-C_HousingDecor:                        Forge_APIRef-C_HousingDecor
+  Forge/Forge_APIRef-C_HousingExpertMode:                   Forge_APIRef-C_HousingExpertMode
+  Forge/Forge_APIRef-C_HousingInspectMode:                  Forge_APIRef-C_HousingInspectMode
+  Forge/Forge_APIRef-C_HousingLayout:                       Forge_APIRef-C_HousingLayout
+  Forge/Forge_APIRef-C_HousingNeighborhood:                 Forge_APIRef-C_HousingNeighborhood
+  Forge/Forge_APIRef-C_ImmersiveInteraction:                Forge_APIRef-C_ImmersiveInteraction
+  Forge/Forge_APIRef-C_IncomingSummon:                      Forge_APIRef-C_IncomingSummon
+  Forge/Forge_APIRef-C_InstanceEncounter:                   Forge_APIRef-C_InstanceEncounter
+  Forge/Forge_APIRef-C_InstanceLeaver:                      Forge_APIRef-C_InstanceLeaver
+  Forge/Forge_APIRef-C_InterfaceFileManifest:               Forge_APIRef-C_InterfaceFileManifest
+  Forge/Forge_APIRef-C_InvasionInfo:                        Forge_APIRef-C_InvasionInfo
+  Forge/Forge_APIRef-C_IslandsInfo:                         Forge_APIRef-C_IslandsInfo
+  Forge/Forge_APIRef-C_IslandsQueue:                        Forge_APIRef-C_IslandsQueue
+  Forge/Forge_APIRef-C_Item:                                Forge_APIRef-C_Item
+  Forge/Forge_APIRef-C_ItemInteraction:                     Forge_APIRef-C_ItemInteraction
+  Forge/Forge_APIRef-C_ItemSocketInfo:                      Forge_APIRef-C_ItemSocketInfo
+  Forge/Forge_APIRef-C_ItemText:                            Forge_APIRef-C_ItemText
+  Forge/Forge_APIRef-C_ItemUpgrade:                         Forge_APIRef-C_ItemUpgrade
+  Forge/Forge_APIRef-C_KeyBindings:                         Forge_APIRef-C_KeyBindings
+  Forge/Forge_APIRef-C_LFGInfo:                             Forge_APIRef-C_LFGInfo
+  Forge/Forge_APIRef-C_LFGList:                             Forge_APIRef-C_LFGList
+  Forge/Forge_APIRef-C_LegendaryCrafting:                   Forge_APIRef-C_LegendaryCrafting
+  Forge/Forge_APIRef-C_LevelLink:                           Forge_APIRef-C_LevelLink
+  Forge/Forge_APIRef-C_LevelSquish:                         Forge_APIRef-C_LevelSquish
+  Forge/Forge_APIRef-C_LimitedInput:                        Forge_APIRef-C_LimitedInput
+  Forge/Forge_APIRef-C_LiveEvent:                           Forge_APIRef-C_LiveEvent
+  Forge/Forge_APIRef-C_LoadingScreen:                       Forge_APIRef-C_LoadingScreen
+  Forge/Forge_APIRef-C_LobbyMatchmakerInfo:                 Forge_APIRef-C_LobbyMatchmakerInfo
+  Forge/Forge_APIRef-C_Log:                                 Forge_APIRef-C_Log
+  Forge/Forge_APIRef-C_Loot:                                Forge_APIRef-C_Loot
+  Forge/Forge_APIRef-C_LootHistory:                         Forge_APIRef-C_LootHistory
+  Forge/Forge_APIRef-C_LootJournal:                         Forge_APIRef-C_LootJournal
+  Forge/Forge_APIRef-C_LoreText:                            Forge_APIRef-C_LoreText
+  Forge/Forge_APIRef-C_LossOfControl:                       Forge_APIRef-C_LossOfControl
+  Forge/Forge_APIRef-C_MacOptions:                          Forge_APIRef-C_MacOptions
+  Forge/Forge_APIRef-C_Macro:                               Forge_APIRef-C_Macro
+  Forge/Forge_APIRef-C_Mail:                                Forge_APIRef-C_Mail
+  Forge/Forge_APIRef-C_MajorFactions:                       Forge_APIRef-C_MajorFactions
+  Forge/Forge_APIRef-C_Map:                                 Forge_APIRef-C_Map
+  Forge/Forge_APIRef-C_MapExplorationInfo:                  Forge_APIRef-C_MapExplorationInfo
+  Forge/Forge_APIRef-C_MerchantFrame:                       Forge_APIRef-C_MerchantFrame
+  Forge/Forge_APIRef-C_Minimap:                             Forge_APIRef-C_Minimap
+  Forge/Forge_APIRef-C_ModelInfo:                           Forge_APIRef-C_ModelInfo
+  Forge/Forge_APIRef-C_ModifiedInstance:                    Forge_APIRef-C_ModifiedInstance
+  Forge/Forge_APIRef-C_MountJournal:                        Forge_APIRef-C_MountJournal
+  Forge/Forge_APIRef-C_MythicPlus:                          Forge_APIRef-C_MythicPlus
+  Forge/Forge_APIRef-C_NamePlate:                           Forge_APIRef-C_NamePlate
+  Forge/Forge_APIRef-C_NamePlateManager:                    Forge_APIRef-C_NamePlateManager
+  Forge/Forge_APIRef-C_Navigation:                          Forge_APIRef-C_Navigation
+  Forge/Forge_APIRef-C_NeighborhoodInitiative:              Forge_APIRef-C_NeighborhoodInitiative
+  Forge/Forge_APIRef-C_NewItems:                            Forge_APIRef-C_NewItems
+  Forge/Forge_APIRef-C_PaperDollInfo:                       Forge_APIRef-C_PaperDollInfo
+  Forge/Forge_APIRef-C_PartyInfo:                           Forge_APIRef-C_PartyInfo
+  Forge/Forge_APIRef-C_PartyPose:                           Forge_APIRef-C_PartyPose
+  Forge/Forge_APIRef-C_PerksActivities:                     Forge_APIRef-C_PerksActivities
+  Forge/Forge_APIRef-C_PerksProgram:                        Forge_APIRef-C_PerksProgram
+  Forge/Forge_APIRef-C_PetBattles:                          Forge_APIRef-C_PetBattles
+  Forge/Forge_APIRef-C_PetInfo:                             Forge_APIRef-C_PetInfo
+  Forge/Forge_APIRef-C_PetJournal:                          Forge_APIRef-C_PetJournal
+  Forge/Forge_APIRef-C_PhotoSharing:                        Forge_APIRef-C_PhotoSharing
+  Forge/Forge_APIRef-C_Ping:                                Forge_APIRef-C_Ping
+  Forge/Forge_APIRef-C_PingSecure:                          Forge_APIRef-C_PingSecure
+  Forge/Forge_APIRef-C_Platform:                            Forge_APIRef-C_Platform
+  Forge/Forge_APIRef-C_PlayerChoice:                        Forge_APIRef-C_PlayerChoice
+  Forge/Forge_APIRef-C_PlayerInfo:                          Forge_APIRef-C_PlayerInfo
+  Forge/Forge_APIRef-C_PlayerInteractionManager:            Forge_APIRef-C_PlayerInteractionManager
+  Forge/Forge_APIRef-C_PlayerMentorship:                    Forge_APIRef-C_PlayerMentorship
+  Forge/Forge_APIRef-C_Pony:                                Forge_APIRef-C_Pony
+  Forge/Forge_APIRef-C_ProfSpecs:                           Forge_APIRef-C_ProfSpecs
+  Forge/Forge_APIRef-C_PvP:                                 Forge_APIRef-C_PvP
+  Forge/Forge_APIRef-C_QuestHub:                            Forge_APIRef-C_QuestHub
+  Forge/Forge_APIRef-C_QuestInfoSystem:                     Forge_APIRef-C_QuestInfoSystem
+  Forge/Forge_APIRef-C_QuestItemUse:                        Forge_APIRef-C_QuestItemUse
+  Forge/Forge_APIRef-C_QuestLine:                           Forge_APIRef-C_QuestLine
+  Forge/Forge_APIRef-C_QuestLog:                            Forge_APIRef-C_QuestLog
+  Forge/Forge_APIRef-C_QuestOffer:                          Forge_APIRef-C_QuestOffer
+  Forge/Forge_APIRef-C_QuestSession:                        Forge_APIRef-C_QuestSession
+  Forge/Forge_APIRef-C_RaidLocks:                           Forge_APIRef-C_RaidLocks
+  Forge/Forge_APIRef-C_RecentAllies:                        Forge_APIRef-C_RecentAllies
+  Forge/Forge_APIRef-C_RecruitAFriend:                      Forge_APIRef-C_RecruitAFriend
+  Forge/Forge_APIRef-C_RemixArtifactUI:                     Forge_APIRef-C_RemixArtifactUI
+  Forge/Forge_APIRef-C_ReportSystem:                        Forge_APIRef-C_ReportSystem
+  Forge/Forge_APIRef-C_Reputation:                          Forge_APIRef-C_Reputation
+  Forge/Forge_APIRef-C_ResearchInfo:                        Forge_APIRef-C_ResearchInfo
+  Forge/Forge_APIRef-C_RestrictedActions:                   Forge_APIRef-C_RestrictedActions
+  Forge/Forge_APIRef-C_ScenarioInfo:                        Forge_APIRef-C_ScenarioInfo
+  Forge/Forge_APIRef-C_ScrappingMachineUI:                  Forge_APIRef-C_ScrappingMachineUI
+  Forge/Forge_APIRef-C_ScriptWarnings:                      Forge_APIRef-C_ScriptWarnings
+  Forge/Forge_APIRef-C_ScriptedAnimations:                  Forge_APIRef-C_ScriptedAnimations
+  Forge/Forge_APIRef-C_SeasonInfo:                          Forge_APIRef-C_SeasonInfo
+  Forge/Forge_APIRef-C_Secrets:                             Forge_APIRef-C_Secrets
+  Forge/Forge_APIRef-C_SecureTransfer:                      Forge_APIRef-C_SecureTransfer
+  Forge/Forge_APIRef-C_SettingsUtil:                        Forge_APIRef-C_SettingsUtil
+  Forge/Forge_APIRef-C_SkillInfo:                           Forge_APIRef-C_SkillInfo
+  Forge/Forge_APIRef-C_SocialQueue:                         Forge_APIRef-C_SocialQueue
+  Forge/Forge_APIRef-C_SocialRestrictions:                  Forge_APIRef-C_SocialRestrictions
+  Forge/Forge_APIRef-C_Soulbinds:                           Forge_APIRef-C_Soulbinds
+  Forge/Forge_APIRef-C_Sound:                               Forge_APIRef-C_Sound
+  Forge/Forge_APIRef-C_SpecializationInfo:                  Forge_APIRef-C_SpecializationInfo
+  Forge/Forge_APIRef-C_Spell:                               Forge_APIRef-C_Spell
+  Forge/Forge_APIRef-C_SpellActivationOverlay:              Forge_APIRef-C_SpellActivationOverlay
+  Forge/Forge_APIRef-C_SpellBook:                           Forge_APIRef-C_SpellBook
+  Forge/Forge_APIRef-C_SpellDiminish:                       Forge_APIRef-C_SpellDiminish
+  Forge/Forge_APIRef-C_SplashScreen:                        Forge_APIRef-C_SplashScreen
+  Forge/Forge_APIRef-C_StableInfo:                          Forge_APIRef-C_StableInfo
+  Forge/Forge_APIRef-C_StorePublic:                         Forge_APIRef-C_StorePublic
+  Forge/Forge_APIRef-C_StringUtil:                          Forge_APIRef-C_StringUtil
+  Forge/Forge_APIRef-C_SummonInfo:                          Forge_APIRef-C_SummonInfo
+  Forge/Forge_APIRef-C_SuperTrack:                          Forge_APIRef-C_SuperTrack
+  Forge/Forge_APIRef-C_System:                              Forge_APIRef-C_System
+  Forge/Forge_APIRef-C_SystemVisibilityManager:             Forge_APIRef-C_SystemVisibilityManager
+  Forge/Forge_APIRef-C_TTSSettings:                         Forge_APIRef-C_TTSSettings
+  Forge/Forge_APIRef-C_TableUtil:                           Forge_APIRef-C_TableUtil
+  Forge/Forge_APIRef-C_TalkingHead:                         Forge_APIRef-C_TalkingHead
+  Forge/Forge_APIRef-C_TaskQuest:                           Forge_APIRef-C_TaskQuest
+  Forge/Forge_APIRef-C_TaxiMap:                             Forge_APIRef-C_TaxiMap
+  Forge/Forge_APIRef-C_Texture:                             Forge_APIRef-C_Texture
+  Forge/Forge_APIRef-C_Timer:                               Forge_APIRef-C_Timer
+  Forge/Forge_APIRef-C_TimerunningUI:                       Forge_APIRef-C_TimerunningUI
+  Forge/Forge_APIRef-C_TooltipComparison:                   Forge_APIRef-C_TooltipComparison
+  Forge/Forge_APIRef-C_TooltipInfo:                         Forge_APIRef-C_TooltipInfo
+  Forge/Forge_APIRef-C_ToyBoxInfo:                          Forge_APIRef-C_ToyBoxInfo
+  Forge/Forge_APIRef-C_TradeInfo:                           Forge_APIRef-C_TradeInfo
+  Forge/Forge_APIRef-C_TradeSkillUI:                        Forge_APIRef-C_TradeSkillUI
+  Forge/Forge_APIRef-C_Trainer:                             Forge_APIRef-C_Trainer
+  Forge/Forge_APIRef-C_TraitConfig:                         Forge_APIRef-C_TraitConfig
+  Forge/Forge_APIRef-C_Traits:                              Forge_APIRef-C_Traits
+  Forge/Forge_APIRef-C_Transmog:                            Forge_APIRef-C_Transmog
+  Forge/Forge_APIRef-C_TransmogCollection:                  Forge_APIRef-C_TransmogCollection
+  Forge/Forge_APIRef-C_TransmogOutfitInfo:                  Forge_APIRef-C_TransmogOutfitInfo
+  Forge/Forge_APIRef-C_TransmogSets:                        Forge_APIRef-C_TransmogSets
+  Forge/Forge_APIRef-C_Tutorial:                            Forge_APIRef-C_Tutorial
+  Forge/Forge_APIRef-C_UI:                                  Forge_APIRef-C_UI
+  Forge/Forge_APIRef-C_UIActionHandler:                     Forge_APIRef-C_UIActionHandler
+  Forge/Forge_APIRef-C_UIColor:                             Forge_APIRef-C_UIColor
+  Forge/Forge_APIRef-C_UIWidgetManager:                     Forge_APIRef-C_UIWidgetManager
+  Forge/Forge_APIRef-C_UnitAuras:                           Forge_APIRef-C_UnitAuras
+  Forge/Forge_APIRef-C_UserFeedback:                        Forge_APIRef-C_UserFeedback
+  Forge/Forge_APIRef-C_Vehicle:                             Forge_APIRef-C_Vehicle
+  Forge/Forge_APIRef-C_VideoOptions:                        Forge_APIRef-C_VideoOptions
+  Forge/Forge_APIRef-C_VignetteInfo:                        Forge_APIRef-C_VignetteInfo
+  Forge/Forge_APIRef-C_VoiceChat:                           Forge_APIRef-C_VoiceChat
+  Forge/Forge_APIRef-C_WarbandScene:                        Forge_APIRef-C_WarbandScene
+  Forge/Forge_APIRef-C_WeeklyRewards:                       Forge_APIRef-C_WeeklyRewards
+  Forge/Forge_APIRef-C_WorldLootObject:                     Forge_APIRef-C_WorldLootObject
+  Forge/Forge_APIRef-C_WorldSafeLocsUIInternal:             Forge_APIRef-C_WorldSafeLocsUIInternal
+  Forge/Forge_APIRef-C_WorldStateInfo:                      Forge_APIRef-C_WorldStateInfo
+  Forge/Forge_APIRef-C_WowEntitlementInfo:                  Forge_APIRef-C_WowEntitlementInfo
+  Forge/Forge_APIRef-C_WowSurvey:                           Forge_APIRef-C_WowSurvey
+  Forge/Forge_APIRef-C_WowTokenUI:                          Forge_APIRef-C_WowTokenUI
+  Forge/Forge_APIRef-C_XMLUtil:                             Forge_APIRef-C_XMLUtil
+  Forge/Forge_APIRef-C_ZoneAbility:                         Forge_APIRef-C_ZoneAbility
+  Forge/Forge_APIRef-CalendarConstants:                     Forge_APIRef-CalendarConstants
+  Forge/Forge_APIRef-Camera:                                Forge_APIRef-Camera
+  Forge/Forge_APIRef-CameraConstants:                       Forge_APIRef-CameraConstants
+  Forge/Forge_APIRef-CatalogShopConstants:                  Forge_APIRef-CatalogShopConstants
+  Forge/Forge_APIRef-CharacterCreationConstants:            Forge_APIRef-CharacterCreationConstants
+  Forge/Forge_APIRef-CharacterSelectionConstants:           Forge_APIRef-CharacterSelectionConstants
+  Forge/Forge_APIRef-CharacterServicesConstants:            Forge_APIRef-CharacterServicesConstants
+  Forge/Forge_APIRef-ChatConstants:                         Forge_APIRef-ChatConstants
+  Forge/Forge_APIRef-ChatShared:                            Forge_APIRef-ChatShared
+  Forge/Forge_APIRef-Cinematic:                             Forge_APIRef-Cinematic
+  Forge/Forge_APIRef-CinematicConstants:                    Forge_APIRef-CinematicConstants
+  Forge/Forge_APIRef-ClickBindingsConstants:                Forge_APIRef-ClickBindingsConstants
+  Forge/Forge_APIRef-Client:                                Forge_APIRef-Client
+  Forge/Forge_APIRef-ClientSettings:                        Forge_APIRef-ClientSettings
+  Forge/Forge_APIRef-ClubShared:                            Forge_APIRef-ClubShared
+  Forge/Forge_APIRef-Color:                                 Forge_APIRef-Color
+  Forge/Forge_APIRef-ColorOverrideConstants:                Forge_APIRef-ColorOverrideConstants
+  Forge/Forge_APIRef-CombatAudioAlertConstants:             Forge_APIRef-CombatAudioAlertConstants
+  Forge/Forge_APIRef-CombatAudioAlertShared:                Forge_APIRef-CombatAudioAlertShared
+  Forge/Forge_APIRef-CombatLogConstants:                    Forge_APIRef-CombatLogConstants
+  Forge/Forge_APIRef-CombatLogShared:                       Forge_APIRef-CombatLogShared
+  Forge/Forge_APIRef-CombatTextShared:                      Forge_APIRef-CombatTextShared
+  Forge/Forge_APIRef-CommentatorShared:                     Forge_APIRef-CommentatorShared
+  Forge/Forge_APIRef-ConfigurationWarningConstants:         Forge_APIRef-ConfigurationWarningConstants
+  Forge/Forge_APIRef-ConnectionScript:                      Forge_APIRef-ConnectionScript
+  Forge/Forge_APIRef-Console:                               Forge_APIRef-Console
+  Forge/Forge_APIRef-ContentTrackingTypes:                  Forge_APIRef-ContentTrackingTypes
+  Forge/Forge_APIRef-CooldownFrameConstants:                Forge_APIRef-CooldownFrameConstants
+  Forge/Forge_APIRef-CooldownViewerConstants:               Forge_APIRef-CooldownViewerConstants
+  Forge/Forge_APIRef-CovenantCallingsConstants:             Forge_APIRef-CovenantCallingsConstants
+  Forge/Forge_APIRef-CovenantSanctumConstants:              Forge_APIRef-CovenantSanctumConstants
+  Forge/Forge_APIRef-CovenantsConstants:                    Forge_APIRef-CovenantsConstants
+  Forge/Forge_APIRef-CraftingOrderUIConstants:              Forge_APIRef-CraftingOrderUIConstants
+  Forge/Forge_APIRef-CraftingOrderUIShared:                 Forge_APIRef-CraftingOrderUIShared
+  Forge/Forge_APIRef-CurrencyConstants_Mainline:            Forge_APIRef-CurrencyConstants_Mainline
+  Forge/Forge_APIRef-CursorConst:                           Forge_APIRef-CursorConst
+  Forge/Forge_APIRef-DamageConstants:                       Forge_APIRef-DamageConstants
+  Forge/Forge_APIRef-DamageMeterConstants:                  Forge_APIRef-DamageMeterConstants
+  Forge/Forge_APIRef-DebugToggle:                           Forge_APIRef-DebugToggle
+  Forge/Forge_APIRef-DelvesConstants:                       Forge_APIRef-DelvesConstants
+  Forge/Forge_APIRef-DungeonEncounterConstants:             Forge_APIRef-DungeonEncounterConstants
+  Forge/Forge_APIRef-DyeColorInfoShared:                    Forge_APIRef-DyeColorInfoShared
+  Forge/Forge_APIRef-EditModeManagerConstants:              Forge_APIRef-EditModeManagerConstants
+  Forge/Forge_APIRef-EditModeManagerConstants_Mainline:     Forge_APIRef-EditModeManagerConstants_Mainline
+  Forge/Forge_APIRef-EncodingUtilConstants:                 Forge_APIRef-EncodingUtilConstants
+  Forge/Forge_APIRef-EncounterEventsShared:                 Forge_APIRef-EncounterEventsShared
+  Forge/Forge_APIRef-EncounterJournalConstants:             Forge_APIRef-EncounterJournalConstants
+  Forge/Forge_APIRef-EncounterTimelineConstants:            Forge_APIRef-EncounterTimelineConstants
+  Forge/Forge_APIRef-EventSchedulerConstants:               Forge_APIRef-EventSchedulerConstants
+  Forge/Forge_APIRef-Expansion:                             Forge_APIRef-Expansion
+  Forge/Forge_APIRef-ExpansionConstants:                    Forge_APIRef-ExpansionConstants
+  Forge/Forge_APIRef-ExpansionInfo:                         Forge_APIRef-ExpansionInfo
+  Forge/Forge_APIRef-ExpansionLevelConstants:               Forge_APIRef-ExpansionLevelConstants
+  Forge/Forge_APIRef-Font:                                  Forge_APIRef-Font
+  Forge/Forge_APIRef-FrameAPIArchaeologyDigSiteFrame:       Forge_APIRef-FrameAPIArchaeologyDigSiteFrame
+  Forge/Forge_APIRef-FrameAPIBlob:                          Forge_APIRef-FrameAPIBlob
+  Forge/Forge_APIRef-FrameAPICharacterModelBase:            Forge_APIRef-FrameAPICharacterModelBase
+  Forge/Forge_APIRef-FrameAPICinematicModel:                Forge_APIRef-FrameAPICinematicModel
+  Forge/Forge_APIRef-FrameAPICooldown:                      Forge_APIRef-FrameAPICooldown
+  Forge/Forge_APIRef-FrameAPIDressUpModel:                  Forge_APIRef-FrameAPIDressUpModel
+  Forge/Forge_APIRef-FrameAPIFogOfWarFrame:                 Forge_APIRef-FrameAPIFogOfWarFrame
+  Forge/Forge_APIRef-FrameAPIModelSceneFrame:               Forge_APIRef-FrameAPIModelSceneFrame
+  Forge/Forge_APIRef-FrameAPIModelSceneFrameActor:          Forge_APIRef-FrameAPIModelSceneFrameActor
+  Forge/Forge_APIRef-FrameAPIModelSceneFrameActorBase:      Forge_APIRef-FrameAPIModelSceneFrameActorBase
+  Forge/Forge_APIRef-FrameAPIModelSceneFrameShared:         Forge_APIRef-FrameAPIModelSceneFrameShared
+  Forge/Forge_APIRef-FrameAPINamePlate:                     Forge_APIRef-FrameAPINamePlate
+  Forge/Forge_APIRef-FrameAPIQuestPOI:                      Forge_APIRef-FrameAPIQuestPOI
+  Forge/Forge_APIRef-FrameAPIScenarioPOI:                   Forge_APIRef-FrameAPIScenarioPOI
+  Forge/Forge_APIRef-FrameAPISimpleCheckout:                Forge_APIRef-FrameAPISimpleCheckout
+  Forge/Forge_APIRef-FrameAPITabardModel:                   Forge_APIRef-FrameAPITabardModel
+  Forge/Forge_APIRef-FrameAPITabardModelBase:               Forge_APIRef-FrameAPITabardModelBase
+  Forge/Forge_APIRef-FrameAPITooltip:                       Forge_APIRef-FrameAPITooltip
+  Forge/Forge_APIRef-FrameAPIUnitPositionFrame:             Forge_APIRef-FrameAPIUnitPositionFrame
+  Forge/Forge_APIRef-FrameScript:                           Forge_APIRef-FrameScript
+  Forge/Forge_APIRef-GARRISON_FOLLOWER_TYPEConstants:       Forge_APIRef-GARRISON_FOLLOWER_TYPEConstants
+  Forge/Forge_APIRef-GARRISON_TYPEConstants:                Forge_APIRef-GARRISON_TYPEConstants
+  Forge/Forge_APIRef-GameCursor:                            Forge_APIRef-GameCursor
+  Forge/Forge_APIRef-GameError:                             Forge_APIRef-GameError
+  Forge/Forge_APIRef-GamePadConst:                          Forge_APIRef-GamePadConst
+  Forge/Forge_APIRef-GameRulesConstants:                    Forge_APIRef-GameRulesConstants
+  Forge/Forge_APIRef-GameUI:                                Forge_APIRef-GameUI
+  Forge/Forge_APIRef-GarrisonConstants:                     Forge_APIRef-GarrisonConstants
+  Forge/Forge_APIRef-GarrisonShared:                        Forge_APIRef-GarrisonShared
+  Forge/Forge_APIRef-GlyphConstants:                        Forge_APIRef-GlyphConstants
+  Forge/Forge_APIRef-GossipConstants:                       Forge_APIRef-GossipConstants
+  Forge/Forge_APIRef-GroupFinderConstants:                  Forge_APIRef-GroupFinderConstants
+  Forge/Forge_APIRef-GuildConstants:                        Forge_APIRef-GuildConstants
+  Forge/Forge_APIRef-GuildInfoShared:                       Forge_APIRef-GuildInfoShared
+  Forge/Forge_APIRef-HouseExteriorConstants:                Forge_APIRef-HouseExteriorConstants
+  Forge/Forge_APIRef-HousingCatalogConstants:               Forge_APIRef-HousingCatalogConstants
+  Forge/Forge_APIRef-HousingCatalogSearcherAPI:             Forge_APIRef-HousingCatalogSearcherAPI
+  Forge/Forge_APIRef-HousingDecorShared:                    Forge_APIRef-HousingDecorShared
+  Forge/Forge_APIRef-HousingFixturePointFrameAPI:           Forge_APIRef-HousingFixturePointFrameAPI
+  Forge/Forge_APIRef-HousingLayoutPinFrameAPI:              Forge_APIRef-HousingLayoutPinFrameAPI
+  Forge/Forge_APIRef-HousingLayoutUITypes:                  Forge_APIRef-HousingLayoutUITypes
+  Forge/Forge_APIRef-HousingUIShared:                       Forge_APIRef-HousingUIShared
+  Forge/Forge_APIRef-ImageSharingConstants:                 Forge_APIRef-ImageSharingConstants
+  Forge/Forge_APIRef-Input:                                 Forge_APIRef-Input
+  Forge/Forge_APIRef-InputConstants:                        Forge_APIRef-InputConstants
+  Forge/Forge_APIRef-Instance:                              Forge_APIRef-Instance
+  Forge/Forge_APIRef-ItemConstants:                         Forge_APIRef-ItemConstants
+  Forge/Forge_APIRef-ItemConstants_Mainline:                Forge_APIRef-ItemConstants_Mainline
+  Forge/Forge_APIRef-ItemConstants_Shared:                  Forge_APIRef-ItemConstants_Shared
+  Forge/Forge_APIRef-ItemQualities:                         Forge_APIRef-ItemQualities
+  Forge/Forge_APIRef-ItemShared:                            Forge_APIRef-ItemShared
+  Forge/Forge_APIRef-LFGConstants:                          Forge_APIRef-LFGConstants
+  Forge/Forge_APIRef-LegendaryCraftingTypes:                Forge_APIRef-LegendaryCraftingTypes
+  Forge/Forge_APIRef-LevelConstants:                        Forge_APIRef-LevelConstants
+  Forge/Forge_APIRef-Locale:                                Forge_APIRef-Locale
+  Forge/Forge_APIRef-Localization:                          Forge_APIRef-Localization
+  Forge/Forge_APIRef-LocalizationShared:                    Forge_APIRef-LocalizationShared
+  Forge/Forge_APIRef-LogConstants:                          Forge_APIRef-LogConstants
+  Forge/Forge_APIRef-LogicConstants:                        Forge_APIRef-LogicConstants
+  Forge/Forge_APIRef-LootConstants:                         Forge_APIRef-LootConstants
+  Forge/Forge_APIRef-LuaColorCurveObjectAPI:                Forge_APIRef-LuaColorCurveObjectAPI
+  Forge/Forge_APIRef-LuaCurveObjectAPI:                     Forge_APIRef-LuaCurveObjectAPI
+  Forge/Forge_APIRef-LuaCurveObjectBaseAPI:                 Forge_APIRef-LuaCurveObjectBaseAPI
+  Forge/Forge_APIRef-LuaCurveObjectConstants:               Forge_APIRef-LuaCurveObjectConstants
+  Forge/Forge_APIRef-LuaDurationObjectAPI:                  Forge_APIRef-LuaDurationObjectAPI
+  Forge/Forge_APIRef-LuaDurationObjectShared:               Forge_APIRef-LuaDurationObjectShared
+  Forge/Forge_APIRef-MajorFactionsConstants:                Forge_APIRef-MajorFactionsConstants
+  Forge/Forge_APIRef-MapConstants:                          Forge_APIRef-MapConstants
+  Forge/Forge_APIRef-MatrixShared:                          Forge_APIRef-MatrixShared
+  Forge/Forge_APIRef-MinimapConstants:                      Forge_APIRef-MinimapConstants
+  Forge/Forge_APIRef-MinimapFrameAPI:                       Forge_APIRef-MinimapFrameAPI
+  Forge/Forge_APIRef-MirrorTimer:                           Forge_APIRef-MirrorTimer
+  Forge/Forge_APIRef-ModelAnimationShared:                  Forge_APIRef-ModelAnimationShared
+  Forge/Forge_APIRef-MoneyConstants:                        Forge_APIRef-MoneyConstants
+  Forge/Forge_APIRef-MountConstants:                        Forge_APIRef-MountConstants
+  Forge/Forge_APIRef-Movie:                                 Forge_APIRef-Movie
+  Forge/Forge_APIRef-MythicPlusInfoShared:                  Forge_APIRef-MythicPlusInfoShared
+  Forge/Forge_APIRef-NamePlateConstants:                    Forge_APIRef-NamePlateConstants
+  Forge/Forge_APIRef-NeighborhoodInitiativesConstants:      Forge_APIRef-NeighborhoodInitiativesConstants
+  Forge/Forge_APIRef-NumericFormatterAPI:                   Forge_APIRef-NumericFormatterAPI
+  Forge/Forge_APIRef-NumericRuleFormatterAPI:               Forge_APIRef-NumericRuleFormatterAPI
+  Forge/Forge_APIRef-NumericRuleFormatterShared:            Forge_APIRef-NumericRuleFormatterShared
+  Forge/Forge_APIRef-Os:                                    Forge_APIRef-Os
+  Forge/Forge_APIRef-PVPMgrConstants:                       Forge_APIRef-PVPMgrConstants
+  Forge/Forge_APIRef-ParentalControls:                      Forge_APIRef-ParentalControls
+  Forge/Forge_APIRef-PartyConstants:                        Forge_APIRef-PartyConstants
+  Forge/Forge_APIRef-PartyPoseUIConstants:                  Forge_APIRef-PartyPoseUIConstants
+  Forge/Forge_APIRef-PerformanceScript:                     Forge_APIRef-PerformanceScript
+  Forge/Forge_APIRef-PerksVendorConstants:                  Forge_APIRef-PerksVendorConstants
+  Forge/Forge_APIRef-PetBattleConstants:                    Forge_APIRef-PetBattleConstants
+  Forge/Forge_APIRef-PetScalingConstants:                   Forge_APIRef-PetScalingConstants
+  Forge/Forge_APIRef-PingConstants:                         Forge_APIRef-PingConstants
+  Forge/Forge_APIRef-PingPinFrameAPI:                       Forge_APIRef-PingPinFrameAPI
+  Forge/Forge_APIRef-Player:                                Forge_APIRef-Player
+  Forge/Forge_APIRef-PlayerDataConstants:                   Forge_APIRef-PlayerDataConstants
+  Forge/Forge_APIRef-PlayerHousingConstants:                Forge_APIRef-PlayerHousingConstants
+  Forge/Forge_APIRef-PlayerInfoShared:                      Forge_APIRef-PlayerInfoShared
+  Forge/Forge_APIRef-PlayerInteractionManagerConstants:     Forge_APIRef-PlayerInteractionManagerConstants
+  Forge/Forge_APIRef-PlayerMentorshipConstants:             Forge_APIRef-PlayerMentorshipConstants
+  Forge/Forge_APIRef-PlayerScript:                          Forge_APIRef-PlayerScript
+  Forge/Forge_APIRef-PowerTypeConstants:                    Forge_APIRef-PowerTypeConstants
+  Forge/Forge_APIRef-ProceduralSpawnConstants:              Forge_APIRef-ProceduralSpawnConstants
+  Forge/Forge_APIRef-ProfessionConstants:                   Forge_APIRef-ProfessionConstants
+  Forge/Forge_APIRef-ProfessionSpecConstants:               Forge_APIRef-ProfessionSpecConstants
+  Forge/Forge_APIRef-PvPFactionConstants:                   Forge_APIRef-PvPFactionConstants
+  Forge/Forge_APIRef-PvpInfoConstants:                      Forge_APIRef-PvpInfoConstants
+  Forge/Forge_APIRef-QuestConstants:                        Forge_APIRef-QuestConstants
+  Forge/Forge_APIRef-QuestConstants_Mainline:               Forge_APIRef-QuestConstants_Mainline
+  Forge/Forge_APIRef-QuestInfoShared:                       Forge_APIRef-QuestInfoShared
+  Forge/Forge_APIRef-QuestRewards:                          Forge_APIRef-QuestRewards
+  Forge/Forge_APIRef-QuestSessionConstants:                 Forge_APIRef-QuestSessionConstants
+  Forge/Forge_APIRef-QueueSpecific:                         Forge_APIRef-QueueSpecific
+  Forge/Forge_APIRef-RaidMarkers:                           Forge_APIRef-RaidMarkers
+  Forge/Forge_APIRef-RecentAlliesConstants:                 Forge_APIRef-RecentAlliesConstants
+  Forge/Forge_APIRef-RecruitAFriendShared:                  Forge_APIRef-RecruitAFriendShared
+  Forge/Forge_APIRef-RenownConstants:                       Forge_APIRef-RenownConstants
+  Forge/Forge_APIRef-ReportSystemConstants:                 Forge_APIRef-ReportSystemConstants
+  Forge/Forge_APIRef-RestrictedActionsConstants:            Forge_APIRef-RestrictedActionsConstants
+  Forge/Forge_APIRef-RolodexConstants:                      Forge_APIRef-RolodexConstants
+  Forge/Forge_APIRef-Screen:                                Forge_APIRef-Screen
+  Forge/Forge_APIRef-ScreenLocationConstants:               Forge_APIRef-ScreenLocationConstants
+  Forge/Forge_APIRef-SeasonsConstants:                      Forge_APIRef-SeasonsConstants
+  Forge/Forge_APIRef-SecondsFormatterAPI:                   Forge_APIRef-SecondsFormatterAPI
+  Forge/Forge_APIRef-SecondsFormatterShared:                Forge_APIRef-SecondsFormatterShared
+  Forge/Forge_APIRef-SecretAspectConstants:                 Forge_APIRef-SecretAspectConstants
+  Forge/Forge_APIRef-SecretPredicates:                      Forge_APIRef-SecretPredicates
+  Forge/Forge_APIRef-SecretWrapperConstants:                Forge_APIRef-SecretWrapperConstants
+  Forge/Forge_APIRef-SharedScriptObjectModelLight:          Forge_APIRef-SharedScriptObjectModelLight
+  Forge/Forge_APIRef-SharedScriptObjectNamePlateFrame:      Forge_APIRef-SharedScriptObjectNamePlateFrame
+  Forge/Forge_APIRef-SharedScriptObjectUnitPositionFrame:   Forge_APIRef-SharedScriptObjectUnitPositionFrame
+  Forge/Forge_APIRef-SharedTraitsEnums:                     Forge_APIRef-SharedTraitsEnums
+  Forge/Forge_APIRef-SimpleAnimAPI:                         Forge_APIRef-SimpleAnimAPI
+  Forge/Forge_APIRef-SimpleAnimAlphaAPI:                    Forge_APIRef-SimpleAnimAlphaAPI
+  Forge/Forge_APIRef-SimpleAnimFlipBookAPI:                 Forge_APIRef-SimpleAnimFlipBookAPI
+  Forge/Forge_APIRef-SimpleAnimGroupAPI:                    Forge_APIRef-SimpleAnimGroupAPI
+  Forge/Forge_APIRef-SimpleAnimPathAPI:                     Forge_APIRef-SimpleAnimPathAPI
+  Forge/Forge_APIRef-SimpleAnimRotationAPI:                 Forge_APIRef-SimpleAnimRotationAPI
+  Forge/Forge_APIRef-SimpleAnimScaleAPI:                    Forge_APIRef-SimpleAnimScaleAPI
+  Forge/Forge_APIRef-SimpleAnimScaleLineAPI:                Forge_APIRef-SimpleAnimScaleLineAPI
+  Forge/Forge_APIRef-SimpleAnimTextureCoordTranslationAPI:  Forge_APIRef-SimpleAnimTextureCoordTranslationAPI
+  Forge/Forge_APIRef-SimpleAnimTranslationAPI:              Forge_APIRef-SimpleAnimTranslationAPI
+  Forge/Forge_APIRef-SimpleAnimTranslationLineAPI:          Forge_APIRef-SimpleAnimTranslationLineAPI
+  Forge/Forge_APIRef-SimpleAnimVertexColorAPI:              Forge_APIRef-SimpleAnimVertexColorAPI
+  Forge/Forge_APIRef-SimpleAnimatableObjectAPI:             Forge_APIRef-SimpleAnimatableObjectAPI
+  Forge/Forge_APIRef-SimpleBrowserAPI:                      Forge_APIRef-SimpleBrowserAPI
+  Forge/Forge_APIRef-SimpleButtonAPI:                       Forge_APIRef-SimpleButtonAPI
+  Forge/Forge_APIRef-SimpleCheckboxAPI:                     Forge_APIRef-SimpleCheckboxAPI
+  Forge/Forge_APIRef-SimpleColorSelectAPI:                  Forge_APIRef-SimpleColorSelectAPI
+  Forge/Forge_APIRef-SimpleControlPointAPI:                 Forge_APIRef-SimpleControlPointAPI
+  Forge/Forge_APIRef-SimpleEditBoxAPI:                      Forge_APIRef-SimpleEditBoxAPI
+  Forge/Forge_APIRef-SimpleFontAPI:                         Forge_APIRef-SimpleFontAPI
+  Forge/Forge_APIRef-SimpleFontStringAPI:                   Forge_APIRef-SimpleFontStringAPI
+  Forge/Forge_APIRef-SimpleFrameAPI:                        Forge_APIRef-SimpleFrameAPI
+  Forge/Forge_APIRef-SimpleFrameScriptObjectAPI:            Forge_APIRef-SimpleFrameScriptObjectAPI
+  Forge/Forge_APIRef-SimpleHTMLAPI:                         Forge_APIRef-SimpleHTMLAPI
+  Forge/Forge_APIRef-SimpleHTMLShared:                      Forge_APIRef-SimpleHTMLShared
+  Forge/Forge_APIRef-SimpleLineAPI:                         Forge_APIRef-SimpleLineAPI
+  Forge/Forge_APIRef-SimpleMapSceneAPI:                     Forge_APIRef-SimpleMapSceneAPI
+  Forge/Forge_APIRef-SimpleMaskTextureAPI:                  Forge_APIRef-SimpleMaskTextureAPI
+  Forge/Forge_APIRef-SimpleMessageFrameAPI:                 Forge_APIRef-SimpleMessageFrameAPI
+  Forge/Forge_APIRef-SimpleModelAPI:                        Forge_APIRef-SimpleModelAPI
+  Forge/Forge_APIRef-SimpleModelFFXAPI:                     Forge_APIRef-SimpleModelFFXAPI
+  Forge/Forge_APIRef-SimpleMovieAPI:                        Forge_APIRef-SimpleMovieAPI
+  Forge/Forge_APIRef-SimpleObjectAPI:                       Forge_APIRef-SimpleObjectAPI
+  Forge/Forge_APIRef-SimpleOffScreenFrameAPI:               Forge_APIRef-SimpleOffScreenFrameAPI
+  Forge/Forge_APIRef-SimpleRegionAPI:                       Forge_APIRef-SimpleRegionAPI
+  Forge/Forge_APIRef-SimpleScriptRegionAPI:                 Forge_APIRef-SimpleScriptRegionAPI
+  Forge/Forge_APIRef-SimpleScriptRegionResizingAPI:         Forge_APIRef-SimpleScriptRegionResizingAPI
+  Forge/Forge_APIRef-SimpleScrollFrameAPI:                  Forge_APIRef-SimpleScrollFrameAPI
+  Forge/Forge_APIRef-SimpleSliderAPI:                       Forge_APIRef-SimpleSliderAPI
+  Forge/Forge_APIRef-SimpleStatusBarAPI:                    Forge_APIRef-SimpleStatusBarAPI
+  Forge/Forge_APIRef-SimpleStatusBarConstants:              Forge_APIRef-SimpleStatusBarConstants
+  Forge/Forge_APIRef-SimpleTextureAPI:                      Forge_APIRef-SimpleTextureAPI
+  Forge/Forge_APIRef-SimpleTextureBaseAPI:                  Forge_APIRef-SimpleTextureBaseAPI
+  Forge/Forge_APIRef-SlashCommand:                          Forge_APIRef-SlashCommand
+  Forge/Forge_APIRef-SocialConstants:                       Forge_APIRef-SocialConstants
+  Forge/Forge_APIRef-SoftTargetConstants:                   Forge_APIRef-SoftTargetConstants
+  Forge/Forge_APIRef-SoulbindsConstants:                    Forge_APIRef-SoulbindsConstants
+  Forge/Forge_APIRef-SpecializationShared:                  Forge_APIRef-SpecializationShared
+  Forge/Forge_APIRef-SpellBookConstants:                    Forge_APIRef-SpellBookConstants
+  Forge/Forge_APIRef-SpellConstants:                        Forge_APIRef-SpellConstants
+  Forge/Forge_APIRef-SpellDiminishConstants:                Forge_APIRef-SpellDiminishConstants
+  Forge/Forge_APIRef-SpellID:                               Forge_APIRef-SpellID
+  Forge/Forge_APIRef-SpellShared:                           Forge_APIRef-SpellShared
+  Forge/Forge_APIRef-SplashScreenConstants:                 Forge_APIRef-SplashScreenConstants
+  Forge/Forge_APIRef-Streaming:                             Forge_APIRef-Streaming
+  Forge/Forge_APIRef-SummonConstants:                       Forge_APIRef-SummonConstants
+  Forge/Forge_APIRef-SuperTrackManagerShared:               Forge_APIRef-SuperTrackManagerShared
+  Forge/Forge_APIRef-SystemTime:                            Forge_APIRef-SystemTime
+  Forge/Forge_APIRef-TalentAndGlyphConstants:               Forge_APIRef-TalentAndGlyphConstants
+  Forge/Forge_APIRef-TalentConstants:                       Forge_APIRef-TalentConstants
+  Forge/Forge_APIRef-TargetScript:                          Forge_APIRef-TargetScript
+  Forge/Forge_APIRef-TextureShared:                         Forge_APIRef-TextureShared
+  Forge/Forge_APIRef-Threat:                                Forge_APIRef-Threat
+  Forge/Forge_APIRef-Time:                                  Forge_APIRef-Time
+  Forge/Forge_APIRef-TimerConstants:                        Forge_APIRef-TimerConstants
+  Forge/Forge_APIRef-TimerunningConstants:                  Forge_APIRef-TimerunningConstants
+  Forge/Forge_APIRef-Title:                                 Forge_APIRef-Title
+  Forge/Forge_APIRef-TooltipConstants:                      Forge_APIRef-TooltipConstants
+  Forge/Forge_APIRef-TooltipInfoShared:                     Forge_APIRef-TooltipInfoShared
+  Forge/Forge_APIRef-Totem:                                 Forge_APIRef-Totem
+  Forge/Forge_APIRef-TradeSkillUITypes:                     Forge_APIRef-TradeSkillUITypes
+  Forge/Forge_APIRef-TraitConstants:                        Forge_APIRef-TraitConstants
+  Forge/Forge_APIRef-TransformManipulatorConstants:         Forge_APIRef-TransformManipulatorConstants
+  Forge/Forge_APIRef-TransmogConstants:                     Forge_APIRef-TransmogConstants
+  Forge/Forge_APIRef-TransmogOutfitConstants:               Forge_APIRef-TransmogOutfitConstants
+  Forge/Forge_APIRef-TransmogShared:                        Forge_APIRef-TransmogShared
+  Forge/Forge_APIRef-UIActionConstants:                     Forge_APIRef-UIActionConstants
+  Forge/Forge_APIRef-UIButtonShared:                        Forge_APIRef-UIButtonShared
+  Forge/Forge_APIRef-UICharacterClassConstants:             Forge_APIRef-UICharacterClassConstants
+  Forge/Forge_APIRef-UIColorShared:                         Forge_APIRef-UIColorShared
+  Forge/Forge_APIRef-UICovenantDisplayInfoConstants:        Forge_APIRef-UICovenantDisplayInfoConstants
+  Forge/Forge_APIRef-UIEventToastConstants:                 Forge_APIRef-UIEventToastConstants
+  Forge/Forge_APIRef-UIFileAssetShared:                     Forge_APIRef-UIFileAssetShared
+  Forge/Forge_APIRef-UIMapPinShared:                        Forge_APIRef-UIMapPinShared
+  Forge/Forge_APIRef-UIModelInfoShared:                     Forge_APIRef-UIModelInfoShared
+  Forge/Forge_APIRef-UIShared:                              Forge_APIRef-UIShared
+  Forge/Forge_APIRef-UITextureAssetShared:                  Forge_APIRef-UITextureAssetShared
+  Forge/Forge_APIRef-UITextureConstants:                    Forge_APIRef-UITextureConstants
+  Forge/Forge_APIRef-UIWidgetManagerShared:                 Forge_APIRef-UIWidgetManagerShared
+  Forge/Forge_APIRef-URL:                                   Forge_APIRef-URL
+  Forge/Forge_APIRef-UiModelSceneConstants:                 Forge_APIRef-UiModelSceneConstants
+  Forge/Forge_APIRef-UiRpcRequestManagerConstants:          Forge_APIRef-UiRpcRequestManagerConstants
+  Forge/Forge_APIRef-Unit:                                  Forge_APIRef-Unit
+  Forge/Forge_APIRef-UnitAuraShared:                        Forge_APIRef-UnitAuraShared
+  Forge/Forge_APIRef-UnitConstants:                         Forge_APIRef-UnitConstants
+  Forge/Forge_APIRef-UnitHealPredictionCalculatorAPI:       Forge_APIRef-UnitHealPredictionCalculatorAPI
+  Forge/Forge_APIRef-UnitHealPredictionCalculatorShared:    Forge_APIRef-UnitHealPredictionCalculatorShared
+  Forge/Forge_APIRef-UnitRole:                              Forge_APIRef-UnitRole
+  Forge/Forge_APIRef-UnitSexConstants:                      Forge_APIRef-UnitSexConstants
+  Forge/Forge_APIRef-UnitShared:                            Forge_APIRef-UnitShared
+  Forge/Forge_APIRef-ValidateNameConstants:                 Forge_APIRef-ValidateNameConstants
+  Forge/Forge_APIRef-VectorShared:                          Forge_APIRef-VectorShared
+  Forge/Forge_APIRef-VignetteConstants:                     Forge_APIRef-VignetteConstants
+  Forge/Forge_APIRef-WarbandSceneInfoConstants:             Forge_APIRef-WarbandSceneInfoConstants
+  Forge/Forge_APIRef-WeeklyRewardsShared:                   Forge_APIRef-WeeklyRewardsShared
+  Forge/Forge_APIRef-WorldElapsedTimerConstants:            Forge_APIRef-WorldElapsedTimerConstants
+  Forge/Forge_APIRef-WowCSConstants:                        Forge_APIRef-WowCSConstants
+  Forge/Forge_APIRef-WowSurveyConstants:                    Forge_APIRef-WowSurveyConstants
+  Forge/Forge_APIRef-ZoneScript:                            Forge_APIRef-ZoneScript
+  Forge/Forge_AddonManager:                                 Forge_AddonManager
+  Forge/Forge_BugCatcher:                                   Forge_BugCatcher
+  Forge/Forge_CVars:                                        Forge_CVars
+  Forge/Forge_Codex:                                        Forge_Codex
+  Forge/Forge_Console:                                      Forge_Console
+  Forge/Forge_Inspector:                                    Forge_Inspector
+  Forge/Forge_Logs:                                         Forge_Logs
+  Forge/Forge_Macros:                                       Forge_Macros
+  Forge/Forge_Profiles:                                     Forge_Profiles
+  Forge/Forge_Registry:                                     Forge_Registry
 
 # Don't ship dev/build infrastructure or editor state to end users.
 #  - .dev/         Dev-local artifacts: release.ps1, future tools, caches
@@ -52,9 +1220,11 @@ ignore:
   - tmp
 
 # We do NOT use @project-version@ substitution in the .toc files -- each
-# Version field carries its own YYMMDDHHMM build stamp and is bumped by
-# release.ps1 on every edit. The packager will leave hardcoded
-# `## Version:` lines untouched.
+
+# We do NOT use @project-version@ substitution in the .toc files -- each
+# Version field carries its own build stamp and is bumped by release.ps1
+# on every edit. The packager will leave hardcoded ## Version: lines
+# untouched.
 
 # License is "All Rights Reserved"; LICENSE is at the repo root and lives
 # inside package-as by default.

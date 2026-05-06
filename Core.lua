@@ -126,6 +126,17 @@ function addon:OnLogin()
             ns.Registry.Register(ns.About.descriptor)
         end
     end
+
+    -- LoD-stub scan: surface tabs for installed-but-unloaded Forge_* sub-addons
+    -- so the user can click them to lazy-load. Eager sub-addons that already
+    -- registered a real descriptor are left alone (Registry.Register refuses
+    -- to downgrade real -> stub).
+    --
+    -- Indirect via ns.* because the local function is declared further down
+    -- in this file (after the slash router section). At file-load time the
+    -- assignment ns.scanForgeToolStubs = scanForgeToolStubs has run by the
+    -- time PLAYER_LOGIN fires, so this lookup resolves correctly.
+    if ns.scanForgeToolStubs then ns.scanForgeToolStubs() end
 end
 
 function addon:OnLogout()
@@ -139,6 +150,85 @@ end
 -- --------------------------------------------------------------------------
 local slash = Cairn.Slash.Register("Forge", "/forge", { aliases = { "/fg" } })
 ns.slash = slash
+
+-- --------------------------------------------------------------------------
+-- LoD-stub scanner.
+--
+-- Walks every installed Forge_* addon and, for any LoadOnDemand one that
+-- isn't yet loaded but advertises X-Forge-Tool-Name in its TOC, registers a
+-- placeholder ("stub") descriptor. The stub renders the tab in the strip; on
+-- first click its OnTabShow does C_AddOns.LoadAddOn(name), which fires the
+-- sub-addon's OnInit synchronously, which registers the real descriptor
+-- (overwriting this stub via Forge.Registry), and then we delegate to the
+-- real OnTabShow.
+--
+-- IMPORTANT: LoD sub-addons MUST register their descriptor in OnInit (not
+-- OnLogin). Cairn.Events does not retro-fire PLAYER_LOGIN for late
+-- subscribers, so a sub-addon LoD-loaded post-login never sees OnLogin.
+-- See cairn_events_no_retro_login memory note.
+--
+-- TOC fields read:
+--   ## X-Forge-Tool-Name: <Title>          -- required, becomes descriptor.name and tab label
+--   ## X-Forge-Tool-Order: <number>        -- optional, default 100
+--   ## X-Forge-Tool-Icon: <texture path>   -- optional, captured for future tab-strip icons
+--   ## LoadOnDemand: 1                     -- only addons with LoD=1 get a stub
+-- --------------------------------------------------------------------------
+local function scanForgeToolStubs()
+    if not (C_AddOns and ns.Registry) then return end
+    local count = (C_AddOns.GetNumAddOns and C_AddOns.GetNumAddOns()) or 0
+    for i = 1, count do
+        local nm = C_AddOns.GetAddOnInfo and C_AddOns.GetAddOnInfo(i)
+        if nm and nm:match("^Forge_") then
+            local toolName = C_AddOns.GetAddOnMetadata(nm, "X-Forge-Tool-Name")
+            -- IMPORTANT: GetAddOnMetadata does NOT return the LoadOnDemand TOC
+            -- field (it's parsed specially by WoW, not exposed via metadata).
+            -- Use C_AddOns.IsAddOnLoadOnDemand instead.
+            local lod      = C_AddOns.IsAddOnLoadOnDemand and C_AddOns.IsAddOnLoadOnDemand(nm)
+            local loaded   = C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded(nm)
+            if toolName and toolName ~= "" and lod and not loaded then
+                -- Skip if a real (non-stub) descriptor is already registered.
+                local existing = ns.Registry.Get(toolName)
+                if not (existing and not existing._isStub) then
+                    local order = tonumber(C_AddOns.GetAddOnMetadata(nm, "X-Forge-Tool-Order")) or 100
+                    local icon  = C_AddOns.GetAddOnMetadata(nm, "X-Forge-Tool-Icon")
+                    local addonName = nm
+                    local stub = {
+                        _isStub    = true,
+                        _addonName = addonName,
+                        name       = toolName,
+                        title      = toolName,
+                        order      = order,
+                        icon       = icon,
+                        OnTabShow  = function(parent, mod)
+                            local ok, reason = C_AddOns.LoadAddOn(addonName)
+                            if not ok then
+                                out(string.format("could not load %s: %s", addonName, tostring(reason)))
+                                return
+                            end
+                            -- The sub-addon's OnInit fired synchronously inside
+                            -- LoadAddOn and (if written correctly) called
+                            -- Forge.Registry.Register with its real descriptor.
+                            local real = ns.Registry.Get(mod.name)
+                            if not real or real == mod or real._isStub then
+                                out(string.format(
+                                    "%s loaded but did not register a descriptor; "
+                                    .. "make sure its Core.lua calls Forge.Registry.Register in OnInit (not OnLogin).",
+                                    addonName))
+                                return
+                            end
+                            if type(real.OnTabShow) == "function" then
+                                local ok2, err = pcall(real.OnTabShow, parent, real)
+                                if not ok2 and geterrorhandler then geterrorhandler()(err) end
+                            end
+                        end,
+                    }
+                    ns.Registry.Register(stub)
+                end
+            end
+        end
+    end
+end
+ns.scanForgeToolStubs = scanForgeToolStubs
 
 -- Walk WoW's addon list and return every loaded Forge_* folder, sorted.
 -- Robust against registry tab-key vs folder-name mismatches (e.g. the tab

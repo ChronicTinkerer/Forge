@@ -144,6 +144,14 @@ local descriptor = {
         -- Save on hide so unsaved edits persist if user switches tabs.
         if ns.UI and ns.UI.SaveCurrent then ns.UI.SaveCurrent(mod) end
         if mod._frame then mod._frame:Hide() end
+        -- The snippet-picker dropdown is on DIALOG strata (parented to
+        -- UIParent, not to mod._frame), so hiding _frame does NOT take it
+        -- down. Without this it bleeds through onto whichever Forge tab
+        -- the user switches to. Same pattern any tab-floating dropdown
+        -- needs to follow.
+        if ns._dropdownList and ns._dropdownList:IsShown() then
+            ns._dropdownList:Hide()
+        end
     end,
 }
 ns.descriptor = descriptor
