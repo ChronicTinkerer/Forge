@@ -8,6 +8,7 @@
 ## X-Category: Development Tools
 ## X-License: All Rights Reserved
 
+Locale.lua
 Manager.lua
 UI.lua
 Core.lua

@@ -1,4 +1,4 @@
-## Interface: 120005
+## Interface: 120005, 120000
 ## Title: Forge
 ## Notes: Developer tools suite for Cairn / LibCodex addon authors. Parent addon: hosts /forge slash router, sub-module registry, and the main window. Sub-addons (Forge_*) plug in to provide individual tools.
 ## Author: ChronicTinkerer
@@ -15,4 +15,5 @@
 Core.lua
 Registry.lua
 Window.lua
+Changelog.lua
 About.lua

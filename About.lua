@@ -14,72 +14,16 @@ local SUMMARY_TEXT = [[
 
 A developer toolset for World of Warcraft addons.
 
-Forge is a collection of in-game tools for addon authors. Each tool is
-its own optional sub-addon that plugs into this shared window. Install
-only the ones you want; each adds a tab here on load.
-
-## What's included
-
-Bug Catcher
-   Quiet Lua error capture. Browsable viewer with copy-as-block,
-   ignore list, optional auto-popup, and a minimap counter. Replaces
-   WoW's default error popup; chains to any external error-tracking
-   addon so they keep working.
-
-Console
-   In-game Lua REPL with snippet manager, auto-run on login, history,
-   and a scrollable output pane. Workspace flow with named snippets.
-
-Macros
-   Macro editor for Account + Character macros, plus a sequence
-   builder that compiles a stack of /cast lines into a /castsequence
-   macro you can drag to your bar.
-
-Inspector
-   Real-time _G tree browser with virtualized scrolling. Pin any path
-   as a root, snapshot the frame under your cursor, search by prefix
-   or substring, drill into metatables, hover for frame metadata.
-   Plus an Events tab (live event monitor with payload capture) and
-   FnLog tab (wrap any function to log its calls and return values).
-
-Addons
-   Addon enable/disable with named sets (Raid / Solo / PvP), sortable
-   columns, status filter, dependency tooltips, recursive enable,
-   protected addons, auto-disable-new-on-login with a popup prompt.
-
-Logs
-   Per-source log viewer over Cairn.Log's ring buffer. Level filter,
-   search, copy-as-block, CSV export. Replaces Cairn.Dashboard.
+Each tool is an optional sub-addon that plugs into this window.
+Install only the ones you want; each adds a tab on load.
 
 ## Quick start
 
    /forge            Toggle this window
-   /forge help       List every subcommand from every sub-module
-   /forge status     Cairn / LibCodex / profile / sub-modules info
+   /forge help       Every subcommand from every sub-module
+   /forge status     Cairn / LibCodex / profile / sub-modules
    /forge modules    Every loaded sub-addon
-
-Each sub-addon adds its own subcommand on load (/forge bug,
-/forge console, /forge inspect, /forge addon, /forge logs, ...).
-
-## Built on Cairn
-
-Forge depends on the Cairn library stack:
-
-   Cairn.DB        SavedVariables with profiles
-   Cairn.Addon     Lifecycle (OnInit / OnLogin / OnLogout)
-   Cairn.Slash     /forge router, sub-module slashes auto-wired
-   Cairn.Events    Event subscription (used by Inspector's Events tab)
-   Cairn.Log       Leveled per-source logger (used by Logs tab)
-
-Forge never duplicates work that lives in Cairn. The Cairn libraries
-are MIT-licensed and can be reused independently.
-
-## Naming family
-
-   Cairn    stones / foundation        composable Lua libraries
-   Codex    book / data                game data catalog
-   Vellum   page / rendered guide      in-game quest guide addon
-   Forge    workshop / dev tools       this addon
+   /forge changelog  Open the Changelog tab
 
 ## Author and license
 
@@ -87,10 +31,8 @@ are MIT-licensed and can be reused independently.
    License: All Rights Reserved
    Project: github.com/ChronicTinkerer
 
-The library dependencies (Cairn, LibCodex) are MIT-licensed.
-This addon and its sub-addons are proprietary; install via the
-official channels (CurseForge / Wago / WoWInterface / GitHub
-releases) and use within World of Warcraft.
+Library dependencies (Cairn, LibCodex) are MIT. This addon and its
+sub-addons are proprietary; install via official channels.
 ]]
 
 -- Strip leading/trailing whitespace.

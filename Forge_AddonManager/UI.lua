@@ -6,6 +6,11 @@ local ADDON, ns = ...
 local UI = {}
 ns.UI = UI
 
+-- Localization lookup. Locale.lua populates ns.L via Cairn-Locale-1.0
+-- before UI.lua loads (see .toc load order). Accessing L["foo"] returns the
+-- active-locale string, falling back to enUS, then the bare key.
+local L = ns.L
+
 local TOOLBAR_H   = 28
 local HEADER_H    = 22
 local STATUS_H    = 22
@@ -42,26 +47,26 @@ local function colVal_protect(e) return ns.Manager.IsProtected(e.name) and 0 or 
 -- Users must enable Esc -> Options -> System -> Advanced -> "Track addon
 -- performance" for these columns to populate with non-zero values.
 local COLUMNS = {
-    { key = "name",    label = "Name",    width = 260, sort = colVal_name    },
-    { key = "status",  label = "Status",  width = 70,  sort = colVal_status  },
-    { key = "memory",  label = "Memory",  width = 80,  sort = colVal_memory  },
-    { key = "recent",  label = "Recent",  width = 60,  sort = colVal_recent  },
-    { key = "peak",    label = "Peak",    width = 60,  sort = colVal_peak    },
-    { key = "spikes",  label = "Spikes",  width = 55,  sort = colVal_spikes  },
-    { key = "version", label = "Version", width = 90,  sort = colVal_version },
-    { key = "protect", label = "P",       width = 24,  sort = colVal_protect },
+    { key = "name",    label = L["Name"],    width = 260, sort = colVal_name    },
+    { key = "status",  label = L["Status"],  width = 70,  sort = colVal_status  },
+    { key = "memory",  label = L["Memory"],  width = 80,  sort = colVal_memory  },
+    { key = "recent",  label = L["Recent"],  width = 60,  sort = colVal_recent  },
+    { key = "peak",    label = L["Peak"],    width = 60,  sort = colVal_peak    },
+    { key = "spikes",  label = L["Spikes"],  width = 55,  sort = colVal_spikes  },
+    { key = "version", label = L["Version"], width = 90,  sort = colVal_version },
+    { key = "protect", label = "P",          width = 24,  sort = colVal_protect },
 }
 
 -- `label` is the popup-menu row text (full description). `short` is what
 -- shows in the toolbar button when this filter is active; the button is
 -- narrower than the popup row, so we abbreviate.
 local FILTER_STATUSES = {
-    { key = "all",       label = "All addons",                short = "All" },
-    { key = "loaded",    label = "Loaded only",               short = "Loaded" },
-    { key = "disabled",  label = "Disabled only",             short = "Disabled" },
-    { key = "lod",       label = "Load-on-demand only",       short = "LoD" },
-    { key = "pending",   label = "Pending (reload required)", short = "Pending" },
-    { key = "protected", label = "Protected only",            short = "Protected" },
+    { key = "all",       label = L["All addons"],                short = L["All"] },
+    { key = "loaded",    label = L["Loaded only"],               short = L["Loaded"] },
+    { key = "disabled",  label = L["Disabled only"],             short = L["Disabled"] },
+    { key = "lod",       label = L["Load-on-demand only"],       short = L["LoD"] },
+    { key = "pending",   label = L["Pending (reload required)"], short = L["Pending"] },
+    { key = "protected", label = L["Protected only"],            short = L["Protected"] },
 }
 
 local _activeMod
@@ -74,13 +79,13 @@ local function escapeBars(s) return (tostring(s)):gsub("|", "||") end
 
 local function statusBadge(entry)
     if ns.Manager.IsLoaded(entry.name) then
-        return "|cff80ff80Loaded|r"
+        return "|cff80ff80" .. L["Loaded"] .. "|r"
     elseif entry.isLoD and ns.Manager.IsEnabled(entry.name) then
-        return "|cffffd87fLoD|r"
+        return "|cffffd87f" .. L["LoD"] .. "|r"
     elseif ns.Manager.IsEnabled(entry.name) then
-        return "|cffaaaaffPending|r"
+        return "|cffaaaaff" .. L["Pending"] .. "|r"
     else
-        return "|cff888888Disabled|r"
+        return "|cff888888" .. L["Disabled"] .. "|r"
     end
 end
 
@@ -117,8 +122,8 @@ local function tooltipFor(entry)
     if not (GameTooltip and entry) then return end
     GameTooltip:ClearLines()
     GameTooltip:AddLine("|cffd87f3a" .. (entry.title or entry.name) .. "|r")
-    if entry.version then GameTooltip:AddDoubleLine("Version", tostring(entry.version), 0.85, 0.7, 0.4, 1, 1, 1) end
-    if entry.author  then GameTooltip:AddDoubleLine("Author",  tostring(entry.author),  0.85, 0.7, 0.4, 1, 1, 1) end
+    if entry.version then GameTooltip:AddDoubleLine(L["Version"], tostring(entry.version), 0.85, 0.7, 0.4, 1, 1, 1) end
+    if entry.author  then GameTooltip:AddDoubleLine(L["Author"],  tostring(entry.author),  0.85, 0.7, 0.4, 1, 1, 1) end
     if entry.notes   then
         GameTooltip:AddLine(" ")
         GameTooltip:AddLine(tostring(entry.notes), 1, 1, 1, true)
@@ -141,18 +146,18 @@ local function tooltipFor(entry)
     local optDeps = ns.Manager.GetOptionalDependencies(entry.name) or {}
     if #reqDeps > 0 then
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine("|cffaaaaaaRequires:|r " .. fmtDepList(reqDeps), 1, 1, 1, true)
+        GameTooltip:AddLine("|cffaaaaaa" .. L["Requires:"] .. "|r " .. fmtDepList(reqDeps), 1, 1, 1, true)
     end
     if #optDeps > 0 then
-        GameTooltip:AddLine("|cffaaaaaaOptional:|r " .. fmtDepList(optDeps), 1, 1, 1, true)
+        GameTooltip:AddLine("|cffaaaaaa" .. L["Optional:"] .. "|r " .. fmtDepList(optDeps), 1, 1, 1, true)
     end
     if ns.Manager.IsProtected(entry.name) then
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine("|cffffd700Protected|r - survives Disable All", 1, 1, 1, true)
+        GameTooltip:AddLine("|cffffd700" .. L["Protected - survives Disable All"] .. "|r", 1, 1, 1, true)
     end
     if ns.Manager.IsSelfProtected and ns.Manager.IsSelfProtected(entry.name) then
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine("|cffff8080Essential|r - cannot be disabled (Forge depends on it)", 1, 1, 1, true)
+        GameTooltip:AddLine("|cffff8080" .. L["Essential - cannot be disabled (Forge depends on it)"] .. "|r", 1, 1, 1, true)
     end
 
     -- ----- CPU profiler breakdown (Mainline 11.0.5+; silent on Classic) ---
@@ -170,17 +175,17 @@ local function tooltipFor(entry)
         local s100        = ns.Manager.SpikeCount(entry.name, 100) or 0
         if recent > 0 or peak > 0 or s1 > 0 then
             GameTooltip:AddLine(" ")
-            GameTooltip:AddLine("|cffaaaaaaCPU profiler|r")
-            GameTooltip:AddDoubleLine("Recent (rolling avg)", string.format("%.3f ms", recent), 0.85, 0.7, 0.4, 1, 1, 1)
-            GameTooltip:AddDoubleLine("Peak (worst spike)",   string.format("%.2f ms", peak),   0.85, 0.7, 0.4, 1, 1, 1)
+            GameTooltip:AddLine("|cffaaaaaa" .. L["CPU profiler"] .. "|r")
+            GameTooltip:AddDoubleLine(L["Recent (rolling avg)"], string.format("%.3f ms", recent), 0.85, 0.7, 0.4, 1, 1, 1)
+            GameTooltip:AddDoubleLine(L["Peak (worst spike)"],   string.format("%.2f ms", peak),   0.85, 0.7, 0.4, 1, 1, 1)
             if encounter > 0 then
-                GameTooltip:AddDoubleLine("Encounter avg",    string.format("%.3f ms", encounter), 0.85, 0.7, 0.4, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["Encounter avg"],    string.format("%.3f ms", encounter), 0.85, 0.7, 0.4, 1, 1, 1)
             end
             if last > 0 then
-                GameTooltip:AddDoubleLine("Last frame",       string.format("%.3f ms", last),  0.85, 0.7, 0.4, 1, 1, 1)
+                GameTooltip:AddDoubleLine(L["Last frame"],       string.format("%.3f ms", last),  0.85, 0.7, 0.4, 1, 1, 1)
             end
             local spikeText = string.format("%d / %d / %d / %d / %d", s1, s5, s10, s50, s100)
-            GameTooltip:AddDoubleLine("Spikes (>1 / >5 / >10 / >50 / >100 ms)", spikeText, 0.85, 0.7, 0.4, 1, 1, 1)
+            GameTooltip:AddDoubleLine(L["Spikes (>1 / >5 / >10 / >50 / >100 ms)"], spikeText, 0.85, 0.7, 0.4, 1, 1, 1)
         end
     end
 
@@ -365,7 +370,7 @@ local function buildSetsDropdown()
 
     local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     title:SetPoint("TOPLEFT", 8, -6)
-    title:SetText("Load a set:")
+    title:SetText(L["Load a set:"])
 
     -- Migrated to Cairn-Gui-Core ScrollFrame with vanilla fallback.
     local scrollGui = Gui and Gui:Create("ScrollFrame")
@@ -387,7 +392,7 @@ local function buildSetsDropdown()
 
     local empty = f:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     empty:SetPoint("CENTER", f, "CENTER", 0, 0)
-    empty:SetText("(no sets saved)")
+    empty:SetText(L["(no sets saved)"])
     empty:Hide()
     f._emptyText = empty
 
@@ -396,13 +401,13 @@ local function buildSetsDropdown()
         closeWidget:SetParent(f); closeWidget:ClearAllPoints()
         closeWidget:SetWidth(60); closeWidget:SetHeight(20)
         closeWidget:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -6, 6)
-        closeWidget:SetText("Close")
+        closeWidget:SetText(L["Close"])
         closeWidget:SetEventListener("OnClick", function() f:Hide() end)
     else
         local close = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
         close:SetSize(60, 20)
         close:SetPoint("BOTTOMRIGHT", -6, 6)
-        close:SetText("Close")
+        close:SetText(L["Close"])
         close:SetScript("OnClick", function() f:Hide() end)
     end
 
@@ -431,7 +436,7 @@ local function buildNamePrompt()
 
     local label = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     label:SetPoint("TOPLEFT", 12, -36)
-    label:SetText("Name:")
+    label:SetText(L["Name:"])
 
     -- Migrated to Cairn-Gui Input. The widget exposes its inner EditBox at
     -- .editBox; we drive focus / text / scripts through that for the parts
@@ -514,8 +519,8 @@ end
 function UI._showSetNamePrompt(title, defaultText, onAccept)
     local f = ns._namePrompt
     if not f then f = buildNamePrompt(); ns._namePrompt = f end
-    f._title:SetText("|cffd87f3a" .. (title or "Set name") .. "|r")
-    if f._ok.SetText then f._ok:SetText("OK") end
+    f._title:SetText("|cffd87f3a" .. (title or L["Set name"]) .. "|r")
+    if f._ok.SetText then f._ok:SetText(L["OK"]) end
     f._okHandler = function()
         local v = (f._ebGetText() or ""):match("^%s*(.-)%s*$") or ""
         if v == "" then return end
@@ -589,7 +594,7 @@ function UI.Build(parent, mod)
 
             local hint = bar:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
             hint:SetPoint("LEFT", s.frame, "LEFT", 8, 0)
-            hint:SetText("Filter by name...")
+            hint:SetText(L["Filter by name..."])
             s:SetEventListener("OnEditFocusGained", function() hint:Hide() end)
             s:SetEventListener("OnEditFocusLost", function()
                 if (s:GetText() or "") == "" then hint:Show() end
@@ -618,7 +623,7 @@ function UI.Build(parent, mod)
             sf:SetScript("OnEscapePressed", function(self) self:ClearFocus(); self:SetText(""); _filterText = ""; UI.Refresh() end)
 
             local placeholder = searchBg:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-            placeholder:SetPoint("LEFT", 8, 0); placeholder:SetText("Filter by name...")
+            placeholder:SetPoint("LEFT", 8, 0); placeholder:SetText(L["Filter by name..."])
             sf:SetScript("OnEditFocusGained", function() placeholder:Hide() end)
             sf:SetScript("OnEditFocusLost", function(self)
                 if (self:GetText() or "") == "" then placeholder:Show() end
@@ -643,7 +648,7 @@ function UI.Build(parent, mod)
             b:SetParent(bar); b:ClearAllPoints()
             b:SetWidth(90); b:SetHeight(BTN_HEIGHT)
             b:SetPoint("LEFT", searchAnchor, "RIGHT", 6, 0)
-            b:SetText("All")
+            b:SetText(L["All"])
             b:SetEventListener("OnClick", function()
                 if not ns._filterPopup then ns._filterPopup = buildFilterPopup() end
                 local f = ns._filterPopup
@@ -762,7 +767,7 @@ function UI.Build(parent, mod)
         reloadW:SetParent(bar)
         reloadW:ClearAllPoints()
         reloadW:SetWidth(90); reloadW:SetHeight(BTN_HEIGHT)
-        reloadW:SetText("Apply + Reload")
+        reloadW:SetText(L["Apply + Reload"])
         reloadW:SetPoint("RIGHT", bar, "RIGHT", -4, 0)
         reloadW:SetEventListener("OnClick", onReload)
         reloadBtn = reloadW.frame
@@ -1016,7 +1021,7 @@ function UI.Build(parent, mod)
 
     local autoLabel = status:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     autoLabel:SetPoint("LEFT", autoCbFrame, "RIGHT", 2, 0)
-    autoLabel:SetText("Auto-disable new")
+    autoLabel:SetText(L["Auto-disable new"])
     autoLabel:SetTextColor(0.85, 0.7, 0.4, 1)
 
     local recCb, recCbFrame = makeStatusCheck(
@@ -1031,7 +1036,7 @@ function UI.Build(parent, mod)
 
     local recLabel = status:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     recLabel:SetPoint("LEFT", recCbFrame, "RIGHT", 2, 0)
-    recLabel:SetText("Recursive enable")
+    recLabel:SetText(L["Recursive enable"])
     recLabel:SetTextColor(0.85, 0.7, 0.4, 1)
 
     local statusText = status:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -1178,7 +1183,7 @@ function UI.Refresh()
         end
 
         local nameStr = entry.title or entry.name
-        if selfProt then nameStr = "|cffd87f3a" .. nameStr .. "  [essential]|r" end
+        if selfProt then nameStr = "|cffd87f3a" .. nameStr .. "  " .. L["[essential]"] .. "|r" end
         row._cols.name:SetText(nameStr)
         row._cols.status:SetText(statusBadge(entry))
         row._cols.memory:SetText(memoryStr(entry))
@@ -1254,7 +1259,7 @@ function UI.Refresh()
         if n > 0 then
             mod._reloadBtn:SetText(string.format("Apply (%d) + Reload", n))
         else
-            mod._reloadBtn:SetText("Reload UI")
+            mod._reloadBtn:SetText(L["Reload UI"])
         end
     end
     if mod._discardBtn then
@@ -1289,13 +1294,13 @@ local function buildOptPopup()
 
     local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", 12, -10)
-    title:SetText("|cffd87f3aOptional dependencies|r")
+    title:SetText("|cffd87f3a" .. L["Optional dependencies"] .. "|r")
 
     local hint = f:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     hint:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -2)
     hint:SetPoint("RIGHT", -12, 0)
     hint:SetJustifyH("LEFT"); hint:SetWordWrap(true)
-    hint:SetText("These addons are listed as optional dependencies and are installed but disabled. Tick the ones you want to enable.")
+    hint:SetText(L["These addons are listed as optional dependencies and are installed but disabled. Tick the ones you want to enable."])
 
     local Gui = LibStub and LibStub("Cairn-Gui-Core-1.0", true)
 
@@ -1322,13 +1327,13 @@ local function buildOptPopup()
         cancelWidget:SetParent(f); cancelWidget:ClearAllPoints()
         cancelWidget:SetWidth(80); cancelWidget:SetHeight(22)
         cancelWidget:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 8)
-        cancelWidget:SetText("Cancel")
+        cancelWidget:SetText(L["Cancel"])
         cancelWidget:SetEventListener("OnClick", function() f:Hide() end)
         cancelFrame = cancelWidget.frame
     else
         local cancelBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
         cancelBtn:SetSize(80, 22); cancelBtn:SetPoint("BOTTOMRIGHT", -12, 8)
-        cancelBtn:SetText("Cancel")
+        cancelBtn:SetText(L["Cancel"])
         cancelBtn:SetScript("OnClick", function() f:Hide() end)
         cancelFrame = cancelBtn
     end
@@ -1338,12 +1343,12 @@ local function buildOptPopup()
         enableWidget:SetParent(f); enableWidget:ClearAllPoints()
         enableWidget:SetWidth(120); enableWidget:SetHeight(22)
         enableWidget:SetPoint("RIGHT", cancelFrame, "LEFT", -6, 0)
-        enableWidget:SetText("Enable selected")
+        enableWidget:SetText(L["Enable selected"])
         f._enableBtn = enableWidget
     else
         local enableBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
         enableBtn:SetSize(120, 22); enableBtn:SetPoint("RIGHT", cancelFrame, "LEFT", -6, 0)
-        enableBtn:SetText("Enable selected")
+        enableBtn:SetText(L["Enable selected"])
         f._enableBtn = enableBtn
     end
     return f

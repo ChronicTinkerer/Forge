@@ -34,6 +34,12 @@ local db = Cairn.DB.New("ForgeDB", {
                 shown = false,
                 activeTab = nil,
             },
+            -- Dev-only locale override. When set to a locale code (e.g.
+            -- "deDE"), Cairn-Locale-1.0 returns strings from that locale
+            -- regardless of GetLocale(). nil means use the real GetLocale().
+            -- See `/forge locale <code>` to set, `/forge locale clear` to
+            -- reset.
+            localeOverride = nil,
         },
         global = {
             firstSeen = nil,
@@ -91,13 +97,34 @@ function addon:OnLogin()
         ns.Window.Show()
     end
 
+    -- Restore the dev locale override if one is saved. Done after Cairn is
+    -- loaded but before any sub-module's L["..."] reads in their OnLogin.
+    -- (Sub-modules registered via the Registry haven't called OnLogin yet
+    -- when this runs - they're invoked afterward via Registry.RunOnLogin.)
+    do
+        local cl = LibStub and LibStub("Cairn-Locale-1.0", true)
+        local code = db.profile.localeOverride
+        if cl and code then
+            cl.SetOverride(code)
+            if log then
+                log:Info("  Locale:   override active (%s)", code)
+            end
+        end
+    end
+
     if log and ns.Registry then
         log:Info("  Sub-modules: %s", ns.Registry.CountString())
     end
 
-    -- Built-in About tab (hosted by the parent itself).
-    if ns.Registry and ns.About and ns.About.descriptor then
-        ns.Registry.Register(ns.About.descriptor)
+    -- Built-in tabs hosted by the parent itself. Order matters for the tab
+    -- bar layout: Changelog (998) sits to the left of About (999).
+    if ns.Registry then
+        if ns.Changelog and ns.Changelog.descriptor then
+            ns.Registry.Register(ns.Changelog.descriptor)
+        end
+        if ns.About and ns.About.descriptor then
+            ns.Registry.Register(ns.About.descriptor)
+        end
     end
 end
 
@@ -171,6 +198,41 @@ slash:Subcommand("reset", function()
     db:ResetProfile()
     out("profile reset to defaults.")
 end, "reset the current profile to defaults")
+
+-- Dev tool: override what GetLocale() returns for every Cairn.Locale
+-- instance (every Forge sub-addon, plus any other addon that uses
+-- Cairn-Locale-1.0). Lets you preview translations without restarting
+-- the WoW client in a different language. Persists across reloads via
+-- db.profile.localeOverride; restored at OnLogin.
+slash:Subcommand("locale", function(input)
+    local cl = LibStub and LibStub("Cairn-Locale-1.0", true)
+    if not cl then
+        out("Cairn-Locale-1.0 not loaded.")
+        return
+    end
+    local arg = (input or ""):gsub("^%s+", ""):gsub("%s+$", "")
+    if arg == "" or arg == "show" then
+        local override = cl.GetOverride()
+        local active   = (GetLocale and GetLocale()) or "?"
+        if override then
+            out(string.format("Locale override: |cffd87f3a%s|r (real: %s)", override, active))
+        else
+            out("Locale override: |cff888888none|r (real: " .. active .. ")")
+        end
+        out("Usage: /forge locale <code>   e.g. deDE, frFR, esES, ruRU, koKR, zhCN, zhTW")
+        out("       /forge locale clear   to remove the override")
+        return
+    end
+    if arg == "clear" or arg == "off" or arg == "none" or arg == "nil" then
+        cl.SetOverride(nil)
+        db.profile.localeOverride = nil
+        out("Locale override cleared.")
+        return
+    end
+    cl.SetOverride(arg)
+    db.profile.localeOverride = arg
+    out(string.format("Locale override -> |cffd87f3a%s|r. Reload some panels to see changes.", arg))
+end, "override Cairn.Locale (dev tool). /forge locale [code|clear|show]")
 
 -- Default action: open (or toggle) the main Forge window. If user typed an
 -- unknown subcommand, show help instead.
