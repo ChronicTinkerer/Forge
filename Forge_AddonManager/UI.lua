@@ -30,13 +30,24 @@ local function colVal_status(e)
     return 4
 end
 local function colVal_memory(e)  return -(ns.Manager.MemoryKB(e.name) or 0) end  -- desc by default
+local function colVal_recent(e)  return -(ns.Manager.RecentMs(e.name) or 0) end  -- desc by default
+local function colVal_peak(e)    return -(ns.Manager.PeakMs(e.name) or 0) end    -- desc by default
+local function colVal_spikes(e)  return -(ns.Manager.SpikeCount(e.name, 10) or 0) end -- desc by default
 local function colVal_version(e) return tostring(e.version or "") end
 local function colVal_protect(e) return ns.Manager.IsProtected(e.name) and 0 or 1 end
 
+-- CPU columns (Recent / Peak / Spikes) are populated by C_AddOnProfiler
+-- which is Mainline 11.0.5+. On Classic flavors the Manager wrappers return
+-- 0 so the cells render as empty strings (see recentStr / peakStr / spikeStr).
+-- Users must enable Esc -> Options -> System -> Advanced -> "Track addon
+-- performance" for these columns to populate with non-zero values.
 local COLUMNS = {
     { key = "name",    label = "Name",    width = 260, sort = colVal_name    },
     { key = "status",  label = "Status",  width = 70,  sort = colVal_status  },
     { key = "memory",  label = "Memory",  width = 80,  sort = colVal_memory  },
+    { key = "recent",  label = "Recent",  width = 60,  sort = colVal_recent  },
+    { key = "peak",    label = "Peak",    width = 60,  sort = colVal_peak    },
+    { key = "spikes",  label = "Spikes",  width = 55,  sort = colVal_spikes  },
     { key = "version", label = "Version", width = 90,  sort = colVal_version },
     { key = "protect", label = "P",       width = 24,  sort = colVal_protect },
 }
@@ -80,6 +91,28 @@ local function memoryStr(entry)
     return string.format("%.2f MB", kb / 1024)
 end
 
+-- CPU column formatters. All return "" for zero-or-missing data so blank
+-- cells stay blank on Classic clients (no C_AddOnProfiler) and on Retail
+-- when the user hasn't enabled "Track addon performance".
+local function recentStr(entry)
+    local ms = ns.Manager.RecentMs(entry.name) or 0
+    if ms <= 0.0001 then return "" end
+    return string.format("%.2f", ms)
+end
+
+local function peakStr(entry)
+    local ms = ns.Manager.PeakMs(entry.name) or 0
+    if ms <= 0.0001 then return "" end
+    if ms >= 100 then return string.format("%d", ms) end
+    return string.format("%.1f", ms)
+end
+
+local function spikeStr(entry)
+    local n = ns.Manager.SpikeCount(entry.name, 10) or 0
+    if n <= 0 then return "" end
+    return tostring(n)
+end
+
 local function tooltipFor(entry)
     if not (GameTooltip and entry) then return end
     GameTooltip:ClearLines()
@@ -121,6 +154,36 @@ local function tooltipFor(entry)
         GameTooltip:AddLine(" ")
         GameTooltip:AddLine("|cffff8080Essential|r - cannot be disabled (Forge depends on it)", 1, 1, 1, true)
     end
+
+    -- ----- CPU profiler breakdown (Mainline 11.0.5+; silent on Classic) ---
+    -- Shown only when at least one metric is non-zero, so we don't pollute
+    -- tooltips on Classic flavors or before "Track addon performance" is on.
+    if ns.Manager.HasProfiler and ns.Manager.HasProfiler() then
+        local recent      = ns.Manager.RecentMs(entry.name) or 0
+        local peak        = ns.Manager.PeakMs(entry.name) or 0
+        local encounter   = ns.Manager.EncounterAvgMs(entry.name) or 0
+        local last        = ns.Manager.LastMs(entry.name) or 0
+        local s1          = ns.Manager.SpikeCount(entry.name, 1) or 0
+        local s5          = ns.Manager.SpikeCount(entry.name, 5) or 0
+        local s10         = ns.Manager.SpikeCount(entry.name, 10) or 0
+        local s50         = ns.Manager.SpikeCount(entry.name, 50) or 0
+        local s100        = ns.Manager.SpikeCount(entry.name, 100) or 0
+        if recent > 0 or peak > 0 or s1 > 0 then
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine("|cffaaaaaaCPU profiler|r")
+            GameTooltip:AddDoubleLine("Recent (rolling avg)", string.format("%.3f ms", recent), 0.85, 0.7, 0.4, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Peak (worst spike)",   string.format("%.2f ms", peak),   0.85, 0.7, 0.4, 1, 1, 1)
+            if encounter > 0 then
+                GameTooltip:AddDoubleLine("Encounter avg",    string.format("%.3f ms", encounter), 0.85, 0.7, 0.4, 1, 1, 1)
+            end
+            if last > 0 then
+                GameTooltip:AddDoubleLine("Last frame",       string.format("%.3f ms", last),  0.85, 0.7, 0.4, 1, 1, 1)
+            end
+            local spikeText = string.format("%d / %d / %d / %d / %d", s1, s5, s10, s50, s100)
+            GameTooltip:AddDoubleLine("Spikes (>1 / >5 / >10 / >50 / >100 ms)", spikeText, 0.85, 0.7, 0.4, 1, 1, 1)
+        end
+    end
+
     GameTooltip:Show()
 end
 
@@ -1120,6 +1183,30 @@ function UI.Refresh()
         row._cols.status:SetText(statusBadge(entry))
         row._cols.memory:SetText(memoryStr(entry))
         row._cols.memory:SetTextColor(0.7, 0.7, 0.7, 1)
+        -- CPU columns. Tint the Peak cell red when peak >= 100ms so users
+        -- can spot spikes at a glance; spikes count goes amber when > 0.
+        row._cols.recent:SetText(recentStr(entry))
+        row._cols.recent:SetTextColor(0.7, 0.7, 0.7, 1)
+        row._cols.peak:SetText(peakStr(entry))
+        do
+            local peakMs = ns.Manager.PeakMs(entry.name) or 0
+            if peakMs >= 100 then
+                row._cols.peak:SetTextColor(1.0, 0.45, 0.45, 1)
+            elseif peakMs >= 16 then
+                row._cols.peak:SetTextColor(1.0, 0.85, 0.45, 1)
+            else
+                row._cols.peak:SetTextColor(0.7, 0.7, 0.7, 1)
+            end
+        end
+        row._cols.spikes:SetText(spikeStr(entry))
+        do
+            local nSpikes = ns.Manager.SpikeCount(entry.name, 10) or 0
+            if nSpikes > 0 then
+                row._cols.spikes:SetTextColor(1.0, 0.85, 0.45, 1)
+            else
+                row._cols.spikes:SetTextColor(0.7, 0.7, 0.7, 1)
+            end
+        end
         row._cols.version:SetText(entry.version or "")
         row._cols.version:SetTextColor(0.6, 0.6, 0.6, 1)
         local prot = ns.Manager.IsProtected(entry.name)

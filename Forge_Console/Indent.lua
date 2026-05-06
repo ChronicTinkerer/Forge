@@ -57,6 +57,7 @@ local ADDON, ns = ...
 -- (The documentation IS the code)
 
 
+ns.indent = ns.indent or {}
 local lib = ns.indent
 
 local stringlen = string.len

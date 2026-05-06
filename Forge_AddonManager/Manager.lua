@@ -181,6 +181,59 @@ function Manager.MemoryKB(name)
     return 0
 end
 
+-- ----- CPU profiler metrics (C_AddOnProfiler) ---------------------------
+-- Available on Mainline 11.0.5+; absent on Classic/Era/TBC/Mists/Vanilla.
+-- All wrappers return 0 when the API or enum isn't present, so callers
+-- can treat zero as "no data" without scattering nil checks.
+-- Users must enable Esc -> Options -> System -> Advanced -> "Track addon
+-- performance" for the API to return non-zero values; if the toggle is
+-- off, the columns we feed will all be 0.
+
+local function _profilerMetric(name, enumKey)
+    if not C_AddOnProfiler or not C_AddOnProfiler.GetAddOnMetric then return 0 end
+    local enum = Enum and Enum.AddOnProfilerMetric and Enum.AddOnProfilerMetric[enumKey]
+    if not enum then return 0 end
+    local ok, v = pcall(C_AddOnProfiler.GetAddOnMetric, name, enum)
+    if not ok then return 0 end
+    return tonumber(v) or 0
+end
+
+-- Rolling-average ms over the recent window.
+function Manager.RecentMs(name)  return _profilerMetric(name, "RecentAverageTime") end
+
+-- Peak (worst) ms since profiler reset.
+function Manager.PeakMs(name)    return _profilerMetric(name, "PeakTime") end
+
+-- Average ms during boss encounters.
+function Manager.EncounterAvgMs(name) return _profilerMetric(name, "EncounterAverageTime") end
+
+-- Last frame ms.
+function Manager.LastMs(name)    return _profilerMetric(name, "LastTime") end
+
+-- Spike count over a given threshold (in ms). Threshold must be one of
+-- 1, 5, 10, 50, 100, 500, 1000 (Blizzard's predefined enum buckets).
+local _SPIKE_ENUMS = {
+    [1]    = "CountTimeOver1Ms",
+    [5]    = "CountTimeOver5Ms",
+    [10]   = "CountTimeOver10Ms",
+    [50]   = "CountTimeOver50Ms",
+    [100]  = "CountTimeOver100Ms",
+    [500]  = "CountTimeOver500Ms",
+    [1000] = "CountTimeOver1000Ms",
+}
+
+function Manager.SpikeCount(name, thresholdMs)
+    local enumKey = _SPIKE_ENUMS[thresholdMs or 10]
+    if not enumKey then return 0 end
+    return _profilerMetric(name, enumKey)
+end
+
+-- True when C_AddOnProfiler is callable on this client. Used by the UI to
+-- decide whether to bother rendering CPU columns at all on Classic flavors.
+function Manager.HasProfiler()
+    return (C_AddOnProfiler and C_AddOnProfiler.GetAddOnMetric) and true or false
+end
+
 function Manager.IsLoaded(name)        return isLoaded(name) end
 function Manager.IsLoadOnDemand(name)  return isLoadOnDemand(name) end
 

@@ -4,6 +4,14 @@ All notable changes to this project. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions are
 YYMMDDHHMM build stamps.
 
+## [2605051821] - 2026-05-05
+
+### Fixed
+- `Indent.lua:84: attempt to perform indexed assignment on local 'lib'
+  (a nil value)` at addon load. `local lib = ns.indent` ran before
+  anything had created `ns.indent`, so every subsequent `lib.X = ...`
+  blew up. Now `ns.indent` is created on demand at the top of the file.
+
 ## [2605051145] - 2026-05-05
 
 ### Added
