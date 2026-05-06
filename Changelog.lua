@@ -18,6 +18,26 @@ local CHANGELOG_TEXT = [[
 
 Release notes across the Forge family. Newest releases on top.
 
+## v12 - 2026-05-06
+
+### Fixed
+- Forge_APIRef bake.py: manifest-update functions can no longer silently
+  truncate Forge/.pkgmeta and Forge/.dev/release.ps1. Both writes now go
+  through a defensive helper that refuses sub-50% shrinkage, verifies
+  byte-equality after a temp-file write, and atomic-renames into place.
+- Removed corrupted self-overwriting trailer on bake.py itself (an orphan
+  call line followed by a duplicated copy of main()'s tail). Cosmetic;
+  was unreachable at runtime.
+- Removed stub artifact from the bottom of Forge/.pkgmeta (a half-pasted
+  duplicate of the @project-version comment header).
+
+### Added
+- Pure-Python regression test at
+  Forge/SubAddons/Forge_APIRef/.dev/tests/test_bake_manifest_preservation.py.
+  16/16 PASS. Covers helper presence, pkgmeta + release.ps1 trailer
+  preservation across substitutions, namespace add/remove, the helper's
+  refusal of sub-50% shrinkage, .tmp cleanup, and idempotency.
+
 ## v10 - 2026-05-06
 
 ### Added

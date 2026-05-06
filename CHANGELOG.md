@@ -10,6 +10,22 @@ a `(Component)` tag identifying which sub-addon changed.
 
 The in-game Changelog tab mirrors this file.
 
+## [12] — bake.py manifest preservation (2026-05-06)
+
+### Fixed
+
+- **(Forge_APIRef bake.py)** Manifest-update functions no longer risk silently truncating `Forge/.pkgmeta` and `Forge/.dev/release.ps1`. Both `update_pkgmeta` and `update_release_ps1` now route their write through a new `_safe_write_text` helper that:
+  1. Refuses to write if the new content is < 50% of the original size (the fingerprint of a regex-overshoot bug).
+  2. Writes to a `.tmp` sibling file first, reads it back, and verifies byte-equality with what we asked to write.
+  3. Atomic-renames the temp file into place via `Path.replace`.
+  Failures raise loudly and leave the original file untouched. Replaces the previous fragile `PATH.write_text(text, "utf-8")` calls.
+- **(bake.py)** Removed a corrupted self-overwriting trailer on the file itself (an orphan `_pkgmeta(baked, dry_run=args.dry_run)` line followed by a duplicated copy of `main()`'s tail and a second `if __name__ == "__main__":` block at the very end of the file). The corruption was an artifact of a prior partial-paste manual restoration and was visually confusing; functionally inert because Python exits via the first `if __name__` block before reaching the orphans.
+- **(Forge/.pkgmeta)** Removed a stub artifact at the bottom of the file (a duplicated single-line "We do NOT use @project-version@..." paste that preceded the real 4-line comment block). Same partial-paste origin as the bake.py corruption.
+
+### Added
+
+- **(Forge_APIRef bake.py)** Regression test at `Forge/SubAddons/Forge_APIRef/.dev/tests/test_bake_manifest_preservation.py`. 16/16 PASS. Covers `_safe_write_text` presence + behavior, pkgmeta + release.ps1 trailer preservation across substitutions, namespace add/remove, idempotency on repeat runs.
+
 ## [11] - 2026-05-06
 
 ### Changed

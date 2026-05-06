@@ -2,7 +2,7 @@
 ## Title: Forge_CVars
 ## Notes: In-game CVar browser and editor. Lists every console variable, edits with risky-CVar guard, saves named profiles you can apply per character or play style. Adds a CVars tab to /forge.
 ## Author: ChronicTinkerer
-## Version: 11
+## Version: 12
 ## SavedVariables: ForgeCVarsDB
 ## Dependencies: Cairn, Forge
 ## LoadOnDemand: 1

@@ -1225,8 +1225,6 @@ ignore:
   - tmp
 
 # We do NOT use @project-version@ substitution in the .toc files -- each
-
-# We do NOT use @project-version@ substitution in the .toc files -- each
 # Version field carries its own build stamp and is bumped by release.ps1
 # on every edit. The packager will leave hardcoded ## Version: lines
 # untouched.
