@@ -1,8 +1,8 @@
-## Interface: 120005
+## Interface: 120005, 50503, 20505, 11508, 120007
 ## Title: Forge_Logs
 ## Notes: Per-source log viewer with DLAPI-style API, level filtering, search, and CSV export. Adds a Logs tab to /forge. Replaces Cairn.Dashboard.
 ## Author: ChronicTinkerer
-## Version: 7
+## Version: 8
 ## SavedVariables: ForgeLogsDB
 ## Dependencies: Cairn, Forge
 ## X-Category: Development Tools

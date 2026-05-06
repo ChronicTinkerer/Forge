@@ -1,8 +1,8 @@
-## Interface: 120005
+## Interface: 120005, 50503, 20505, 11508, 120007
 ## Title: Forge_Registry
 ## Notes: Browse every Cairn registry: Addons, Hooks, Timers, Events, DBs, Slash, Callbacks, Settings. A "what's wired up" view for addon authors.
 ## Author: ChronicTinkerer
-## Version: 7
+## Version: 8
 ## SavedVariables: ForgeRegistryDB
 ## Dependencies: Cairn, Forge
 ## X-Category: Development Tools

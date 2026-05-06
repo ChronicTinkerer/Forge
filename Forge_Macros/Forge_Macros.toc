@@ -1,8 +1,8 @@
-## Interface: 120005
+## Interface: 120005, 50503, 20505, 11508, 120007
 ## Title: Forge_Macros
 ## Notes: In-game macro editor + GSE-style sequence builder. Adds a Macros tab to /forge.
 ## Author: ChronicTinkerer
-## Version: 7
+## Version: 8
 ## SavedVariables: ForgeMacrosDB
 ## Dependencies: Cairn, Forge
 ## X-Category: Development Tools
