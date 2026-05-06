@@ -2,7 +2,7 @@
 ## Title: Forge_Logs
 ## Notes: Per-source log viewer with DLAPI-style API, level filtering, search, and CSV export. Adds a Logs tab to /forge. Replaces Cairn.Dashboard.
 ## Author: ChronicTinkerer
-## Version: 2605042012
+## Version: 6
 ## SavedVariables: ForgeLogsDB
 ## Dependencies: Cairn, Forge
 ## X-Category: Development Tools

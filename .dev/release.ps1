@@ -40,7 +40,17 @@ $ErrorActionPreference = 'Stop'
 
 $AddonName       = 'Forge'
 $RepoOwner       = 'ChronicTinkerer'
-$VersionStampFmt = 'yyMMddHHmm'   # produces a 10-digit YYMMDDHHMM stamp
+
+# Versioning convention (changed 2026-05-05): sequential integer build
+# numbers, +1 per release. Reads the current value from $PrimaryVersionFile
+# and writes (N+1) to every TOC in $FilesToBump. If the primary's value is 0
+# or missing, the counter starts at 1.
+# Rationale: time-stamped versions go non-monotonic when builds happen
+# from machines on different timezones (or when a sandbox runs UTC vs
+# Eastern). Sequential is always strictly increasing.
+# All 10 Forge TOCs share one stamp because they all ship from the same
+# zip; users see one coordinated release across the whole family.
+$PrimaryVersionFile = 'Forge.toc'
 
 # All 10 toc files get the same stamp on every release. Order is parent
 # first, sub-addons alphabetical -- doesn't matter functionally; just for
@@ -68,9 +78,23 @@ function Invoke-Git {
     }
 }
 
-Push-Location $PSScriptRoot
+# This script lives at .dev/release.ps1; the repo root is one level up.
+# Anchor there so $FilesToBump's relative paths (Forge.toc, Forge_*/*.toc)
+# resolve correctly no matter where the user invoked this from.
+$RepoRoot = Split-Path -Parent $PSScriptRoot
+Push-Location $RepoRoot
 try {
-    $stamp = Get-Date -Format $VersionStampFmt
+    # Read the current version from the primary TOC and increment by 1.
+    if (-not (Test-Path $PrimaryVersionFile)) {
+        throw "Primary version file not found: $PrimaryVersionFile"
+    }
+    $primaryContent = Get-Content $PrimaryVersionFile -Raw
+    if ($primaryContent -match '(?m)^## Version:\s*(\d+)') {
+        $currentVersion = [long]$matches[1]
+    } else {
+        $currentVersion = 0
+    }
+    $stamp = ($currentVersion + 1).ToString()
 
     Write-Host ''
     Write-Host "Release $AddonName -> $stamp" -ForegroundColor Cyan
