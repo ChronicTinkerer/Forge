@@ -10,7 +10,7 @@
 ## X-License: All Rights Reserved
 ## X-Curse-Project-ID: 1533362
 ## X-Wago-ID: ZKxZa3Nk
-## X-WoWI-ID: 27135
+## X-WoWI-ID: 27136
 
 Core.lua
 Registry.lua
