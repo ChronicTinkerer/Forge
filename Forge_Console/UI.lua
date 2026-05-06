@@ -596,6 +596,22 @@ function UI.Build(parent, mod)
     clearBtnW:ClearAllPoints()
     clearBtnW:SetPoint("RIGHT", runBtnFrame, "LEFT", -4, 0)
 
+    -- Copy: opens Forge.ShowCopyDialog with the current output transcript,
+    -- color codes stripped. Pairs with Clear (both act on the output pane).
+    -- The output FontString itself isn't selectable; this button is the
+    -- escape hatch when you need to paste output into chat / a bug report.
+    local copyBtnW, copyBtnFrame = makeBtn(toolbar, "Copy", BTN_WIDTH, BTN_HEIGHT, function()
+        if not (Forge and Forge.ShowCopyDialog) then return end
+        local raw = (mod._outputText and mod._outputText:GetText()) or ""
+        -- Strip color escapes |cAARRGGBB...|r so the copied text is plain.
+        local clean = raw:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+        if clean == "" then clean = "(output is empty)" end
+        Forge.ShowCopyDialog("Console - copy output", clean,
+            "Ctrl-A to select all, Ctrl-C to copy. Color codes stripped.")
+    end)
+    copyBtnW:ClearAllPoints()
+    copyBtnW:SetPoint("RIGHT", clearBtnFrame, "LEFT", -4, 0)
+
     local exportBtnW, exportBtnFrame = makeBtn(toolbar, "Export", BTN_WIDTH, BTN_HEIGHT, function()
         if not (Forge and Forge.ShowCopyDialog and Forge.SerializeTable) then return end
         local snippets = {}
@@ -607,7 +623,7 @@ function UI.Build(parent, mod)
             "Ctrl-A to select all, Ctrl-C to copy. " .. tostring(#ns.ListSnippets()) .. " snippets.")
     end)
     exportBtnW:ClearAllPoints()
-    exportBtnW:SetPoint("RIGHT", clearBtnFrame, "LEFT", -4, 0)
+    exportBtnW:SetPoint("RIGHT", copyBtnFrame, "LEFT", -4, 0)
 
     -- ===== Code editor =====================================================
     -- Migrated to Cairn-Gui-Core ScrollingEditBox. Two gotchas to know:
