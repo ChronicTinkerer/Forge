@@ -37,15 +37,15 @@ move-folders:
   Forge/Forge_Registry:     Forge_Registry
 
 # Don't ship dev/build infrastructure or editor state to end users.
+#  - .dev/         Dev-local artifacts: release.ps1, future tools, caches
 #  - SESSION_NOTES.md is project-internal, not user-facing
-#  - release.ps1 is a developer tool, not part of the addon
 #  - editor/IDE folders never ship
 #  - scratch/tmp dirs are local workspace junk
 ignore:
+  - .dev
   - .vscode
   - .idea
   - SESSION_NOTES.md
-  - release.ps1
   - "*.bat"
   - "*.ps1"
   - scratch

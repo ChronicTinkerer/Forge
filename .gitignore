@@ -1,3 +1,10 @@
+# Forge .gitignore
+#
+# All dev-local artifacts (release.ps1, future tools, caches, scratch)
+# live under /.dev/ at the repo root. One folder, one ignore line. Add
+# new tooling artifacts there and you don't have to touch this file.
+.dev/
+
 # OS junk
 .DS_Store
 Thumbs.db
@@ -13,8 +20,6 @@ $RECYCLE.BIN/
 .idea/
 *.iml
 *.code-workspace
-
-# VS Code: never commit editor state to the public repo
 .vscode/
 
 # Lua build/bytecode
