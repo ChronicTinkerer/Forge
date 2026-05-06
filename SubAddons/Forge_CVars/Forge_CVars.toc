@@ -1,0 +1,21 @@
+## Interface: 120005, 50503, 20505, 11508, 120007
+## Title: Forge_CVars
+## Notes: In-game CVar browser and editor. Lists every console variable, edits with risky-CVar guard, saves named profiles you can apply per character or play style. Adds a CVars tab to /forge.
+## Author: ChronicTinkerer
+## Version: 11
+## SavedVariables: ForgeCVarsDB
+## Dependencies: Cairn, Forge
+## LoadOnDemand: 1
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: CVars
+## X-Forge-Tool-Order: 30
+## X-Forge-Tool-Icon: Interface\Icons\INV_Misc_Note_01
+
+Core.lua
+Snapshot.lua
+RiskyList.lua
+Profiles.lua
+EditModal.lua
+List.lua
+UI.lua

@@ -10,6 +10,16 @@ a `(Component)` tag identifying which sub-addon changed.
 
 The in-game Changelog tab mirrors this file.
 
+## [11] - 2026-05-06
+
+### Changed
+
+- **(Source layout)** Every sub-addon folder moved from the repo root into `Forge/SubAddons/`. The repo root drops from 594 folders to 1. The packager's `move-folders` directive still flattens to siblings at install time, so the published zip is byte-identical to the previous build and end users see no change.
+- `.pkgmeta` `move-folders` source paths now `Forge/SubAddons/Forge_*`. Updated descriptive prose accordingly.
+- `.dev/release.ps1` `$FilesToBump` sub-addon paths now prefixed `SubAddons\`. Parent `Forge.toc` entry unchanged.
+- **(Forge_APIRef bake.py)** New `SUBADDONS_ROOT = FORGE_ROOT / "SubAddons"`. Generated namespace addons now land under `Forge/SubAddons/Forge_APIRef-<Namespace>/`. The auto-rewrite of `Forge/.pkgmeta` `move-folders` and `Forge/.dev/release.ps1` `$FilesToBump` emits the new prefix on every bake.
+- **(Forge_APIRef link-siblings.ps1)** Anchor renamed `$SubAddonsRoot` to reflect the new location; deprecation note added pointing at workspace-level `Sync-WoWAddons.ps1` for general use.
+
 ## [6] - 2026-05-05
 
 ### Added
