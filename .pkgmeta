@@ -1201,6 +1201,7 @@ move-folders:
   Forge/SubAddons/Forge_AddonManager:                                 Forge_AddonManager
   Forge/SubAddons/Forge_BugCatcher:                                   Forge_BugCatcher
   Forge/SubAddons/Forge_CVars:                                        Forge_CVars
+  Forge/SubAddons/Forge_CairnInspect:                                 Forge_CairnInspect
   Forge/SubAddons/Forge_Codex:                                        Forge_Codex
   Forge/SubAddons/Forge_Console:                                      Forge_Console
   Forge/SubAddons/Forge_Inspector:                                    Forge_Inspector

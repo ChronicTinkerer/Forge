@@ -42,7 +42,7 @@ local function getFilteredEntries()
     local source = ns.GetSelectedSource()
     local minLevel = ns.GetMinLevel()
     local search = (ns.GetSearchText() or ""):lower()
-    return Log:GetEntries(function(e)
+    local entries = Log:GetEntries(function(e)
         if source ~= "All" and e.source ~= source then return false end
         if (e.level or 5) > minLevel then return false end  -- higher number = lower priority
         if search ~= "" then
@@ -52,6 +52,29 @@ local function getFilteredEntries()
         end
         return true
     end)
+
+    -- Apply sort. Cairn.Log:GetEntries returns entries oldest-first (it
+    -- walks the ring from bufferHead). With sortMode = "newest", we
+    -- reverse so the latest activity is at the top of the list -- the
+    -- right default once the ring buffer wraps and old archived entries
+    -- would otherwise mask current activity.
+    local mode = ns.GetSortMode and ns.GetSortMode() or "newest"
+    if mode == "newest" then
+        local n = #entries
+        for i = 1, math.floor(n / 2) do
+            entries[i], entries[n - i + 1] = entries[n - i + 1], entries[i]
+        end
+    elseif mode == "source" then
+        -- Group by source name, newest within each source.
+        table.sort(entries, function(a, b)
+            local sa, sb = a.source or "", b.source or ""
+            if sa ~= sb then return sa < sb end
+            return (a.ts or 0) > (b.ts or 0)
+        end)
+    end
+    -- "oldest" -> leave as-is (already oldest-first from GetEntries).
+
+    return entries
 end
 
 -- ----- Source discovery -------------------------------------------------
@@ -287,10 +310,40 @@ function UI.Build(parent, mod)
     local exportBtn, exportFrame = makeButton("Export CSV", 70, 22, copyFrame,    4)
     onClick(exportBtn, function() UI.ExportCSV() end)
 
-    local clearBtn, _            = makeButton("Clear",      60, 22, exportFrame,  4)
+    local clearBtn, clearFrame   = makeButton("Clear",      60, 22, exportFrame,  4)
     onClick(clearBtn, function()
         if Log and Log.Clear then Log:Clear(); UI.Refresh() end
     end)
+
+    -- Sort cycling button. Cycles through Latest first / Oldest first /
+    -- By source. Default ("newest") puts the most recent activity at the
+    -- top of the list -- the right answer once Cairn.Log's ring buffer
+    -- has wrapped (otherwise stale archived entries from prior sessions
+    -- would mask current activity at the natural oldest-first iteration
+    -- order).
+    local SORT_LABELS = {
+        newest = "Sort: Latest",
+        oldest = "Sort: Oldest",
+        source = "Sort: Source",
+    }
+    local SORT_NEXT = { newest = "oldest", oldest = "source", source = "newest" }
+    local sortBtn, sortFrame     = makeButton("Sort: Latest", 100, 22, clearFrame, 4)
+    local function refreshSortLabel()
+        local m = ns.GetSortMode and ns.GetSortMode() or "newest"
+        sortBtn:SetText(SORT_LABELS[m] or SORT_LABELS.newest)
+    end
+    onClick(sortBtn, function()
+        local m = ns.GetSortMode and ns.GetSortMode() or "newest"
+        ns.SetSortMode(SORT_NEXT[m] or "newest")
+        refreshSortLabel()
+        UI.Refresh()
+        -- Snap scroll to top so the user actually sees the new ordering.
+        if mod._logsScrollFrame and mod._logsScrollFrame.SetVerticalScroll then
+            mod._logsScrollFrame:SetVerticalScroll(0)
+        end
+    end)
+    refreshSortLabel()
+    mod._sortBtn = sortBtn
 
     -- Count label on the right edge.
     local countFs = bar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")

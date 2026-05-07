@@ -10,6 +10,41 @@ a `(Component)` tag identifying which sub-addon changed.
 
 The in-game Changelog tab mirrors this file.
 
+## [14] — Forge_CairnInspect + Forge_Logs sort dropdown (2026-05-07)
+
+### Added
+
+- **(Forge_Logs)** Sort cycling button in the toolbar: cycles `Sort: Latest` -> `Sort: Oldest` -> `Sort: Source`. Defaults to `Latest` so the most recent log activity appears at the top of the list. New `ns.GetSortMode` / `ns.SetSortMode` API on the saved profile.
+
+  Why this matters: Cairn.Log's ring buffer wraps once it hits 1000 entries, and `Log:GetEntries` returns entries in oldest-first chronological order. Once the buffer wraps, the "newest" entries are at low indices in the buffer array and old archived entries from prior sessions fill the high indices. Forge_Logs's default oldest-first iteration was therefore showing stale data on top, hiding current activity. The new "Latest" default is a correct view regardless of buffer state.
+
+- **(Forge_CairnInspect)** New sub-addon: a tab-level consumer of Cairn-Gui-2.0's Decision 10B introspection surface (Inspector / Stats / EventLog / DevAPI). Adds a `Cairn-Inspect` tab to /forge with four panels:
+
+  - **Widget tree** (top-left): every Cairn-Gui-2.0 widget the library has ever Acquired, walked via `Inspector:WalkAll`. Indented by parent/child depth, click to select. Live filter input in the toolbar (substring match on widget type) hides non-matching rows. Selection persists across refreshes.
+
+  - **Detail / Dump panel** (top-right): when a tree row is selected, shows that widget's `:Dump()` output as a sorted key/value list. Scrollable. Clears when nothing is selected.
+
+  - **Stats panel** (middle): live counters from `Stats:Snapshot` rendered as labeled rows. Sections: animations (added / completed / active), layout recomputes, primitives draws (rect / border / icon), event dispatches, pool occupancy, EventLog buffer state. Refreshes every `statsRefreshSec` (default 0.5s). Pause button freezes refresh.
+
+  - **EventLog tail** (bottom): scrolling list of recent entries from `EventLog:Tail(200)`, formatted as `time  WidgetType  event  (N args)`. Filter input (substring match on `WidgetType:event`) hides non-matching rows. Local buttons: Enable/Disable EventLog (auto-syncs label), Clear buffer. Auto-scrolls to bottom on new entries when not paused.
+
+- **Toolbar** (top): Refresh (forces full refresh), Pause (freezes Stats + EventLog updates), Dev (toggles `Cairn.DevAPI` — shows Cairn's frame-outline overlay on every tracked widget; label live-syncs via `Cairn.DevAPI:OnChange`), Search input for tree filter.
+
+- **Click-to-highlight**: selecting a widget in the tree briefly tints its on-screen frame tan for 0.6 seconds so you can locate it visually. Works regardless of `Cairn.Dev` state.
+
+- **Auto-enable EventLog on first open** (configurable via the saved profile's `autoEnableLog`). The buffer starts recording the moment you open the tab so you see real data without ceremony.
+
+- **Slash subcommand**: `/forge cairninspectstats` prints a one-line snapshot to chat (anims, layout, events, pool counts). Useful as a low-ceremony "is anything happening" check without opening the tab.
+
+### Changed
+
+- **(Forge build orchestration)** `Forge_CairnInspect` registered in `.pkgmeta` (move-folders) and `.dev/release.ps1` (FilesToBump) so it ships in the published zip and auto-bumps with every release.
+
+### Notes
+
+- Forge_CairnInspect is **load-on-demand** (matches Forge_Console / CVars / etc. — pure UI tools per the forge_lod_pattern memory). Descriptor self-registers in `OnInit` so the LoD path doesn't miss the retro-PLAYER_LOGIN broadcast that eager addons rely on.
+- The tab is currently invisible to your in-game session until you create the AddOns junction (one PowerShell command, see deployment notes below).
+
 ## [13] — Forge_Console streaming output + snippet management (2026-05-07)
 
 ### Added

@@ -1,0 +1,16 @@
+## Interface: 120005, 50503, 20505, 11508, 120007
+## Title: Forge_CairnInspect
+## Notes: Live introspection for Cairn-Gui-2.0 widgets. Browse the widget tree, inspect per-widget state, watch live Stats counters, tail the EventLog buffer, toggle the frame-outline overlay. Consumes Decision 10B introspection APIs (Inspector / Stats / EventLog / DevAPI). Adds a Cairn-Inspect tab to /forge.
+## Author: ChronicTinkerer
+## Version: 13
+## SavedVariables: ForgeCairnInspectDB
+## Dependencies: Cairn, Forge
+## LoadOnDemand: 1
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: CairnInspect
+## X-Forge-Tool-Order: 25
+## X-Forge-Tool-Icon: Interface\Icons\INV_Misc_Spyglass_03
+
+Core.lua
+UI.lua

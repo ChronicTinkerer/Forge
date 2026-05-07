@@ -644,6 +644,7 @@ $FilesToBump = @(
     @{ Path = 'SubAddons\Forge_AddonManager\Forge_AddonManager.toc';    Pattern = '(?m)^(## Version:\s*)\d+'; Description = 'Forge_AddonManager Version' },
     @{ Path = 'SubAddons\Forge_BugCatcher\Forge_BugCatcher.toc';        Pattern = '(?m)^(## Version:\s*)\d+'; Description = 'Forge_BugCatcher Version' },
     @{ Path = 'SubAddons\Forge_CVars\Forge_CVars.toc';                  Pattern = '(?m)^(## Version:\s*)\d+'; Description = 'Forge_CVars Version' },
+    @{ Path = 'SubAddons\Forge_CairnInspect\Forge_CairnInspect.toc';    Pattern = '(?m)^(## Version:\s*)\d+'; Description = 'Forge_CairnInspect Version' },
     @{ Path = 'SubAddons\Forge_Codex\Forge_Codex.toc';                  Pattern = '(?m)^(## Version:\s*)\d+'; Description = 'Forge_Codex Version' },
     @{ Path = 'SubAddons\Forge_Console\Forge_Console.toc';              Pattern = '(?m)^(## Version:\s*)\d+'; Description = 'Forge_Console Version' },
     @{ Path = 'SubAddons\Forge_Inspector\Forge_Inspector.toc';          Pattern = '(?m)^(## Version:\s*)\d+'; Description = 'Forge_Inspector Version' },

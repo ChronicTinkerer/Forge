@@ -13,6 +13,13 @@ local db = Cairn.DB.New("ForgeLogsDB", {
             searchText     = "",
             tapEvents      = false,    -- log all WoW events as they fire
             tapChatEvents  = false,    -- log chat messages
+            -- Sort mode for the log list. "newest" = most recent first
+            -- (the natural read order, fixes the ring-buffer wrap-around
+            -- where "stale" old entries would otherwise appear at the
+            -- top of the list). "oldest" preserves the underlying
+            -- chronological order. "source" groups by source name then
+            -- newest within each source.
+            sortMode       = "newest",
         },
     },
     profileType = "default",  -- account-level: Forge is a dev tool, no per-char variation
@@ -70,6 +77,18 @@ function ns.SetMinLevel(level)   db.profile.minLevel = level or 5 end
 function ns.GetSearchText()      return db.profile.searchText or "" end
 function ns.SetSearchText(s)     db.profile.searchText = s or "" end
 
+-- Sort mode: one of "newest" (default), "oldest", "source".
+-- "newest" reverses the chronological order so the latest entries appear
+-- at the top of the list. This is the right default once a session has
+-- filled Cairn.Log's ring buffer (oldest-first display puts archived
+-- entries from prior sessions on top, hiding the current activity).
+function ns.GetSortMode()        return db.profile.sortMode or "newest" end
+function ns.SetSortMode(m)
+    if m == "newest" or m == "oldest" or m == "source" then
+        db.profile.sortMode = m
+    end
+end
+
 -- ----- Lifecycle --------------------------------------------------------
 function addon:OnInit()
     local _ = db.profile
@@ -87,6 +106,7 @@ function addon:OnInit()
     if db.profile.searchText     == nil then db.profile.searchText     = "" end
     if db.profile.tapEvents      == nil then db.profile.tapEvents      = false end
     if db.profile.tapChatEvents  == nil then db.profile.tapChatEvents  = false end
+    if db.profile.sortMode       == nil then db.profile.sortMode       = "newest" end
 end
 
 function addon:OnLogin()
