@@ -189,6 +189,20 @@ local function buildToolbar(parent, mod)
     devW:SetPoint("LEFT", pauseFrame, "RIGHT", 4, 0)
     mod._devBtn = devW
 
+    -- Fake combat toggle (Decision 8): flips Cairn.Gui.Combat fake-combat
+    -- flag so the combat queue treats us as in-combat. Lets consumers
+    -- test the queue / drain path without actually getting into a fight.
+    local fcW, fcFrame = makeBtn("Fake Combat: off", BTN_W + 56, function()
+        local Core = getCore()
+        if Core and Core.Combat then
+            Core.Combat:SetFakeCombat(not Core.Combat:IsFakeCombat())
+            UI.RefreshToolbarLabels(mod)
+        end
+    end)
+    fcW:ClearAllPoints()
+    fcW:SetPoint("LEFT", devFrame, "RIGHT", 4, 0)
+    mod._fakeCombatBtn = fcW
+
     -- Subscribe to Dev changes so the label stays in sync if some other
     -- code (slash command, Forge_Console snippet) toggles it.
     local Core = getCore()
@@ -199,7 +213,7 @@ local function buildToolbar(parent, mod)
     -- Search: filters tree rows by widget type substring. Live as you type.
     local searchLabel = bar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     searchLabel:SetText("Search:")
-    searchLabel:SetPoint("LEFT", devFrame, "RIGHT", 12, 0)
+    searchLabel:SetPoint("LEFT", fcFrame, "RIGHT", 12, 0)
 
     local search = CreateFrame("EditBox", nil, bar, "InputBoxTemplate")
     search:SetSize(SEARCH_W, BTN_H - 4)
@@ -231,6 +245,12 @@ function UI.RefreshToolbarLabels(mod)
         local on = Core and Core.DevAPI and Core.DevAPI:IsEnabled()
         local label = "Dev: " .. (on and "ON" or "off")
         if mod._devBtn.SetText then mod._devBtn:SetText(label) end
+    end
+    if mod._fakeCombatBtn then
+        local Core = getCore()
+        local on = Core and Core.Combat and Core.Combat:IsFakeCombat()
+        local label = "Fake Combat: " .. (on and "ON" or "off")
+        if mod._fakeCombatBtn.SetText then mod._fakeCombatBtn:SetText(label) end
     end
 end
 
