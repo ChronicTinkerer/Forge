@@ -2,7 +2,7 @@
 ## Title: Forge_BugCatcher
 ## Notes: Lua error handler. Captures errors quietly to a browsable viewer. Adds a Bug Catcher tab to /forge with copy-as-block, ignore list, optional auto-popup, and a minimap counter.
 ## Author: ChronicTinkerer
-## Version: 12
+## Version: 13
 ## SavedVariables: ForgeBugCatcherDB
 ## Dependencies: Cairn, Forge
 ## X-Category: Development Tools

@@ -2,7 +2,7 @@
 ## Title: Forge_APIRef
 ## Notes: In-game WoW API reference. Searchable lookup of function signatures, security flags, patch history, and examples. Per-namespace data ships in LoadOnDemand sibling addons (Forge_APIRef-<Namespace>) so the core stays small and only the namespaces you query pay memory. Adds an APIRef tab to /forge.
 ## Author: ChronicTinkerer
-## Version: 12
+## Version: 13
 ## SavedVariables: ForgeAPIRefDB
 ## Dependencies: Cairn, Forge
 ## LoadOnDemand: 1

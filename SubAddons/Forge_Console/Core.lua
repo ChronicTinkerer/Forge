@@ -71,17 +71,80 @@ function ns.SetCurrentSnippet(name)
     return true
 end
 
+-- The reserved scratch snippet name. Always present; auto-created on init,
+-- always re-cleared on the first Console-tab open per game session. Users
+-- can't lock or rename scratch; it's the safe default landing pad.
+ns.SCRATCH = "scratch"
+
 -- Save text into a named snippet. If the snippet doesn't exist, create it.
-function ns.SaveSnippet(name, code)
+-- Returns (true) on success, (false, reason) when refused (e.g., locked).
+-- Pass `force=true` to bypass the lock check (used by the explicit "save
+-- anyway" path; not used by auto-save).
+function ns.SaveSnippet(name, code, force)
     if type(name) ~= "string" or name == "" then return false, "name required" end
     code = code or ""
     local s = db.profile.snippets[name]
+    if s and s.locked and not force then
+        return false, "locked"
+    end
     if not s then
         s = { code = "", autorun = {} }
         db.profile.snippets[name] = s
     end
     s.code = code
     return true
+end
+
+-- ----- Lock state --------------------------------------------------------
+
+function ns.IsLocked(name)
+    local s = db.profile.snippets[name]
+    return (s and s.locked) and true or false
+end
+
+-- Toggle or set the locked flag. Scratch can't be locked: it's the safe
+-- default pad; locking it would defeat its purpose.
+function ns.SetLocked(name, locked)
+    if name == ns.SCRATCH then return false, "scratch cannot be locked" end
+    local s = db.profile.snippets[name]
+    if not s then return false, "not found" end
+    s.locked = locked and true or nil  -- nil instead of false saves table space
+    return true
+end
+
+function ns.ToggleLocked(name)
+    return ns.SetLocked(name, not ns.IsLocked(name))
+end
+
+-- ----- Scratch / session reset ------------------------------------------
+
+-- Module-scoped flag: true at session start (Lua state initialized fresh
+-- on /reload or login), set false after the first Console-tab open in
+-- this session. UI.Build / OnTabShow reads this to decide whether to
+-- reset scratch.
+local _sessionScratchPending = true
+
+function ns.IsScratchResetPending()
+    return _sessionScratchPending
+end
+
+function ns.MarkScratchResetDone()
+    _sessionScratchPending = false
+end
+
+-- Ensure the scratch snippet exists. Idempotent.
+function ns.EnsureScratch()
+    if not db.profile.snippets[ns.SCRATCH] then
+        db.profile.snippets[ns.SCRATCH] = { code = "", autorun = {} }
+    end
+end
+
+-- Wipe scratch's code (preserving its autorun config in the unlikely event
+-- the user has scratch flagged for autorun). Force-bypass the lock check
+-- since SetLocked refuses to lock scratch in the first place.
+function ns.ResetScratch()
+    ns.EnsureScratch()
+    db.profile.snippets[ns.SCRATCH].code = ""
 end
 
 function ns.LoadSnippet(name)
@@ -133,6 +196,17 @@ local descriptor = {
     description = "In-game Lua scripting workspace.",
     SlashSub    = { name = "console", help = "open the Lua console" },
     OnTabShow   = function(parent, mod)
+        -- Session scratch reset: on the first Console-tab open per game
+        -- session, switch the active snippet to scratch and clear it. Done
+        -- BEFORE UI.Build so the very first editor render lands in a blank
+        -- scratch rather than briefly flashing whatever was last selected.
+        if ns.IsScratchResetPending() then
+            ns.EnsureScratch()
+            ns.ResetScratch()
+            db.profile.currentSnippet = ns.SCRATCH
+            ns.MarkScratchResetDone()
+        end
+
         if not mod._built then
             ns.UI.Build(parent, mod)
             mod._built = true
@@ -189,17 +263,15 @@ function addon:OnInit()
         end
     end
 
-    -- Default "scratch" snippet on first run.
-    if next(db.profile.snippets) == nil then
-        db.profile.snippets["scratch"] = { code = "", autorun = {} }
-    end
+    -- Always ensure the reserved scratch snippet exists. EnsureScratch is
+    -- idempotent and creates it lazily; calling unconditionally here
+    -- handles both first-ever-run and migration-from-old-snapshots cases.
+    ns.EnsureScratch()
 
-    -- Ensure currentSnippet points at something real.
+    -- Ensure currentSnippet points at something real. Default to scratch
+    -- (the safe pad) so a fresh install lands there.
     if not db.profile.currentSnippet or not db.profile.snippets[db.profile.currentSnippet] then
-        for name in pairs(db.profile.snippets) do
-            db.profile.currentSnippet = name
-            break
-        end
+        db.profile.currentSnippet = ns.SCRATCH
     end
 end
 

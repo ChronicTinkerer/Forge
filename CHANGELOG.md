@@ -10,6 +10,38 @@ a `(Component)` tag identifying which sub-addon changed.
 
 The in-game Changelog tab mirrors this file.
 
+## [13] — Forge_Console streaming output + snippet management (2026-05-07)
+
+### Added
+
+- **(Forge_Console)** Streaming output for snippets that schedule deferred work. Prints emitted from `C_Timer.After`, ticker callbacks, event handlers, and other post-snippet-body callbacks now stream into the output pane instead of being silently swallowed by the previous "restore `_G.print` on Run return" path.
+- **(Forge_Console)** Reserved `scratch` snippet as the default safe pad. On every Forge open per game session, the active snippet is forced to `scratch` and its content is cleared. Other snippets stay untouched until you select them explicitly. Solves the "I keep typing into the wrong snippet and overwriting it" problem.
+- **(Forge_Console)** Modified indicator on the dropdown label. A trailing ` *` appears as soon as the editor's text diverges from the saved snippet code, and disappears when they match again. Hooks into the editor's `OnTextChanged`.
+- **(Forge_Console)** Confirm-on-switch prompt when switching away from a modified snippet. Three buttons: Save (writes editor text to the snippet), Discard (jumps to the new snippet without saving), Cancel (stays on the current snippet). Replaces the old auto-save-on-switch behavior. Auto-save on tab hide is preserved (lock state still gates it).
+- **(Forge_Console)** Lock state on snippets. Right-click a row in the snippet dropdown to toggle a lock; locked snippets show a tan `[L]` next to their name. Locked snippets refuse `SaveSnippet` calls (returns `false, "locked"`), which means auto-save on tab hide AND the explicit Save button in the switch-confirm prompt both honor the lock. Scratch can't be locked (`Core.lua` refuses) since its purpose is to be the always-safe pad.
+- **(Forge_Console)** Soft warning when typing in a locked snippet. The first time per session that the editor diverges from the saved code while a locked snippet is active, a tan `[lock] '<name>' is locked; changes won't save. Right-click in the dropdown to unlock.` line drops into the output pane.
+- **(Forge_Console)** New public APIs: `ns.SCRATCH` (the reserved name), `ns.IsLocked(name)`, `ns.SetLocked(name, locked)`, `ns.ToggleLocked(name)`, `ns.EnsureScratch()`, `ns.ResetScratch()`, `ns.IsScratchResetPending()`, `ns.MarkScratchResetDone()`, `UI.IsModified()`, `Eval.EndSession()`.
+
+### Changed
+
+- **(Forge_Console)** Run no longer auto-saves the editor's text into the current snippet. Previously, clicking Run wrote the editor's content into the snippet's saved code as a side effect, which meant the modified asterisk would disappear after Run and the switch-confirm prompt would silently skip on subsequent dropdown clicks. Save is now explicit only: the switch-confirm Save button, slash commands, or tab-hide auto-save (which still respects lock state). Run executes the editor's current text without touching saved code.
+
+### Fixed
+
+- **(Forge_Console)** Snippet-picker dropdown list was 60% transparent (alpha 0.40 from the ambient theme), letting the editor's code bleed through between rows. Bumped its specific backdrop to alpha 0.97 so it reads as a real overlay; rest of the Forge UI keeps the translucent ambient look.
+
+  Mechanics: `Eval.Run` is now two-phase. The synchronous body fills the returned `lines` array as before (preserving every existing caller). After the body returns, an idle-aware streaming session installs a wrapped `_G.print` that fires an `onAppend(line)` callback for every subsequent print, posts to chat via the original print, and resets an idle timer. After 5 seconds with no new prints, `_G.print` is restored automatically.
+
+  - **Idle-aware shutoff**: implemented as a generation counter. Each print bumps the gen and schedules a fresh `C_Timer.After` restore-check at the new gen; older timers fire and silently no-op when their captured gen no longer matches. No need to cancel C_Timer handles.
+  - **Session ownership**: a second `Run` force-ends the prior session before starting its own, so starting a new snippet immediately owns the print stream. `UI.ClearOutput` also ends any active session so late prints don't appear in a freshly-cleared pane.
+  - **Visual differentiation**: streamed deferred prints render in blue (`ff7fbfff`) so users can tell async output from the synchronous batch.
+  - **Error path skips streaming**: if a snippet aborts with a syntax or runtime error, no streaming session is installed. The error message renders inline as before; there's no async to wait for from a snippet that didn't get to schedule anything.
+  - **New public API**: `ns.Eval.EndSession()` for callers that need to force-end the active streaming session (used by `UI.ClearOutput`, available for any future code that needs the same primitive).
+
+### Notes
+
+- This unblocks a class of in-game tests for any timer-driven Cairn lib (Cairn-FSM async transitions, Cairn-Sequencer ticker advancement, animation completion callbacks) that previously had to use synchronous-only acceptance tests because deferred prints couldn't be observed. Existing tests can be rewritten to use real C_Timer-driven async paths in a follow-up.
+
 ## [12] — bake.py manifest preservation (2026-05-06)
 
 ### Fixed

@@ -32,6 +32,12 @@ local DROPDOWN_W  = 200
 
 local _activeMod  -- the live module instance from the Forge tab
 
+-- One-time-per-snippet-per-session record of "we already warned the user
+-- they're typing in a locked snippet". Resets implicitly on /reload (Lua
+-- state is fresh) so each game session gets one warning per locked
+-- snippet they touch.
+local _lockWarnedThisSession = {}
+
 -- ----- Output helpers ----------------------------------------------------
 local function escapeBars(s) return (tostring(s)):gsub("|", "||") end
 
@@ -60,10 +66,31 @@ function UI.AppendOutput(mod, lines, color)
 end
 
 function UI.ClearOutput(mod)
+    -- End any active streaming session: when the user clears, they want
+    -- a clean slate, not late prints from a still-running session
+    -- appearing in the freshly-cleared pane.
+    if ns.Eval and ns.Eval.EndSession then
+        ns.Eval.EndSession()
+    end
     if mod._outputText then
         mod._outputText:SetText("")
         if mod._reflowOutput then mod._reflowOutput() end
     end
+end
+
+-- ----- Modified state ----------------------------------------------------
+-- Compares the live editor text against the saved snippet's code. Returns
+-- false if there's no editor / no current snippet (nothing to compare).
+-- Used by the modified indicator and the switch-confirmation prompt.
+function UI.IsModified(mod)
+    mod = mod or _activeMod
+    if not (mod and mod._editor) then return false end
+    local current = ns.GetCurrentSnippet()
+    if not current then return false end
+    local snippet = ns.GetSnippet(current)
+    local saved   = (snippet and snippet.code) or ""
+    local live    = mod._editor:GetText() or ""
+    return live ~= saved
 end
 
 -- ----- Editor helpers ----------------------------------------------------
@@ -101,12 +128,117 @@ function UI.LoadCurrent(mod)
     UI.RefreshDropdown()
 end
 
--- Switch to a different snippet (saving current first).
+-- ----- Switch confirmation popup ----------------------------------------
+-- Three-button modal shown when the user picks a different snippet from the
+-- dropdown while the editor has unsaved changes. The ambient 0.40-alpha
+-- theme is overridden here (0.95) so the prompt reads as a real modal
+-- against the editor underneath.
+local function showSwitchConfirm(currentName, targetName, onSwitch)
+    local f = ns._switchConfirm
+    if not f then
+        f = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+        f:SetSize(420, 130)
+        f:SetPoint("CENTER")
+        f:SetFrameStrata("DIALOG")
+        f:SetBackdrop({
+            bgFile   = "Interface\\Tooltips\\UI-Tooltip-Background",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+            tile = true, tileSize = 16, edgeSize = 12,
+            insets = { left = 3, right = 3, top = 3, bottom = 3 },
+        })
+        f:SetBackdropColor(0.08, 0.06, 0.04, 0.95)
+        f:SetBackdropBorderColor(0.85, 0.50, 0.20, 1)
+        f:EnableMouse(true)
+        f:Hide()
+
+        local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+        title:SetPoint("TOPLEFT", 12, -10)
+        title:SetText("|cffd87f3aUnsaved changes|r")
+
+        local body = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        body:SetPoint("TOPLEFT", 12, -38)
+        body:SetPoint("RIGHT", -12, 0)
+        body:SetJustifyH("LEFT")
+        body:SetWordWrap(true)
+        f._body = body
+
+        local function makeBtn(label)
+            local b = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+            b:SetSize(80, 22)
+            b:SetText(label)
+            return b
+        end
+
+        local cancelBtn = makeBtn("Cancel")
+        cancelBtn:SetPoint("BOTTOMRIGHT", -12, 10)
+        cancelBtn:SetScript("OnClick", function() f:Hide() end)
+
+        local discardBtn = makeBtn("Discard")
+        discardBtn:SetPoint("RIGHT", cancelBtn, "LEFT", -6, 0)
+        f._discard = discardBtn
+
+        local saveBtn = makeBtn("Save")
+        saveBtn:SetPoint("RIGHT", discardBtn, "LEFT", -6, 0)
+        f._save = saveBtn
+
+        -- Esc cancels.
+        f:EnableKeyboard(true)
+        f:SetScript("OnKeyDown", function(_, key)
+            if key == "ESCAPE" then f:Hide() end
+        end)
+        f:SetPropagateKeyboardInput(false)
+
+        ns._switchConfirm = f
+    end
+
+    f._body:SetText(string.format(
+        "Snippet '|cffffd200%s|r' has unsaved changes.\nSave before switching to '|cffffd200%s|r'?",
+        currentName, targetName))
+
+    f._save:SetScript("OnClick", function()
+        ns.SaveSnippet(currentName, (_activeMod and _activeMod._editor and _activeMod._editor:GetText()) or "")
+        f:Hide()
+        if onSwitch then onSwitch() end
+    end)
+    f._discard:SetScript("OnClick", function()
+        f:Hide()
+        if onSwitch then onSwitch() end
+    end)
+
+    f:Show()
+end
+
+-- Switch to a different snippet. Behavior depends on edit + lock state of
+-- the snippet we're leaving:
+--   * unmodified           -> switch silently
+--   * modified + locked    -> switch silently (changes can't be saved; the
+--                             lock icon told the user this would happen)
+--   * modified + unlocked  -> prompt Save / Discard / Cancel
 function UI.SwitchTo(name)
     if not name then return end
-    UI.SaveCurrent()
-    if not ns.SetCurrentSnippet(name) then return end
-    UI.LoadCurrent()
+    if name == ns.GetCurrentSnippet() then return end
+
+    local current  = ns.GetCurrentSnippet()
+    local modified = UI.IsModified()
+    local locked   = current and ns.IsLocked(current)
+
+    local function doSwitch()
+        if not ns.SetCurrentSnippet(name) then return end
+        UI.LoadCurrent()
+    end
+
+    if not modified then
+        doSwitch()
+        return
+    end
+    if locked then
+        -- Lock semantic accepted: user knew changes wouldn't persist. Switch
+        -- without prompting; the lock + asterisk in the dropdown told them.
+        doSwitch()
+        return
+    end
+
+    showSwitchConfirm(current, name, doSwitch)
 end
 
 -- ----- Run ---------------------------------------------------------------
@@ -136,7 +268,12 @@ function UI.RunEditor(mod)
     local code = UI.GetEditor()
     if code:match("^%s*$") then return end
 
-    UI.SaveCurrent(mod)
+    -- Run no longer auto-saves the editor's text into the current snippet.
+    -- Save is explicit (switch-confirm prompt's Save button, slash commands,
+    -- or tab-hide auto-save for unlocked snippets). This keeps the modified
+    -- asterisk meaningful: clicking Run doesn't silently mark the snippet
+    -- as saved, so the switch-confirm prompt fires correctly when the user
+    -- moves to a different snippet after running their changes.
 
     -- Clear any prior error highlight before we run.
     if mod._gutter and ns.LineNumbers then
@@ -145,7 +282,16 @@ function UI.RunEditor(mod)
 
     UI.AppendOutput(mod, { "> run " .. (ns.GetCurrentSnippet() or "?") }, "ffd87f3a")
 
-    local ok, lines, errLine = ns.Eval.Run(code)
+    -- Streaming opts: prints emitted AFTER the synchronous body returns
+    -- (e.g., from C_Timer.After callbacks or event handlers that the
+    -- snippet kicked off) flow through onAppend into the output pane.
+    -- The session auto-disables 5s after the last print.
+    local ok, lines, errLine = ns.Eval.Run(code, {
+        idleSec  = 5,
+        onAppend = function(line)
+            UI.AppendOutput(mod, { line }, "ff7fbfff")  -- blue tint marks deferred output
+        end,
+    })
     UI.AppendOutput(mod, lines, ok and "ffaaaaaa" or "ffff4040")
 
     if (not ok) and errLine then
@@ -229,7 +375,18 @@ local function refreshDropdownList(f)
 
             row:SetScript("OnEnter", function(self) self._hov:Show() end)
             row:SetScript("OnLeave", function(self) self._hov:Hide() end)
-            row:SetScript("OnClick", function(self)
+            -- Left-click switches; right-click toggles lock. Scratch can't
+            -- be locked (Core.lua refuses) so the right-click is a no-op
+            -- on that row, intentionally.
+            row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+            row:SetScript("OnClick", function(self, button)
+                if button == "RightButton" then
+                    if self._name == ns.SCRATCH then return end
+                    if ns.ToggleLocked then ns.ToggleLocked(self._name) end
+                    refreshDropdownList(f)   -- redraw row with new lock state
+                    UI.RefreshDropdown()     -- redraw main label too
+                    return
+                end
                 f:Hide()
                 UI.SwitchTo(self._name)
             end)
@@ -240,9 +397,10 @@ local function refreshDropdownList(f)
         row._hov:Hide()
         local s = ns.GetSnippet(name)
         local autoMark = (s and s.autorun and s.autorun[ns.CharKey()]) and "  |cffaaffaaauto|r" or ""
+        local lockMark = (s and s.locked) and "  |cffd87f3a[L]|r" or ""
         local marker   = (name == current) and "|cffd87f3a* |r" or "  "
-        row._text:SetText(string.format("%s%s   |cffaaaaaa(%d)|r%s",
-            marker, name, s and #(s.code or "") or 0, autoMark))
+        row._text:SetText(string.format("%s%s%s   |cffaaaaaa(%d)|r%s",
+            marker, name, lockMark, s and #(s.code or "") or 0, autoMark))
         row:ClearAllPoints()
         row:SetWidth(f._scroll:GetWidth() - 24)
         row:SetPoint("TOPLEFT", f._content, "TOPLEFT", 0, -y)
@@ -272,7 +430,11 @@ function UI.ShowDropdownList(anchorBtn)
             tile = true, tileSize = 16, edgeSize = 8,
             insets = { left = 2, right = 2, top = 2, bottom = 2 },
         })
-        f:SetBackdropColor(0.04, 0.04, 0.04, 0.40)
+        -- Near-opaque backdrop so the dropdown list doesn't let the editor's
+        -- code or other underlying UI bleed through between rows. Dropdowns
+        -- are short-lived overlays; consistency with the ambient 0.40 theme
+        -- of the rest of Forge isn't a goal here.
+        f:SetBackdropColor(0.04, 0.04, 0.04, 0.97)
         f:SetBackdropBorderColor(0.85, 0.50, 0.20, 1)
         f:EnableMouse(true)
         f:SetScript("OnHide", function() end)
@@ -306,7 +468,14 @@ end
 
 function UI.RefreshDropdown()
     if not (_activeMod and _activeMod._dropdown) then return end
-    _activeMod._dropdown._label:SetText(ns.GetCurrentSnippet() or "(none)")
+    local name     = ns.GetCurrentSnippet() or "(none)"
+    local locked   = ns.IsLocked and ns.IsLocked(name)
+    local modified = UI.IsModified()
+    -- Build label: "[L] name *" with [L] tan if locked, * if editor differs
+    -- from saved.
+    local lockMark = locked   and "|cffd87f3a[L]|r " or ""
+    local modMark  = modified and " *" or ""
+    _activeMod._dropdown._label:SetText(lockMark .. name .. modMark)
     if ns._dropdownList and ns._dropdownList:IsShown() then
         refreshDropdownList(ns._dropdownList)
     end
@@ -678,6 +847,21 @@ function UI.Build(parent, mod)
             -- Refresh gutter so line count tracks the user's typing.
             if mod._gutter and ns.LineNumbers then
                 ns.LineNumbers.Update(mod._gutter)
+            end
+            -- Refresh the dropdown label so the modified asterisk appears
+            -- as soon as the editor diverges from the saved snippet text.
+            UI.RefreshDropdown()
+            -- Soft warning: if the user is typing in a locked snippet AND
+            -- the editor now differs from saved, drop a one-time-per-session
+            -- note in the output pane so they know typing won't persist.
+            local current = ns.GetCurrentSnippet()
+            if current and ns.IsLocked and ns.IsLocked(current)
+                and UI.IsModified(mod)
+                and not _lockWarnedThisSession[current] then
+                _lockWarnedThisSession[current] = true
+                UI.AppendOutput(mod, {
+                    string.format("[lock] '%s' is locked; changes won't save. Right-click in the dropdown to unlock.", current)
+                }, "ffd87f3a")
             end
         end)
 
