@@ -2,7 +2,7 @@
 ## Title: Forge_Registry
 ## Notes: Browse every Cairn registry: Addons, Hooks, Timers, Events, DBs, Slash, Callbacks, Settings. A "what's wired up" view for addon authors.
 ## Author: ChronicTinkerer
-## Version: 13
+## Version: 14
 ## SavedVariables: ForgeRegistryDB
 ## Dependencies: Cairn, Forge
 ## X-Category: Development Tools

@@ -2,7 +2,7 @@
 ## Title: Forge_Macros
 ## Notes: In-game macro editor + GSE-style sequence builder. Adds a Macros tab to /forge.
 ## Author: ChronicTinkerer
-## Version: 13
+## Version: 14
 ## SavedVariables: ForgeMacrosDB
 ## Dependencies: Cairn, Forge
 ## X-Category: Development Tools
