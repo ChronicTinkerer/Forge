@@ -2,7 +2,7 @@
 ## Title: Forge_Codex
 ## Notes: Browse / search / stats over LibCodex's catalog. Adds a Codex tab to /forge. Replaces LibCodex's GUI.
 ## Author: ChronicTinkerer
-## Version: 14
+## Version: 15
 ## SavedVariables: ForgeCodexDB
 ## Dependencies: Cairn, Forge, LibCodex-1.0
 ## X-Category: Development Tools
