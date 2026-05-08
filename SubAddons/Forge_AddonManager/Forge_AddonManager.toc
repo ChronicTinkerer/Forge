@@ -2,7 +2,7 @@
 ## Title: Forge_AddonManager
 ## Notes: In-game addon manager. Enable/disable addons, named sets (Raid/Solo/PvP), per-addon memory + load info, search, protected addons, ReloadUI. Adds an Addons tab to /forge.
 ## Author: ChronicTinkerer
-## Version: 15
+## Version: 14
 ## SavedVariables: ForgeAddonManagerDB
 ## Dependencies: Cairn, Forge
 ## X-Category: Development Tools

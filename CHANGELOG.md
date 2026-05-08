@@ -10,7 +10,7 @@ a `(Component)` tag identifying which sub-addon changed.
 
 The in-game Changelog tab mirrors this file.
 
-## [15] — Forge_AddonManager fix: drop login-time StaticPopup that tainted GameMenu (2026-05-08)
+## [Unreleased]
 
 ### Fixed
 
