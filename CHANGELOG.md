@@ -10,6 +10,12 @@ a `(Component)` tag identifying which sub-addon changed.
 
 The in-game Changelog tab mirrors this file.
 
+## [15] — Forge_AddonManager fix: drop login-time StaticPopup that tainted GameMenu (2026-05-08)
+
+### Fixed
+
+- **(Forge_AddonManager)** `ADDON_ACTION_FORBIDDEN` was raised when the user pressed ESC to open the Game Menu after a login session where `autoDisableNew` had queued any disables. Root cause: `Core.lua` showed a `FORGE_ADDONMANAGER_RELOAD` StaticPopup from `OnLogin` to nudge the user to Apply. In modern Retail (interface 120005) showing a StaticPopup from PLAYER_LOGIN attaches that popup frame to the global escape-close callback chain, and the chain is iterated by `Blizzard_GameMenu/Shared/GameMenuFrame.lua:66-69` when the menu opens — finding any addon-tainted handler in the chain throws ADDON_ACTION_FORBIDDEN with that addon blamed. Fix: removed the StaticPopup_Show call and the `FORGE_ADDONMANAGER_RELOAD` dialog definition; the OnLogin code now prints a chat nudge (`Open /forge -> Addons and click Apply + Reload to commit.`). The existing `FORGE_AM_RELOAD` popup in `UI.lua` is unaffected — it is shown from a button click inside the Forge tab, which is a real hardware-secure context.
+
 ## [14] — Forge_CairnInspect + Forge_Logs sort dropdown (2026-05-07)
 
 ### Added

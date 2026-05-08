@@ -61,42 +61,14 @@ local function out(msg)
 end
 ns.out = out
 
--- StaticPopup dialog shown after auto-disable detection. The popup buttons
--- run in a hardware-click context, so calling Manager.ApplyPendingChanges
--- (which calls C_AddOns + ReloadUI) is safe from there.
---   button1 (Apply + Reload) - apply queued changes (auto-disable stays)
---   button2 (Enable & apply) - cancel disables, queue enables, then apply
---   button3 (Later)          - dismiss; queued changes persist for next click
-StaticPopupDialogs = StaticPopupDialogs or {}
-StaticPopupDialogs["FORGE_ADDONMANAGER_RELOAD"] = {
-    text         = "%s",
-    button1      = "Apply + Reload",
-    button2      = "Enable & apply",
-    button3      = "Later",
-    OnAccept     = function(_, data)
-        if ns.Manager and ns.Manager.ApplyPendingChanges then
-            ns.Manager.ApplyPendingChanges()
-        end
-    end,
-    OnCancel     = function(_, data)
-        -- Override: re-enable the addons we just queued for disable.
-        if data and data.addons then
-            for _, nm in ipairs(data.addons) do
-                if ns.Manager and ns.Manager.SetEnabled then
-                    ns.Manager.SetEnabled(nm, true)
-                end
-            end
-        end
-        if ns.Manager and ns.Manager.ApplyPendingChanges then
-            ns.Manager.ApplyPendingChanges()
-        end
-    end,
-    OnAlt        = function() end,  -- "Later": no-op; queued changes stay
-    timeout      = 0,
-    whileDead    = true,
-    hideOnEscape = true,
-    preferredIndex = 3,
-}
+-- NOTE: previously this file declared a "FORGE_ADDONMANAGER_RELOAD" StaticPopup
+-- shown from OnLogin to nudge the user about auto-disable. That popup tainted
+-- the GameMenu's secure callback chain in modern Retail (120005): showing a
+-- StaticPopup from PLAYER_LOGIN attaches it to the global escape-close chain,
+-- and pressing ESC later raised ADDON_ACTION_FORBIDDEN from
+-- Blizzard_GameMenu/Shared/GameMenuFrame.lua's callback iterator with
+-- Forge_AddonManager blamed. Replaced by a chat nudge below; the user clicks
+-- Apply inside the Forge -> Addons tab (a real hardware click) to commit.
 
 function addon:OnInit()
     -- ADDON_LOADED fired; SVs are populated. Trigger lazy init of Cairn.DB
@@ -138,14 +110,8 @@ function addon:OnLogin()
     end
     if changes.newlyDisabled and #changes.newlyDisabled > 0 then
         local list = table.concat(changes.newlyDisabled, ", ")
-        out("|cffffaa00auto-disabled new addons|r (queued; click Apply to reload): " .. list)
-        local msg = string.format(
-            "Forge_AddonManager queued %d new addon(s) for disable:\n\n|cffd87f3a%s|r\n\nApply now (and reload), or enable them anyway?",
-            #changes.newlyDisabled, list)
-        if StaticPopup_Show then
-            local popup = StaticPopup_Show("FORGE_ADDONMANAGER_RELOAD", msg)
-            if popup then popup.data = { addons = changes.newlyDisabled } end
-        end
+        out("|cffffaa00auto-disabled new addons|r (queued): " .. list)
+        out("Open |cffd87f3a/forge|r -> |cffd87f3aAddons|r and click |cff80ff80Apply + Reload|r to commit.")
     end
 
     -- Queue re-enables for any protected addon that's currently disabled.
