@@ -1,5 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge BugCatcher
+## Version: 16
 ## Notes: Lua error handler. Captures errors quietly to a browsable viewer. Adds a Bug Catcher tab to /forge with copy-as-block, ignore list, optional auto-popup.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_BugCatcherDB
@@ -13,3 +14,4 @@ Capture.lua
 Viewer.lua
 Notify.lua
 Core.lua
+

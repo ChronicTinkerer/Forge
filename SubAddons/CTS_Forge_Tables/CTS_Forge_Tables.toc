@@ -1,5 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Tables
+## Version: 16
 ## Notes: Lua table inspector. Browse any global by name; drill into sub-tables.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_TablesDB
@@ -10,3 +11,4 @@
 ## X-Forge-Tool-Order: 30
 
 Core.lua
+

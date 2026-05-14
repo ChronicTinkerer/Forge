@@ -1,5 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Profiles
+## Version: 16
 ## Notes: Cross-addon profile manager. Switcher UI, declaration API, auto-discovery adapters for non-Cairn addons.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_ProfilesDB
@@ -10,3 +11,4 @@
 ## X-Forge-Tool-Order: 70
 
 Core.lua
+

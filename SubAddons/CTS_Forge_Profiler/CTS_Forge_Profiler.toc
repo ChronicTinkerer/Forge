@@ -1,5 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Profiler
+## Version: 16
 ## Notes: Live CPU time-series chart for the top-5 hottest addons.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_ProfilerDB
@@ -10,3 +11,4 @@
 ## X-Forge-Tool-Order: 91
 
 Core.lua
+

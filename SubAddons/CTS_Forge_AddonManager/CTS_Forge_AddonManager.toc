@@ -1,5 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge AddOn Manager
+## Version: 16
 ## Notes: In-game addon enable/disable, named sets (Raid/Solo/PvP), memory + CPU columns, dependency graph, error counts.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_AddonManagerDB
@@ -10,3 +11,4 @@
 ## X-Forge-Tool-Order: 90
 
 Core.lua
+

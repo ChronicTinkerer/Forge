@@ -1,5 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Textures
+## Version: 16
 ## Notes: Texture + atlas browser. Preview Blizzard textures + atlas slices by name.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_TexturesDB
@@ -10,3 +11,4 @@
 ## X-Forge-Tool-Order: 50
 
 Core.lua
+

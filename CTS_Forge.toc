@@ -1,5 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge
+## Version: 16
 ## Notes: Developer tools suite for Cairn / LibCodex addon authors. Hosts the /forge slash router, sub-module registry, and the main window. Sub-addons (CTS_Forge_*) plug in.
 ## Author: ChronicTinkerer
 ## SavedVariables: ForgeDB
@@ -9,11 +10,4 @@
 ## X-License: All Rights Reserved
 ## X-Curse-Project-ID: 1533362
 ## X-Wago-ID: ZKxZa3Nk
-## X-WoWI-ID: 27136
-
-Core.lua
-Registry.lua
-Window.lua
-Minimap.lua
-Changelog.lua
-About.lua
+## X-WoWI-ID
