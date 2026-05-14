@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge Stats
+## Notes: Live stats tab for /forge — character, location, network, system. Updates 2x/sec while the tab is visible.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_StatsDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: Stats
+## X-Forge-Tool-Order: 20
+
+Core.lua

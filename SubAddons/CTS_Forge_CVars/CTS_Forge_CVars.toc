@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge CVars
+## Notes: WoW CVar viewer + editor. Search, filter, get/set values, see defaults.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_CVarsDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: CVars
+## X-Forge-Tool-Order: 35
+
+Core.lua

@@ -1,0 +1,17 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge Console
+## Notes: In-game Lua REPL. Snippet picker, FAIAP syntax highlighting, line-number gutter, REPL strip, streaming deferred prints.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_ConsoleDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: Console
+## X-Forge-Tool-Order: 15
+
+Indent.lua
+LineNumbers.lua
+Eval.lua
+REPL.lua
+UI.lua
+Core.lua

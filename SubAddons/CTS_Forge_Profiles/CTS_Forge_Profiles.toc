@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge Profiles
+## Notes: Cross-addon profile manager. Switcher UI, declaration API, auto-discovery adapters for non-Cairn addons.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_ProfilesDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: Profiles
+## X-Forge-Tool-Order: 70
+
+Core.lua

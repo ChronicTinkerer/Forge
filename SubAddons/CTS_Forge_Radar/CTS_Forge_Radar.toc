@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge Radar
+## Notes: Live list of nearby players, NPCs, vignettes, and POIs with distance + bearing.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_RadarDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: Radar
+## X-Forge-Tool-Order: 95
+
+Core.lua

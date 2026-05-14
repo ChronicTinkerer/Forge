@@ -1,0 +1,27 @@
+0000000000000000000000000000000000000000 947131700e4bcf3f24d3510262abba0c8e9a282b Chronic Tinkerer <steven.landon@chronictinkerer.dev> 1778665979 -0400	commit (initial): init-broken gui
+947131700e4bcf3f24d3510262abba0c8e9a282b 8044ed5ad852af74251b5a788379d7367ee17796 Steven Landon <srlandon@gmail.com> 1778670125 +0000	commit: Rebuild Forge/Window.lua: build once, no rebuild churn
+8044ed5ad852af74251b5a788379d7367ee17796 5fda5820a2474d5f7782040e16903c4c6fd63adf Steven Landon <srlandon@gmail.com> 1778671830 -0400	commit: AddonManager: sortable columns + filter chips + scroll auto-fit; restore Changelog+About tabs
+5fda5820a2474d5f7782040e16903c4c6fd63adf 4d4722562574de2703d524c7b76ac65b4b475469 Steven Landon <srlandon@gmail.com> 1778673764 -0400	commit: Scrub em-dash and ellipsis from session-edited files (WoW Lua 5.1 doesn't tolerate them)
+4d4722562574de2703d524c7b76ac65b4b475469 2fc88566f4256c798130cc66e04af43f0d1292e7 Steven Landon <srlandon@gmail.com> 1778681323 -0400	commit: Forge_AddonManager: Phase 3-7 in one pass
+2fc88566f4256c798130cc66e04af43f0d1292e7 dbe135a9efdf6c2c73512ea842ace941d75d09e5 Steven Landon <srlandon@gmail.com> 1778682082 -0400	commit: Forge_Profiler: v1 CPU time-series chart
+dbe135a9efdf6c2c73512ea842ace941d75d09e5 47cbecb7062ff37da206f9f4811d1b36e0719ba0 Steven Landon <srlandon@gmail.com> 1778683561 -0400	commit: Forge_Events: SetLayoutManual scrolls + relayout split, fix row overflow
+47cbecb7062ff37da206f9f4811d1b36e0719ba0 25935c91ae1801efb906a0376312f9b7ce589ebf Steven Landon <srlandon@gmail.com> 1778684934 -0400	commit: Forge_Tables: v1 inspector + function color fix
+25935c91ae1801efb906a0376312f9b7ce589ebf df52df865bce403f0a5a13edabb90283893d996d Steven Landon <srlandon@gmail.com> 1778685642 -0400	commit: Forge_CVars: v1 viewer + editor
+df52df865bce403f0a5a13edabb90283893d996d e7d18fed73e9519b2338517390f7a0a2476452a8 Steven Landon <srlandon@gmail.com> 1778686372 -0400	commit: Forge_APIBrowser: v1 walker + inline call skeleton
+e7d18fed73e9519b2338517390f7a0a2476452a8 3c3daa6e444f9081b48d4b9225f25d8f2e336026 Steven Landon <srlandon@gmail.com> 1778687317 -0400	commit: Forge_APIBrowser: v2 tree view (replaces flat list)
+3c3daa6e444f9081b48d4b9225f25d8f2e336026 d89410daaec70b74f4286d9dea64f083fb90c737 Steven Landon <srlandon@gmail.com> 1778688807 -0400	commit: Forge_Tables: v2 TreeView consumer with lazy expansion
+d89410daaec70b74f4286d9dea64f083fb90c737 472e85ab70acb8229ae99b6b83cf3c5ebd63564c Steven Landon <srlandon@gmail.com> 1778689052 -0400	commit: Forge_CVars: v2 TreeView consumer grouped by camelCase prefix
+472e85ab70acb8229ae99b6b83cf3c5ebd63564c fa1cc77b23c570c29ecd625adbfcd653c8e7a922 Steven Landon <srlandon@gmail.com> 1778701816 -0400	commit: Add REPL and UI modules for enhanced console functionality
+fa1cc77b23c570c29ecd625adbfcd653c8e7a922 fcf22cb38fd4c5a68801233ed047fd181ff8dd13 Steven Landon <srlandon@gmail.com> 1778711503 -0400	commit: v2 polish (persistent REPL history + output cap + error transcript + lock-aware right-click
+fcf22cb38fd4c5a68801233ed047fd181ff8dd13 c0181ddd4d9d89327fdd8cad97478680b3e4318c Steven Landon <srlandon@gmail.com> 1778711612 -0400	commit: Add initial .gitignore file to exclude development artifacts and OS junk
+c0181ddd4d9d89327fdd8cad97478680b3e4318c 5e56610834a93b82a230fb485a3fd71a14adf5a0 Steven Landon <srlandon@gmail.com> 1778718488 -0400	commit: Forge_Profiler: v2 (memory chart + click-to-pin + CSV export)
+5e56610834a93b82a230fb485a3fd71a14adf5a0 43c537502e7a2aa90f52bc666e0237212da46b3e Steven Landon <srlandon@gmail.com> 1778718983 -0400	commit: v2 (multi-event tail with per-event color coding)
+43c537502e7a2aa90f52bc666e0237212da46b3e 56d9897cffc4b988e6a398c923490aa757b44283 Steven Landon <srlandon@gmail.com> 1778719561 -0400	commit: Forge_Tables: v3 (per-level filter + function preview)
+56d9897cffc4b988e6a398c923490aa757b44283 aa3a349898db204a488315101ae89de17f207011 Steven Landon <srlandon@gmail.com> 1778720573 -0400	commit: Forge_CVars: v3 (bitfield panel + presets popup)
+aa3a349898db204a488315101ae89de17f207011 5c021cf713c90ee180774f3212858e08b3fd5883 Steven Landon <srlandon@gmail.com> 1778721318 -0400	commit: Forge_APIBrowser: v3 (wiki signatures + Clear button)
+5c021cf713c90ee180774f3212858e08b3fd5883 99db521e7e67c2338e06f13040868a96d805e0e0 Steven Landon <srlandon@gmail.com> 1778722743 -0400	commit: Forge_Registry: v1 (14 sources, filter persistence)
+99db521e7e67c2338e06f13040868a96d805e0e0 109ce3ff048a94bb50abea9bd0c49be598139556 Steven Landon <srlandon@gmail.com> 1778723202 -0400	commit: Forge_Logs: v1 (Cairn.Log viewer with filters + copy popup)
+109ce3ff048a94bb50abea9bd0c49be598139556 323d67c42551c0e6185da55eb641ba5cad9eca94 Steven Landon <srlandon@gmail.com> 1778761115 -0400	commit: Forge_Radar: v1 (group + sticky + nameplates + history + vignettes + POIs, distance + bearing, ID column, click-to-detail) and Forge_Console: permanent Copy button + ShowCopyPopupWithText
+323d67c42551c0e6185da55eb641ba5cad9eca94 5e5a87ba102e91022e759b64b501d19cf76e581d Steven Landon <srlandon@gmail.com> 1778785843 -0400	commit: Forge_Logs: CSV export of visible window
+5e5a87ba102e91022e759b64b501d19cf76e581d e9856c4412b8e1fb9b6ecfe005ac7b77ea0b9ea9 Steven Landon <srlandon@gmail.com> 1778786959 -0400	commit: Forge_Logs: category filter + live-refresh + selection-preserve + opts.label
+e9856c4412b8e1fb9b6ecfe005ac7b77ea0b9ea9 39bb9bff350aae750cef22db0ef7f9d06f80f255 Steven Landon <srlandon@gmail.com> 1778787317 -0400	commit: Forge_Logs: tap arbitrary WoW events with /forge logstap

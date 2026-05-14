@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge AddOn Manager
+## Notes: In-game addon enable/disable, named sets (Raid/Solo/PvP), memory + CPU columns, dependency graph, error counts.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_AddonManagerDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: AddOn Manager
+## X-Forge-Tool-Order: 90
+
+Core.lua

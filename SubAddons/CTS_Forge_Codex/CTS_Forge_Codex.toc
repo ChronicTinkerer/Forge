@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge Codex
+## Notes: LibCodex browser. Search, browse, and inspect LibCodex catalogs (quests, items, currencies, etc.) in one tab. Subsumes LibCodex's standalone dashboard.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_CodexDB
+## Dependencies: Cairn, CTS_Forge, LibCodex-1.0
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: Codex
+## X-Forge-Tool-Order: 80
+
+Core.lua

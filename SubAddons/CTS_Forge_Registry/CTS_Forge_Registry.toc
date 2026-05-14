@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge Registry
+## Notes: Inspect Forge's sub-module registry. See what's loaded, descriptor metadata, slash sub-commands, LoD-stubs.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_RegistryDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: Registry
+## X-Forge-Tool-Order: 75
+
+Core.lua

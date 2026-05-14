@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge Tables
+## Notes: Lua table inspector. Browse any global by name; drill into sub-tables.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_TablesDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: Tables
+## X-Forge-Tool-Order: 30
+
+Core.lua

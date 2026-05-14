@@ -1,0 +1,13 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge API Browser
+## Notes: Browse WoW's Lua API. Search by function name, see signatures, insert call skeletons.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_APIBrowserDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: API Browser
+## X-Forge-Tool-Order: 45
+
+Signatures.lua
+Core.lua

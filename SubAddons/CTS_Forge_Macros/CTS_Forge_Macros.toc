@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge Macros
+## Notes: Full-size macro editor. Account + Character lists, icon picker, drag-to-bar, 255-char counter.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_MacrosDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: Macros
+## X-Forge-Tool-Order: 65
+
+Core.lua

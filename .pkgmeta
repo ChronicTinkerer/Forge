@@ -1,0 +1,82 @@
+# CTS_Forge packaging manifest.
+# Consumed by BigWigsMods/packager v2 (see .github/workflows/release.yml).
+# Reference: https://github.com/BigWigsMods/packager
+#
+# Multi-addon package. The published zip contains the CTS_Forge parent
+# plus 17 sub-addons that each install as siblings under
+# Interface/AddOns/ (same model Ace3 uses):
+#
+#   CTS_Forge/                       parent
+#   CTS_Forge_APIBrowser/
+#   CTS_Forge_AddonManager/
+#   CTS_Forge_BugCatcher/
+#   CTS_Forge_CVars/
+#   CTS_Forge_Codex/
+#   CTS_Forge_Console/
+#   CTS_Forge_Events/
+#   CTS_Forge_Logs/
+#   CTS_Forge_Macros/
+#   CTS_Forge_Profiler/
+#   CTS_Forge_Profiles/
+#   CTS_Forge_Radar/
+#   CTS_Forge_Registry/
+#   CTS_Forge_Sounds/
+#   CTS_Forge_Stats/
+#   CTS_Forge_Tables/
+#   CTS_Forge_Textures/
+#
+# In the source repo every sub-addon folder lives INSIDE CTS_Forge/SubAddons/
+# (so the git repo has a single top-level addon and one nested SubAddons/
+# container). On release the move-folders directives below lift each
+# sub-addon back out so it sits next to CTS_Forge/ in the zip.
+#
+# Sync-WoWAddons.ps1 treats SubAddons/ as a transparent container, so
+# during local dev each sub-addon still appears as a top-level junction
+# under Interface/AddOns/ exactly as it would after install.
+
+package-as: CTS_Forge
+
+# Move sub-addons out of the CTS_Forge/SubAddons/ staging folder so they
+# become siblings in the final zip (and therefore install as independent
+# addons).
+move-folders:
+  CTS_Forge/SubAddons/CTS_Forge_APIBrowser:    CTS_Forge_APIBrowser
+  CTS_Forge/SubAddons/CTS_Forge_AddonManager:  CTS_Forge_AddonManager
+  CTS_Forge/SubAddons/CTS_Forge_BugCatcher:    CTS_Forge_BugCatcher
+  CTS_Forge/SubAddons/CTS_Forge_CVars:         CTS_Forge_CVars
+  CTS_Forge/SubAddons/CTS_Forge_Codex:         CTS_Forge_Codex
+  CTS_Forge/SubAddons/CTS_Forge_Console:       CTS_Forge_Console
+  CTS_Forge/SubAddons/CTS_Forge_Events:        CTS_Forge_Events
+  CTS_Forge/SubAddons/CTS_Forge_Logs:          CTS_Forge_Logs
+  CTS_Forge/SubAddons/CTS_Forge_Macros:        CTS_Forge_Macros
+  CTS_Forge/SubAddons/CTS_Forge_Profiler:      CTS_Forge_Profiler
+  CTS_Forge/SubAddons/CTS_Forge_Profiles:      CTS_Forge_Profiles
+  CTS_Forge/SubAddons/CTS_Forge_Radar:         CTS_Forge_Radar
+  CTS_Forge/SubAddons/CTS_Forge_Registry:      CTS_Forge_Registry
+  CTS_Forge/SubAddons/CTS_Forge_Sounds:        CTS_Forge_Sounds
+  CTS_Forge/SubAddons/CTS_Forge_Stats:         CTS_Forge_Stats
+  CTS_Forge/SubAddons/CTS_Forge_Tables:        CTS_Forge_Tables
+  CTS_Forge/SubAddons/CTS_Forge_Textures:      CTS_Forge_Textures
+
+# Don't ship dev/build infrastructure or editor state to end users.
+#  - .dev/         Dev-local artifacts: release.ps1, future tools, caches
+#  - SESSION_NOTES.md is project-internal, not user-facing
+#  - editor/IDE folders never ship
+#  - scratch/tmp dirs are local workspace junk
+ignore:
+  - .dev
+  - .vscode
+  - .idea
+  - SESSION_NOTES.md
+  - "*.bat"
+  - "*.ps1"
+  - scratch
+  - tmp
+
+# We do NOT use @project-version@ substitution in the .toc files -- each
+# Version field carries its own build stamp and is bumped by release.ps1
+# on every edit. The packager will leave hardcoded ## Version: lines
+# untouched.
+
+# License is "All Rights Reserved"; LICENSE is at the repo root and lives
+# inside package-as by default.

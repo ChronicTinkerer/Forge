@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge Logs
+## Notes: Logger system + activity dashboard. DLAPI-compatible: addons write via Forge.Log("source", fmt, ...). Per-source tabs, verbosity levels, CSV/HTML export.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_LogsDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: Logs
+## X-Forge-Tool-Order: 60
+
+Core.lua

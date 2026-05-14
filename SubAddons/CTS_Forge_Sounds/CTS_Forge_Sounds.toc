@@ -1,0 +1,12 @@
+## Interface: 120005,120007,50503,20505,11508
+## Title: Forge Sounds
+## Notes: Sound kit + file browser. Search, play, copy sound IDs and paths.
+## Author: ChronicTinkerer
+## SavedVariables: Forge_SoundsDB
+## Dependencies: Cairn, CTS_Forge
+## X-Category: Development Tools
+## X-License: All Rights Reserved
+## X-Forge-Tool-Name: Sounds
+## X-Forge-Tool-Order: 55
+
+Core.lua
