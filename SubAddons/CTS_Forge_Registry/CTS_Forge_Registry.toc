@@ -1,6 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Registry
-## Version: 16
+## Version: 17
 ## Notes: Inspect Forge's sub-module registry. See what's loaded, descriptor metadata, slash sub-commands, LoD-stubs.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_RegistryDB
@@ -11,4 +11,5 @@
 ## X-Forge-Tool-Order: 75
 
 Core.lua
+
 

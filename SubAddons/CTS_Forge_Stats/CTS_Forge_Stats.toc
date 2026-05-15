@@ -1,6 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Stats
-## Version: 16
+## Version: 17
 ## Notes: Live stats tab for /forge — character, location, network, system. Updates 2x/sec while the tab is visible.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_StatsDB
@@ -11,4 +11,5 @@
 ## X-Forge-Tool-Order: 20
 
 Core.lua
+
 

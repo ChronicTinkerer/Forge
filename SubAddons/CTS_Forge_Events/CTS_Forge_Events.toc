@@ -1,6 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Events
-## Version: 16
+## Version: 17
 ## Notes: Live event monitor. Subscribe to any Blizzard event, see args + timestamps, filter by name.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_EventsDB
@@ -11,4 +11,5 @@
 ## X-Forge-Tool-Order: 40
 
 Core.lua
+
 

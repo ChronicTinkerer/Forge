@@ -1,6 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Codex
-## Version: 16
+## Version: 17
 ## Notes: LibCodex browser. Search, browse, and inspect LibCodex catalogs (quests, items, currencies, etc.) in one tab. Subsumes LibCodex's standalone dashboard.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_CodexDB
@@ -11,4 +11,5 @@
 ## X-Forge-Tool-Order: 80
 
 Core.lua
+
 

@@ -1,6 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Sounds
-## Version: 16
+## Version: 17
 ## Notes: Sound kit + file browser. Search, play, copy sound IDs and paths.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_SoundsDB
@@ -11,4 +11,5 @@
 ## X-Forge-Tool-Order: 55
 
 Core.lua
+
 

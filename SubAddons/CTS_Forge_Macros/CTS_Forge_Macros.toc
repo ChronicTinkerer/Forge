@@ -1,6 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Macros
-## Version: 16
+## Version: 17
 ## Notes: Full-size macro editor. Account + Character lists, icon picker, drag-to-bar, 255-char counter.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_MacrosDB
@@ -11,4 +11,5 @@
 ## X-Forge-Tool-Order: 65
 
 Core.lua
+
 

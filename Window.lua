@@ -107,6 +107,14 @@ local function buildToolbar(Gui, content)
     _toolbar:SetPoint("TOPLEFT",  content, "TOPLEFT",  0, 0)
     _toolbar:SetPoint("TOPRIGHT", content, "TOPRIGHT", 0, 0)
 
+    -- Right-to-left order: Reload UI, Exit to Main Menu, Exit Game.
+    -- /logout returns to the character-select screen (NOT a true logout
+    -- in the leave-the-game sense -- WoW calls it Logout but the user-
+    -- facing concept is "back to the main menu"). /exit shuts the
+    -- client down entirely. Both go through SecureActionButtonTemplate
+    -- because they're protected actions; see attachSecureMacro above
+    -- for the strata/click-binding gotchas.
+
     -- Reload UI (rightmost)
     local reloadBtn = Gui:Acquire("Button", _toolbar, {
         text    = "Reload UI",
@@ -119,17 +127,32 @@ local function buildToolbar(Gui, content)
     reloadBtn:SetPoint("RIGHT", _toolbar, "RIGHT", -4, 0)
     attachSecureMacro(reloadBtn, "/reload")
 
-    -- Logout (to the left of Reload UI)
-    local logoutBtn = Gui:Acquire("Button", _toolbar, {
-        text    = "Logout",
+    -- Exit to Main Menu (to the left of Reload UI). Uses /logout under
+    -- the hood; renamed in the UI so the label matches what actually
+    -- happens (you land on character select, not at a true sign-off).
+    local exitToMenuBtn = Gui:Acquire("Button", _toolbar, {
+        text    = "Exit to Main Menu",
         variant = "ghost",
-        width   = 80,
+        width   = 140,
         height  = 22,
     })
-    logoutBtn.Cairn:SetLayoutManual(true)
-    logoutBtn:ClearAllPoints()
-    logoutBtn:SetPoint("RIGHT", reloadBtn, "LEFT", -4, 0)
-    attachSecureMacro(logoutBtn, "/logout")
+    exitToMenuBtn.Cairn:SetLayoutManual(true)
+    exitToMenuBtn:ClearAllPoints()
+    exitToMenuBtn:SetPoint("RIGHT", reloadBtn, "LEFT", -4, 0)
+    attachSecureMacro(exitToMenuBtn, "/logout")
+
+    -- Exit Game (leftmost of the three). /exit (alias /quit) closes the
+    -- WoW client. Same SecureActionButtonTemplate path as the other two.
+    local exitGameBtn = Gui:Acquire("Button", _toolbar, {
+        text    = "Exit Game",
+        variant = "ghost",
+        width   = 90,
+        height  = 22,
+    })
+    exitGameBtn.Cairn:SetLayoutManual(true)
+    exitGameBtn:ClearAllPoints()
+    exitGameBtn:SetPoint("RIGHT", exitToMenuBtn, "LEFT", -4, 0)
+    attachSecureMacro(exitGameBtn, "/exit")
 end
 
 
@@ -188,11 +211,14 @@ local function build()
     local p = (ns.db and ns.db.profile and ns.db.profile.window) or {}
 
     _win = Gui:Acquire("Window", UIParent, {
-        title    = "Forge",
-        width    = p.w or 880,
-        height   = p.h or 560,
-        closable = true,
-        movable  = true,
+        title     = "Forge",
+        width     = p.w or 880,
+        height    = p.h or 560,
+        closable  = true,
+        movable   = true,
+        resizable = true,
+        minWidth  = 600,
+        minHeight = 400,
     })
 
     if p.x and p.y and (p.x ~= 0 or p.y ~= 0) then
@@ -211,6 +237,20 @@ local function build()
         pp.w = _win:GetWidth()  or 880
         pp.h = _win:GetHeight() or 560
         pp.shown = false
+    end)
+
+    -- Persist size live as the user drags the resize grip. The Window
+    -- widget fires Resized on every OnSizeChanged tick during drag plus
+    -- once on mouse-up. Writing to db.profile is an in-memory assignment
+    -- (the actual disk write happens at session end via SavedVariables),
+    -- so the 60Hz event rate is essentially free. The OnHide handler
+    -- above is still the safety net for sessions that don't trigger any
+    -- resize at all.
+    _win.Cairn:On("Resized", function(_, w, h)
+        if not (ns.db and ns.db.profile and ns.db.profile.window) then return end
+        local pp = ns.db.profile.window
+        pp.w = w
+        pp.h = h
     end)
 
     local content = _win.Cairn:GetContent()

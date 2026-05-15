@@ -1,6 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge API Browser
-## Version: 16
+## Version: 17
 ## Notes: Browse WoW's Lua API. Search by function name, see signatures, insert call skeletons.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_APIBrowserDB
@@ -12,4 +12,5 @@
 
 Signatures.lua
 Core.lua
+
 

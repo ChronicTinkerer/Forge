@@ -1,6 +1,6 @@
 ## Interface: 120005,120007,50503,20505,11508
 ## Title: Forge Logs
-## Version: 16
+## Version: 17
 ## Notes: Logger system + activity dashboard. DLAPI-compatible: addons write via Forge.Log("source", fmt, ...). Per-source tabs, verbosity levels, CSV/HTML export.
 ## Author: ChronicTinkerer
 ## SavedVariables: Forge_LogsDB
@@ -11,4 +11,5 @@
 ## X-Forge-Tool-Order: 60
 
 Core.lua
+
 
